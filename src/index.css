@@ -1,0 +1,143 @@
+@import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
+@theme {
+  --duration-450: 450ms;
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'DM Sans', system-ui, sans-serif;
+
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-glass: rgba(255, 255, 255, 0.72);
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
+
+  --color-accent: #0033cc;
+  --color-accent-foreground: #ffffff;
+  --color-accent-hover: #002299;
+  --color-accent-soft: #eef2ff;
+  --color-accent-muted: #c7d2fe;
+
+  --color-danger: #ff0000;
+  --color-danger-soft: #ffe6e6;
+  --color-warning: #ffd700;
+  --color-warning-soft: #fffadb;
+  --color-success: #10b981;
+  --color-success-soft: #ecfdf5;
+
+  /* Shadcn UI required backgrounds and borders */
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-text-primary);
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: var(--color-text-secondary);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-accent);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* ── Base resets ── */
+
+*,
+*::before,
+*::after {
+  border-color: var(--color-border);
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  min-height: 100dvh;
+}
+
+/* ── Scrollbar styling ── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ── Hide WebKit native time input icon ── */
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+/* ── Calendar time grid ── */
+
+.time-grid-line {
+  border-top: 1px solid var(--color-border);
+}
+
+.time-grid-line-half {
+  border-top: 1px dashed color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+
+.current-time-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--color-danger);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.current-time-line::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-danger);
+}
+
+/* ── Selection states ── */
+
+::selection {
+  background-color: var(--color-accent-muted);
+  color: var(--color-text-primary);
+}
+
+:root {
+  --destructive-foreground: var(--color-red-700);
+}
+
+.dark {
+  --destructive-foreground: var(--color-red-400);
+}
+
+@theme inline {
+  --color-destructive-foreground: var(--destructive-foreground);
+}
