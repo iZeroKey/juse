@@ -14,46 +14,63 @@ export async function drawTextAligned(
   alignY: "bottom" | "middle" | "top",
   maxWidth?: number,
   lineHeight?: number,
+  maxLines?: number // <-- NUEVO PARÁMETRO ESTRELLA
 ) {
+  let currentSize = size;
   let lines: string[] = [];
 
-  if (maxWidth) {
-    const words = text.split(" ");
+  // Función auxiliar interna para calcular el salto de línea según un tamaño específico
+  const getWrappedLines = (textSize: number) => {
+    const words = text.replace(/\n/g, " ").trim().split(" ");
+    let tempLines: string[] = [];
     let currentLine = "";
 
     for (const word of words) {
       const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const testWidth = font.widthOfTextAtSize(testLine, size);
+      const testWidth = font.widthOfTextAtSize(testLine, textSize);
 
-      if (testWidth > maxWidth && currentLine) {
-        lines.push(currentLine);
+      if (testWidth > (maxWidth || 9999) && currentLine) {
+        tempLines.push(currentLine);
         currentLine = word;
       } else {
         currentLine = testLine;
       }
     }
-    if (currentLine) {
-      lines.push(currentLine);
+    if (currentLine) tempLines.push(currentLine);
+    return tempLines;
+  };
+
+  // Lógica principal
+  if (maxWidth) {
+    if (maxLines) {
+      // Bucle mágico: reduce la fuente de 0.5 en 0.5 hasta que encaje en el máximo de líneas
+      while (currentSize >= 5) {
+        lines = getWrappedLines(currentSize);
+        if (lines.length <= maxLines) break; // ¡Encajó!
+        currentSize -= 0.5; 
+      }
+    } else {
+      lines = getWrappedLines(currentSize);
     }
   } else {
     lines = text.split("\n");
   }
 
-  const actualLineHeight = lineHeight || size * 1.2;
-  const blockHeight = (lines.length - 1) * actualLineHeight + size;
+  const actualLineHeight = lineHeight || currentSize * 1.2;
+  const blockHeight = (lines.length - 1) * actualLineHeight + currentSize;
 
   let currentY = y;
   if (alignY === "top") {
-    currentY = y - size;
+    currentY = y - currentSize;
   } else if (alignY === "middle") {
-    currentY = y + blockHeight / 2 - size;
+    currentY = y + blockHeight / 2 - currentSize;
   } else if (alignY === "bottom") {
-    currentY = y + blockHeight - size;
+    currentY = y + blockHeight - currentSize;
   }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const lineWidth = font.widthOfTextAtSize(line, size);
+    const lineWidth = font.widthOfTextAtSize(line, currentSize);
     let startX = x;
 
     if (alignX === "center") {
@@ -66,38 +83,30 @@ export async function drawTextAligned(
       x: startX,
       y: currentY - i * actualLineHeight,
       font,
-      size,
+      size: currentSize, // <-- Imprime con el tamaño dinámico reducido
     });
   }
 }
 
 // CONFIGURACIÓN PARA EL RECIBO
 const reciboConfig = {
-  // Cabecera superior
   fechaEmision: { x: 325, y: 735, size: 10, isBold: true, alignX: "center", alignY: "bottom" },
   contratoNumber: { x: 506, y: 735, size: 11, isBold: true, alignX: "center", alignY: "bottom" },
   
-  // Datos principales
-  clienteNombre: { x: 247, y: 700, size: 11, isBold: false, alignX: "center", alignY: "bottom" },
-  cantidadLetras: { x: 138, y: 680, size: 10, isBold: false, alignX: "left", alignY: "bottom" },
+  clienteNombre: { x: 247, y: 700, size: 11, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 280, maxLines: 1 },
+  cantidadLetras: { x: 138, y: 680, size: 10, isBold: false, alignX: "left", alignY: "bottom", maxWidth: 360, maxLines: 1 },
   
-  // Monto principal (Símbolo separado para estilo Excel)
   simboloMonto: { x: 465, y: 701, size: 14, isBold: false, alignX: "left", alignY: "bottom" },
   cantidadMonto: { x: 550, y: 701, size: 14, isBold: false, alignX: "right", alignY: "bottom" },
   
-  // Concepto (Bajado al centro matemático exacto de la caja)
-  paqueteDetalle: { x: 345, y: 642, size: 8, isBold: true, alignX: "center", alignY: "middle", maxWidth: 400, lineHeight: 11 },
+  // Concepto limitado a 3 líneas (achicará la fuente si es necesario)
+  paqueteDetalle: { x: 345, y: 642, size: 8, isBold: true, alignX: "center", alignY: "middle", maxWidth: 400, lineHeight: 11, maxLines: 3 },
   
-  // Finanzas inferiores
   formaPago: { x: 505, y: 586, size: 10, isBold: true, alignX: "center", alignY: "bottom" },
-  
   simboloPrecio: { x: 455, y: 556, size: 9, isBold: false, alignX: "left", alignY: "bottom" },
   precio: { x: 553, y: 556, size: 9, isBold: false, alignX: "right", alignY: "bottom" },
-  
   simboloAcuenta: { x: 455, y: 542, size: 9, isBold: false, alignX: "left", alignY: "bottom" },
   aCuenta: { x: 553, y: 542, size: 9, isBold: false, alignX: "right", alignY: "bottom" },
-  
-  // Saldo en Negrita
   simboloSaldo: { x: 455, y: 528, size: 9, isBold: true, alignX: "left", alignY: "bottom" },
   saldo: { x: 553, y: 528, size: 9, isBold: true, alignX: "right", alignY: "bottom" },
 } as const;
@@ -107,45 +116,34 @@ const contratoConfig = {
   contratoNumber: { x: 531, y: 731, size: 10, isBold: true, alignX: "center", alignY: "middle" },
   fechaEmision: { x: 531, y: 718, size: 10, isBold: true, alignX: "center", alignY: "middle" },
   
-  // Bloque 1: DATOS (Subidos de vuelta a su posición correcta)
-  clienteNombre: { x: 210, y: 650, size: 9, isBold: false, alignX: "center", alignY: "middle" },
-  fechaEvento: { x: 485, y: 650, size: 9, isBold: false, alignX: "center", alignY: "middle" },
+  clienteNombre: { x: 210, y: 650, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 2 },
+  fechaEvento: { x: 485, y: 650, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
+  clienteDni: { x: 210, y: 636, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
+  tipoEvento: { x: 485, y: 636, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 2 },
   
-  clienteDni: { x: 210, y: 636, size: 9, isBold: false, alignX: "center", alignY: "middle" },
-  tipoEvento: { x: 485, y: 636, size: 9, isBold: false, alignX: "center", alignY: "middle" },
+  clienteDireccion: { x: 210, y: 616, size: 8, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, lineHeight: 11, maxLines: 2 },
+  horaEvento: { x: 485, y: 616, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
+  clienteCelular: { x: 210, y: 596, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
+  paqueteId: { x: 485, y: 596, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
   
-  clienteDireccion: { x: 210, y: 616, size: 8, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, lineHeight: 11 },
-  horaEvento: { x: 485, y: 616, size: 9, isBold: false, alignX: "center", alignY: "middle" },
+  paqueteDetalle: { x: 305, y: 530, size: 10, isBold: false, alignX: "center", alignY: "middle", maxWidth: 510, lineHeight: 14, maxLines: 3 },
   
-  clienteCelular: { x: 210, y: 596, size: 9, isBold: false, alignX: "center", alignY: "middle" },
-  paqueteId: { x: 485, y: 596, size: 9, isBold: false, alignX: "center", alignY: "middle" },
-  
-  // Bloque 2: ESPECIFICACIONES (Alineado al medio de la caja blanca)
-  paqueteDetalle: { x: 305, y: 530, size: 10, isBold: false, alignX: "center", alignY: "middle", maxWidth: 510, lineHeight: 14 },
-  
-  // Bloque 3: DATOS ADICIONALES
-  nombreBebe: { x: 210, y: 454, size: 9, isBold: false, alignX: "center", alignY: "bottom" },
-  nombresPapitos: { x: 210, y: 437, size: 9, isBold: false, alignX: "center", alignY: "middle",  maxWidth: 165, lineHeight: 11  },
-  nombreCumpleanero: { x: 210, y: 412, size: 9, isBold: false, alignX: "center", alignY: "bottom" },
-  informacionAdicional: { x: 210, y: 398, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, lineHeight: 11 },
+  nombreBebe: { x: 210, y: 454, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, maxLines: 1 },
+  nombresPapitos: { x: 210, y: 437, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, lineHeight: 11, maxLines: 2 },
+  nombreCumpleanero: { x: 210, y: 412, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, maxLines: 1 },
+  informacionAdicional: { x: 210, y: 398, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, lineHeight: 11, maxLines: 1 },
 
-  // Bloque 4: VALOR DEL SERVICIO
   formaPago: { x: 443, y: 226, size: 10, isBold: false, alignX: "center", alignY: "bottom" },
-  
-  // Montos numéricos (Separados con el "S/" a la izquierda)
   simboloPrecio: { x: 400, y: 213, size: 10, isBold: false, alignX: "left", alignY: "bottom" },
   precio: { x: 480, y: 213, size: 10, isBold: false, alignX: "right", alignY: "bottom" },
-  
   simboloAcuenta: { x: 400, y: 199, size: 10, isBold: false, alignX: "left", alignY: "bottom" },
   aCuenta: { x: 480, y: 199, size: 10, isBold: false, alignX: "right", alignY: "bottom" },
-  
-  // Saldo en Negrita
   simboloSaldo: { x: 400, y: 185, size: 10, isBold: true, alignX: "left", alignY: "bottom" },
   saldo: { x: 480, y: 185, size: 10, isBold: true, alignX: "right", alignY: "bottom" },
   
-  // Valores de Movilidad
-  movilidadTotal: { x: 530, y: 218, size: 9, isBold: true, alignX: "center", alignY: "middle", maxWidth: 80, lineHeight: 11 },
-  movilidadSaldo: { x: 530, y: 190, size: 9, isBold: true, alignX: "center", alignY: "middle", maxWidth: 80, lineHeight: 11 }
+  // Valores de Movilidad limitados a 1 sola línea (se encogerá si el texto es muy largo)
+  movilidadTotal: { x: 530, y: 218, size: 9, isBold: true, alignX: "center", alignY: "middle", maxWidth: 80, lineHeight: 11, maxLines: 1 },
+  movilidadSaldo: { x: 530, y: 190, size: 9, isBold: true, alignX: "center", alignY: "middle", maxWidth: 80, lineHeight: 11, maxLines: 1 }
 } as const;
 
 async function injectData(
@@ -172,6 +170,7 @@ async function injectData(
       config.alignY,
       config.maxWidth,
       config.lineHeight,
+      config.maxLines
     );
   }
 }
