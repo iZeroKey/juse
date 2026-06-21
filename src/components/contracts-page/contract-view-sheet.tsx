@@ -16,7 +16,7 @@ import { usePackages } from '@/hooks/use-packages';
 import type { JuseContract } from '@/types/contract';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency, formatPhoneNumber } from '@/lib/utils';
 
 function DataRow({
   label,

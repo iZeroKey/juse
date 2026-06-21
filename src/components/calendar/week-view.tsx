@@ -22,14 +22,17 @@ import { MobileAgendaItem } from "@/components/calendar/mobile-agenda-item";
 interface WeekViewProps {
   date: Date;
   onEventClick: (event: JuseEvent) => void;
-  onDayClick: (date: Date) => void;
+  onDayClick?: (date: Date) => void;
+  onNewEvent?: (initialDate?: string) => void;
+  onEditEvent?: (event: JuseEvent) => void;
+  onDeleteEvent?: (id: string) => void;
 }
 
 // ---------------------------------------------------------------------------
 // Desktop: 7 columns on a shared time grid
 // ---------------------------------------------------------------------------
 
-function DesktopWeekGrid({ date, onEventClick, onDayClick }: WeekViewProps) {
+function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDeleteEvent }: WeekViewProps) {
   const { events } = useEvents();
   const weekDays = useMemo(() => getWeekDays(date), [date]);
 
@@ -201,6 +204,8 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick }: WeekViewProps) {
                         key={event.id}
                         event={event}
                         onClick={() => onEventClick(event)}
+                        onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                        onDelete={onDeleteEvent ? () => onDeleteEvent(event.id) : undefined}
                         style={{
                           top: `${topPx}px`,
                           height: `${heightPx}px`,
@@ -226,7 +231,7 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick }: WeekViewProps) {
 // Mobile: agenda list for the whole week
 // ---------------------------------------------------------------------------
 
-function MobileWeekView({ date, onEventClick }: WeekViewProps) {
+function MobileWeekView({ date, onEventClick, onEditEvent, onDeleteEvent }: WeekViewProps) {
   const { events } = useEvents();
   const weekDays = useMemo(() => getWeekDays(date), [date]);
 
@@ -277,6 +282,8 @@ function MobileWeekView({ date, onEventClick }: WeekViewProps) {
                         key={event.id}
                         event={event}
                         onClick={() => onEventClick(event)}
+                        onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                        onDelete={onDeleteEvent ? () => onDeleteEvent(event.id) : undefined}
                       />
                     ))
                   ) : (

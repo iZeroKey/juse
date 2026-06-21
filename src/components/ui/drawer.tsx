@@ -44,6 +44,17 @@ export function Drawer({
     <DrawerContext.Provider value={{ position }}>
       <DrawerPrimitive.Root
         swipeDirection={swipeDirection ?? directionMap[position]}
+        modal={props.modal ?? "trap-focus"}
+        onOpenChange={(open, details) => {
+          if (!open && details && details.reason === 'outsidePress') {
+            const target = details.event?.target as Element;
+            if (target?.closest?.('#titlebar') || target?.closest?.('[data-slot="context-menu-popup"]')) {
+              if (details.cancel) details.cancel();
+              return;
+            }
+          }
+          if (props.onOpenChange) props.onOpenChange(open, details);
+        }}
         {...props}
       />
     </DrawerContext.Provider>
@@ -208,6 +219,13 @@ export function DrawerPopup({
             className,
           )}
           data-slot="drawer-popup"
+          onInteractOutside={(e: any) => {
+            const target = e.target as Element;
+            if (target.closest?.('#titlebar') || target.closest?.('[data-slot="context-menu-popup"]')) {
+              e.preventDefault();
+            }
+            if ((props as any).onInteractOutside) (props as any).onInteractOutside(e);
+          }}
           {...props}
         >
           {children}
@@ -339,7 +357,7 @@ export function DrawerPanel({
 
   if (scrollable) {
     return (
-      <ScrollArea className="touch-auto" scrollFade={scrollFade}>
+      <ScrollArea className="touch-auto flex-1 min-h-0" scrollFade={scrollFade}>
         {content}
       </ScrollArea>
     );

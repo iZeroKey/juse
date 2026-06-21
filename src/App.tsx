@@ -11,8 +11,8 @@ import { MonthView } from '@/components/calendar/month-view';
 import { EventSheet } from '@/components/event/event-sheet';
 import { EventFormSheet } from '@/components/event/event-form-sheet';
 import { ContractsPage } from '@/components/contracts-page/contracts-page';
-
 import { TitleBar } from '@/components/title-bar';
+import { GlobalContextMenu } from '@/components/global-context-menu';
 
 export default function App() {
   const { addEvent, updateEvent, deleteEvent, getEvent } = useEvents();
@@ -68,7 +68,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-dvh bg-background overflow-hidden relative">
+    <GlobalContextMenu>
+      <div className="flex flex-col h-dvh bg-background overflow-hidden relative">
       <TitleBar />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
@@ -117,6 +118,11 @@ export default function App() {
                         date={currentDate}
                         onEventClick={handleEventClick}
                         onDayClick={handleDayClick}
+                        onEditEvent={(event) => {
+                          setEditingEvent(event);
+                          setFormOpen(true);
+                        }}
+                        onDeleteEvent={handleDeleteEvent}
                       />
                     </motion.div>
                   )}
@@ -135,6 +141,11 @@ export default function App() {
                         onEventClick={handleEventClick}
                         onDayClick={handleDayClick}
                         onNewEvent={handleNewEvent}
+                        onEditEvent={(event) => {
+                          setEditingEvent(event);
+                          setFormOpen(true);
+                        }}
+                        onDeleteEvent={handleDeleteEvent}
                       />
                     </motion.div>
                   )}
@@ -180,6 +191,7 @@ export default function App() {
           onCancel={handleFormCancel}
         />
       )}
-    </div>
+      </div>
+    </GlobalContextMenu>
   );
 }

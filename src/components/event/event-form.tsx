@@ -139,7 +139,7 @@ export function EventForm({
 
   return (
     <form id={formId} onSubmit={handleSubmit(processSubmit)} className="flex flex-col h-full">
-      <div className="flex-1 relative overflow-x-hidden overflow-y-auto">
+      <div className="flex-1 relative">
         <AnimatePresence mode="wait">
         {/* ── Tab 1: General ─────────────────────────────── */}
         {activeTab === 'general' && (

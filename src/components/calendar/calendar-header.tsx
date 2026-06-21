@@ -135,7 +135,7 @@ export function CalendarHeader({
           <button
             onClick={handlePrev}
             aria-label="Período anterior"
-            className="flex items-center justify-center h-full w-8 md:w-9 border-r border-slate-200 bg-transparent hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            className="flex items-center justify-center h-full w-8 md:w-9 border-r border-slate-200 bg-transparent hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer"
           >
             <ChevronLeft className="size-3.5 md:size-4 text-slate-600" />
           </button>
@@ -144,7 +144,7 @@ export function CalendarHeader({
             type="button"
             onClick={handleToday}
             className={cn(
-              "flex items-center justify-center h-full px-3 md:px-4 text-xs md:text-[13px] font-semibold transition-colors border-r border-slate-200",
+              "flex items-center justify-center h-full px-3 md:px-4 text-xs md:text-[13px] font-semibold transition-colors border-r border-slate-200 cursor-pointer",
               isCurrentDateToday
                 ? "text-[var(--color-juse-blue)] bg-[var(--color-juse-blue)]/5 hover:bg-[var(--color-juse-blue)]/10"
                 : "text-slate-700 bg-transparent hover:bg-slate-50 hover:text-slate-900"
@@ -162,7 +162,7 @@ export function CalendarHeader({
           <button
             onClick={handleNext}
             aria-label="Período siguiente"
-            className="flex items-center justify-center h-full w-8 md:w-9 bg-transparent hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            className="flex items-center justify-center h-full w-8 md:w-9 bg-transparent hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer"
           >
             <ChevronRight className="size-3.5 md:size-4 text-slate-600" />
           </button>

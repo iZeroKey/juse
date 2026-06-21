@@ -254,7 +254,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                             <PopoverTrigger asChild>
                               <button
                                 type="button"
-                                className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline-none z-10"
+                                className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline-none z-10 cursor-pointer"
                               >
                                 <CalendarIcon className="h-4 w-4" />
                               </button>
@@ -356,7 +356,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                             <PopoverTrigger asChild>
                               <button
                                 type="button"
-                                className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline-none z-10"
+                                className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline-none z-10 cursor-pointer"
                               >
                                 <CalendarIcon className="h-4 w-4" />
                               </button>
@@ -538,7 +538,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
           >
             <X className="size-4" />
             Cancelar
@@ -546,7 +546,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
           <button
             type="submit"
             form="contract-form"
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-blue)] hover:brightness-110 rounded-lg transition-all shadow-sm"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-blue)] hover:brightness-110 rounded-lg transition-all shadow-sm cursor-pointer"
           >
             <Save className="size-4" />
             Guardar Contrato

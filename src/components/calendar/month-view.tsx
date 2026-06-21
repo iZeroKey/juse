@@ -20,6 +20,8 @@ import { cn } from '@/lib/utils';
 import type { JuseEvent } from '@/types/event';
 // unused imports removed
 import { es } from 'date-fns/locale';
+import { Plus } from 'lucide-react';
+import { ContextMenu, ContextMenuTrigger, ContextMenuPopup, ContextMenuItem, ContextMenuGroup, ContextMenuGroupLabel } from "@/components/ui/context-menu";
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -32,8 +34,10 @@ const DAY_HEADERS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] as const
 interface MonthViewProps {
   date: Date;
   onEventClick: (event: JuseEvent) => void;
-  onDayClick?: (date: Date) => void;
-  onNewEvent?: (initialDate?: string) => void;
+  onDayClick: (date: Date) => void;
+  onNewEvent: (initialDate?: string) => void;
+  onEditEvent?: (event: JuseEvent) => void;
+  onDeleteEvent?: (id: string) => void;
 }
 
 // ── Sub-components ─────────────────────────────────────────
@@ -57,11 +61,13 @@ function DayCell({
   events,
   onDayClick,
   isSelected,
+  onNewEvent,
 }: {
   day: Date;
   currentMonth: number;
   events: JuseEvent[];
   onDayClick: (date: Date) => void;
+  onNewEvent?: () => void;
   isSelected?: boolean;
 }) {
   const isCurrentMonth = day.getMonth() === currentMonth;
@@ -81,16 +87,18 @@ function DayCell({
   );
 
   return (
-    <motion.button
-      type="button"
-      onClick={handleDayClick}
-      className={cn(
-        'relative flex flex-col items-start border-b border-r border-border p-1 md:p-2',
-        'min-h-[80px] md:min-h-[120px]',
-        'text-left cursor-pointer transition-colors duration-200 hover:bg-accent-soft',
-        !isCurrentMonth && 'opacity-40',
-      )}
-    >
+    <ContextMenu>
+      <ContextMenuTrigger className="flex-1 w-full" style={{ display: 'flex' }}>
+        <motion.button
+          type="button"
+          onClick={handleDayClick}
+          className={cn(
+            'flex-1 w-full relative flex flex-col items-start border-b border-r border-border p-1 md:p-2',
+            'min-h-[80px] md:min-h-[120px]',
+            'text-left cursor-pointer transition-colors duration-200 hover:bg-accent-soft',
+            !isCurrentMonth && 'opacity-40',
+          )}
+        >
       {/* Day number */}
       <motion.span
         initial={false}
@@ -143,6 +151,16 @@ function DayCell({
         )}
       </div>
     </motion.button>
+      </ContextMenuTrigger>
+      <ContextMenuPopup>
+        <ContextMenuGroup>
+          <ContextMenuGroupLabel>Acciones</ContextMenuGroupLabel>
+          <ContextMenuItem onClick={onNewEvent} className="cursor-pointer">
+            <Plus className="mr-2 size-4" /> Nuevo Evento
+          </ContextMenuItem>
+        </ContextMenuGroup>
+      </ContextMenuPopup>
+    </ContextMenu>
   );
 }
 
@@ -150,17 +168,16 @@ function DayCell({
 // Desktop: Day Sidebar Grid
 // ---------------------------------------------------------------------------
 
-function DesktopDaySidebar({
-  date,
-  events,
-  onEventClick,
-  onNewEvent,
-}: {
+interface DesktopDaySidebarProps {
   date: Date;
   events: JuseEvent[];
   onEventClick: (event: JuseEvent) => void;
-  onNewEvent?: (initialDate?: string) => void;
-}) {
+  onNewEvent: (initialDate?: string) => void;
+  onEditEvent?: (event: JuseEvent) => void;
+  onDeleteEvent?: (id: string) => void;
+}
+
+function DesktopDaySidebar({ date, events, onEventClick, onNewEvent, onEditEvent, onDeleteEvent }: DesktopDaySidebarProps) {
   const timeBlocks = useMemo(() => computeTimeBlocks(events), [events]);
   const positioned = useMemo(() => calculateOverlaps(events), [events]);
 
@@ -292,6 +309,8 @@ function DesktopDaySidebar({
                         key={event.id}
                         event={event}
                         onClick={() => onEventClick(event)}
+                        onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                        onDelete={onDeleteEvent ? () => onDeleteEvent(event.id) : undefined}
                         style={{
                           top: `${topPx}px`,
                           height: `${heightPx}px`,
@@ -313,7 +332,7 @@ function DesktopDaySidebar({
 
 // ── Main component ─────────────────────────────────────────
 
-export function MonthView({ date, onEventClick, onDayClick, onNewEvent }: MonthViewProps) {
+export function MonthView({ date, onEventClick, onDayClick, onNewEvent, onEditEvent, onDeleteEvent }: MonthViewProps) {
   const { events } = useEvents();
   const [selectedDay, setSelectedDay] = useState<Date>(date);
 
@@ -376,6 +395,7 @@ export function MonthView({ date, onEventClick, onDayClick, onNewEvent }: MonthV
                     setSelectedDay(d);
                     onDayClick?.(d);
                   }}
+                  onNewEvent={() => onNewEvent(format(day, 'yyyy-MM-dd'))}
                 />
               ))}
             </div>
@@ -413,6 +433,8 @@ export function MonthView({ date, onEventClick, onDayClick, onNewEvent }: MonthV
                   key={event.id}
                   event={event}
                   onClick={() => onEventClick(event)}
+                  onEdit={onEditEvent ? () => onEditEvent(event) : undefined}
+                  onDelete={onDeleteEvent ? () => onDeleteEvent(event.id) : undefined}
                 />
               ))
             ) : (
@@ -430,6 +452,8 @@ export function MonthView({ date, onEventClick, onDayClick, onNewEvent }: MonthV
             events={getEvents(selectedDay)}
             onEventClick={onEventClick}
             onNewEvent={onNewEvent}
+            onEditEvent={onEditEvent}
+            onDeleteEvent={onDeleteEvent}
           />
         </div>
       </div>

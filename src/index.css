@@ -155,3 +155,15 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   -webkit-app-region: drag;
   app-region: drag;
 }
+
+:root {
+  --destructive-foreground: var(--color-red-700);
+}
+
+.dark {
+  --destructive-foreground: var(--color-red-400);
+}
+
+@theme inline {
+  --color-destructive-foreground: var(--destructive-foreground);
+}

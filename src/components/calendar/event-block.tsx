@@ -5,18 +5,20 @@ import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 import type { JuseEvent } from "@/types/event";
 import { cn, calculateDuration } from "@/lib/utils";
-import {
-  getEventColors,
-} from "@/lib/calendar-utils";
+import { getEventColors } from "@/lib/calendar-utils";
+import { ContextMenu, ContextMenuTrigger, ContextMenuPopup, ContextMenuItem, ContextMenuSeparator, ContextMenuGroup, ContextMenuGroupLabel } from "@/components/ui/context-menu";
+import { Edit2, Trash2, Calendar as CalendarIcon } from "lucide-react";
 
 interface EventBlockProps {
   event: JuseEvent;
   style?: CSSProperties;
   onClick?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   compact?: boolean;
 }
 
-function EventBlock({ event, style, onClick, compact = false }: EventBlockProps) {
+function EventBlock({ event, style, onClick, onEdit, onDelete, compact = false }: EventBlockProps) {
   const { bg, text, dot, colorValue } = getEventColors(event.color);
   const hasSaldo = event.saldo > 0;
   const missingStaff = event.dj.length === 0 || event.animadoras.length === 0;
@@ -59,25 +61,27 @@ function EventBlock({ event, style, onClick, compact = false }: EventBlockProps)
   const isLarge = duration > 90;
 
   return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{
-        duration: 0.2,
-        ease: [0.4, 0, 0.2, 1],
-      }}
-      whileHover={{ zIndex: 20 }}
-      whileTap={{ scale: 0.98 }}
-      style={{ ...style, borderLeftColor: colorValue.includes('var') ? `var(${colorValue.replace('var(', '').replace(')', '')})` : colorValue }}
-      className={cn(
-        "absolute overflow-hidden rounded-md border border-slate-200 border-l-[4px] text-left group bg-white",
-        "transition-all duration-200 hover:shadow-md hover:border-slate-300",
-        isMicro ? "p-0.5 px-1" : "p-1.5"
-      )}
-    >
-      {/* Content Container */}
+    <ContextMenu>
+      <ContextMenuTrigger className="absolute" style={style}>
+        <motion.button
+          type="button"
+          onClick={onClick}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{
+            duration: 0.2,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+          whileHover={{ zIndex: 20 }}
+          whileTap={{ scale: 0.98 }}
+          style={{ borderLeftColor: colorValue.includes('var') ? `var(${colorValue.replace('var(', '').replace(')', '')})` : colorValue }}
+          className={cn(
+            "w-full h-full overflow-hidden rounded-md border border-slate-200 border-l-[4px] text-left group bg-white cursor-pointer",
+            "transition-all duration-200 hover:shadow-md hover:border-slate-300",
+            isMicro ? "p-0.5 px-1" : "p-1.5"
+          )}
+        >
+          {/* Content Container */}
       <div className={cn("flex h-full flex-col min-w-0", isMicro ? "gap-0" : "gap-0.5")}>
         {isMicro ? (
           <div className="flex w-full items-center gap-1 h-full min-w-0">
@@ -152,6 +156,27 @@ function EventBlock({ event, style, onClick, compact = false }: EventBlockProps)
         )}
       </div>
     </motion.button>
+      </ContextMenuTrigger>
+      <ContextMenuPopup>
+        <ContextMenuGroup>
+          <ContextMenuGroupLabel>Evento</ContextMenuGroupLabel>
+          <ContextMenuItem onClick={onClick} className="cursor-pointer">
+            <CalendarIcon className="mr-2 size-4" /> Ver Detalles
+          </ContextMenuItem>
+          {(onEdit || onDelete) && <ContextMenuSeparator />}
+          {onEdit && (
+            <ContextMenuItem onClick={onEdit} className="cursor-pointer">
+              <Edit2 className="mr-2 size-4" /> Editar Evento
+            </ContextMenuItem>
+          )}
+          {onDelete && (
+            <ContextMenuItem onClick={onDelete} variant="destructive" className="cursor-pointer text-red-600">
+              <Trash2 className="mr-2 size-4" /> Eliminar Evento
+            </ContextMenuItem>
+          )}
+        </ContextMenuGroup>
+      </ContextMenuPopup>
+    </ContextMenu>
   );
 }
 

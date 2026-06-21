@@ -57,7 +57,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
         ) : (
           <button
             type="button"
-            className="flex items-center justify-center size-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors"
+            className="flex items-center justify-center size-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
             aria-label="Menú principal"
           >
             <Menu className="size-5" />
@@ -68,7 +68,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
       <SheetContent side="left" className="w-[280px] p-0 flex flex-col" showCloseButton={false}>
         <SheetHeader className="flex flex-row items-center justify-between p-4 border-b border-border text-left">
           <SheetTitle className="text-lg">Menú</SheetTitle>
-          <SheetClose className="flex items-center justify-center size-8 rounded-full hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-900">
+          <SheetClose className="flex items-center justify-center size-8 rounded-full hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-900 cursor-pointer">
             <X className="size-5" />
             <span className="sr-only">Cerrar menú</span>
           </SheetClose>
@@ -78,7 +78,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
           <SheetClose asChild>
             <button 
               onClick={() => handleNavigation('/')}
-              className={`flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors ${currentView === 'calendar' ? 'bg-slate-100 font-medium text-[var(--color-juse-blue)]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+              className={`flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors cursor-pointer ${currentView === 'calendar' ? 'bg-slate-100 font-medium text-[var(--color-juse-blue)]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
             >
               <Calendar className="size-5 mr-3" />
               Calendario
@@ -88,7 +88,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
           <SheetClose asChild>
             <button 
               onClick={() => handleNavigation('/gestion')}
-              className={`flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors ${currentView === 'contracts' ? 'bg-slate-100 font-medium text-[var(--color-juse-blue)]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+              className={`flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors cursor-pointer ${currentView === 'contracts' ? 'bg-slate-100 font-medium text-[var(--color-juse-blue)]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
             >
               <FileText className="size-5 mr-3" />
               Gestión
@@ -102,14 +102,14 @@ export function NavDrawer({ children }: NavDrawerProps) {
           <div className="flex flex-col gap-1">
             <button 
               onClick={handleThemeChange}
-              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
             >
               <Moon className="size-5 mr-3" />
               Cambiar Tema
             </button>
             <button 
               onClick={handleDownloadPath}
-              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
             >
               <FolderOpen className="size-5 mr-3" />
               Ruta de Descarga
