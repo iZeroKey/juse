@@ -17,7 +17,6 @@ import {
   DrawerPopup,
   DrawerTitle
 } from '@/components/ui/drawer';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn, formatCurrency, formatDuration } from '@/lib/utils';
@@ -33,7 +32,6 @@ import {
   Trash2
 } from 'lucide-react';
 import * as React from 'react';
-import { toast } from 'sonner';
 
 interface EventSheetProps {
   event: JuseEvent | null;
@@ -124,12 +122,6 @@ function EventSheet({
     onDelete(event.id);
     setConfirmOpen(false);
     onClose();
-  };
-
-  const handleReceipt = () => {
-    toast('Función de recibo en desarrollo', {
-      description: 'Pronto podrás generar recibos y contratos desde aquí.',
-    });
   };
 
   return (

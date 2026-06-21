@@ -37,3 +37,24 @@ export function formatDuration(minutes: number): string {
   if (m === 0) return `${h}h`;
   return `${h}h ${m}min`;
 }
+
+export function formatFecha(isoString?: string) {
+  if (!isoString) return "";
+  const partes = isoString.split('T')[0].split('-');
+  if (partes.length !== 3) return isoString;
+  const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  return `${parseInt(partes[2])} de ${meses[parseInt(partes[1]) - 1]} de ${partes[0]}`;
+}
+
+export function formatHora(horaString?: string) {
+  if (!horaString) return "";
+  const partes = horaString.split(':');
+  if (partes.length < 2) return horaString;
+  let h = parseInt(partes[0]);
+  const m = partes[1];
+  const ampm = h >= 12 ? 'p. m.' : 'a. m.';
+  h = h % 12;
+  h = h ? h : 12;
+  const hStr = h < 10 ? `0${h}` : h.toString();
+  return `${hStr}:${m} ${ampm}`;
+}

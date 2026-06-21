@@ -7,7 +7,6 @@ import { es } from 'date-fns/locale';
 import { EVENT_PALETTE } from '@/lib/calendar-utils';
 import { cn, parseCurrency, calculateDuration, formatDuration } from '@/lib/utils';
 import type { JuseEvent, EventFormValues } from '@/types/event';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent } from '@/components/ui/tabs';

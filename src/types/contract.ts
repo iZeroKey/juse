@@ -29,6 +29,7 @@ export interface JuseContract {
   nombresPapitos: string;
   nombreBebe: string;
   nombreCumpleanero: string;
+  informacionAdicional: string;
   
   // Meta
   createdAt: string;
@@ -55,4 +56,5 @@ export interface ContractFormValues {
   nombresPapitos: string;
   nombreBebe: string;
   nombreCumpleanero: string;
+  informacionAdicional: string;
 }

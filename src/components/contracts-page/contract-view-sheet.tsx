@@ -1,6 +1,6 @@
 import { 
-  FileText, User, MapPin, Calendar, Clock, 
-  Package, DollarSign, IdCard, Phone, Users 
+  FileText, User, MapPin, Calendar,
+  Package, DollarSign
 } from 'lucide-react';
 import {
   Drawer,
@@ -119,12 +119,17 @@ export function ContractViewSheet({ open, onClose, contract }: ContractViewSheet
                   </div>
                 </section>
 
-                {/* ── Festejados (Opcional) ─────────────── */}
-                {(contract.nombreCumpleanero || contract.nombreBebe || contract.nombresPapitos) && (
+                {/* ── Festejados e Info (Opcional) ─────────────── */}
+                {(contract.nombreCumpleanero || contract.nombreBebe || contract.nombresPapitos || contract.informacionAdicional) && (
                   <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
                     {contract.nombreCumpleanero && <DataRow label="Cumpleañero/a" value={contract.nombreCumpleanero} />}
                     {contract.nombresPapitos && <DataRow label="Papitos" value={contract.nombresPapitos} />}
                     {contract.nombreBebe && <DataRow label="Bebé" value={contract.nombreBebe} />}
+                    {contract.informacionAdicional && (
+                      <div className="col-span-2 mt-1">
+                        <DataRow label="Info Adicional" value={<span className="whitespace-pre-wrap">{contract.informacionAdicional}</span>} />
+                      </div>
+                    )}
                   </div>
                 )}
 

@@ -8,7 +8,6 @@ import { es } from 'date-fns/locale';
 import { useEffect, useRef } from 'react';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { User, Calendar as CalendarIcon, Baby, CircleDollarSign, X, Save } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -21,7 +20,6 @@ import {
   ComboboxList,
   ComboboxPopup,
 } from "@/components/ui/combobox";
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Drawer,
   DrawerDescription,
@@ -64,6 +62,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
       nombresPapitos: '',
       nombreBebe: '',
       nombreCumpleanero: '',
+      informacionAdicional: '',
     }
   });
 
@@ -89,6 +88,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
           nombresPapitos: initialData.nombresPapitos,
           nombreBebe: initialData.nombreBebe,
           nombreCumpleanero: initialData.nombreCumpleanero,
+          informacionAdicional: initialData.informacionAdicional || '',
         });
       } else {
         reset({
@@ -110,6 +110,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
           nombresPapitos: '',
           nombreBebe: '',
           nombreCumpleanero: '',
+          informacionAdicional: '',
         });
       }
     }
@@ -185,6 +186,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
       nombresPapitos: data.nombresPapitos,
       nombreBebe: data.nombreBebe,
       nombreCumpleanero: data.nombreCumpleanero,
+      informacionAdicional: data.informacionAdicional,
     };
 
     if (initialData) {
@@ -407,7 +409,6 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                     return (
                       <Combobox
                         items={packageOptions}
-                        itemToString={(item) => item?.label || ''}
                         value={selectedItem}
                         onValueChange={(val) => {
                           field.onChange(val?.value || '');
@@ -467,6 +468,13 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                   <label className="text-sm font-medium text-slate-700">Nombre del Bebé</label>
                   <Input
                     {...register('nombreBebe')}
+                  />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-sm font-medium text-slate-700">Información Adicional</label>
+                  <Input
+                    {...register('informacionAdicional')}
+                    placeholder="Detalles extra, notas, etc."
                   />
                 </div>
               </div>
