@@ -9,6 +9,7 @@ import { useRender } from "@base-ui/react/use-render";
 import { ChevronRightIcon, XIcon } from "lucide-react";
 import type React from "react";
 import { createContext, useContext } from "react";
+import { GlobalContextMenu } from "@/components/global-context-menu";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -228,17 +229,21 @@ export function DrawerPopup({
           }}
           {...props}
         >
-          {children}
-          {showCloseButton && (
-            <DrawerPrimitive.Close
-              aria-label="Close"
-              className="absolute end-2 top-2"
-              render={<Button size="icon" variant="ghost" />}
-            >
-              <XIcon />
-            </DrawerPrimitive.Close>
-          )}
-          {showBar && <DrawerBar />}
+          <GlobalContextMenu>
+            <div className="flex flex-col h-full w-full">
+              {children}
+              {showCloseButton && (
+                <DrawerPrimitive.Close
+                  aria-label="Close"
+                  className="absolute end-2 top-2"
+                  render={<Button size="icon" variant="ghost" />}
+                >
+                  <XIcon />
+                </DrawerPrimitive.Close>
+              )}
+              {showBar && <DrawerBar />}
+            </div>
+          </GlobalContextMenu>
         </DrawerPrimitive.Popup>
       </DrawerViewport>
     </DrawerPortal>

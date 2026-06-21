@@ -27,8 +27,8 @@ export function NavDrawer({ children }: NavDrawerProps) {
     }, 300);
   };
 
-  const handleThemeChange = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+  const handleThemeChange = (e: React.MouseEvent) => {
+    setTheme(theme === 'dark' ? 'light' : 'dark', e);
   };
 
   const handleDownloadPath = async () => {

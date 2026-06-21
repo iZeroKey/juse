@@ -184,9 +184,9 @@ export function TitleBar() {
             <ContextMenuSubTrigger inset>Tema</ContextMenuSubTrigger>
             <ContextMenuSubPopup className="w-48">
               <ContextMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}>
-                <ContextMenuRadioItem value="light">Claro</ContextMenuRadioItem>
-                <ContextMenuRadioItem value="dark">Oscuro</ContextMenuRadioItem>
-                <ContextMenuRadioItem value="system">Sistema</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="light" onSelect={(e) => setTheme('light', e)}>Claro</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="dark" onSelect={(e) => setTheme('dark', e)}>Oscuro</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="system" onSelect={(e) => setTheme('system', e)}>Sistema</ContextMenuRadioItem>
               </ContextMenuRadioGroup>
             </ContextMenuSubPopup>
           </ContextMenuSub>

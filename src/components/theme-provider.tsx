@@ -10,7 +10,7 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: Theme
-  setTheme: (theme: Theme) => void
+  setTheme: (theme: Theme, event?: React.MouseEvent | MouseEvent | Event) => void
 }
 
 const initialState: ThemeProviderState = {
@@ -50,9 +50,42 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+    setTheme: (newTheme: Theme, event?: React.MouseEvent | MouseEvent | Event) => {
+      if (!document.startViewTransition || !event || !('clientX' in event)) {
+        localStorage.setItem(storageKey, newTheme)
+        setTheme(newTheme)
+        return
+      }
+
+      const x = event.clientX
+      const y = event.clientY
+
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+      )
+
+      document.documentElement.style.setProperty("--x", `${x}px`)
+      document.documentElement.style.setProperty("--y", `${y}px`)
+      document.documentElement.style.setProperty("--r", `${endRadius}px`)
+
+      document.documentElement.classList.add("theme-transitioning")
+      const transition = document.startViewTransition(() => {
+        const root = window.document.documentElement
+        root.classList.remove("light", "dark")
+        if (newTheme === "system") {
+          const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+          root.classList.add(systemTheme)
+        } else {
+          root.classList.add(newTheme)
+        }
+        localStorage.setItem(storageKey, newTheme)
+        setTheme(newTheme)
+      })
+
+      transition.finished.finally(() => {
+        document.documentElement.classList.remove("theme-transitioning")
+      })
     },
   }
 

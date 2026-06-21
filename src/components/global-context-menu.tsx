@@ -103,7 +103,7 @@ export function GlobalContextMenu({ children }: GlobalContextMenuProps) {
             <ContextMenuItem onClick={handleReload} className="cursor-pointer">
               <RefreshCw className="mr-2 size-4" /> Recargar interfaz
             </ContextMenuItem>
-            <ContextMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer">
+            <ContextMenuItem onClick={(e) => setTheme(theme === 'dark' ? 'light' : 'dark', e)} className="cursor-pointer">
               <Palette className="mr-2 size-4" /> Cambiar Tema
             </ContextMenuItem>
           </ContextMenuGroup>
