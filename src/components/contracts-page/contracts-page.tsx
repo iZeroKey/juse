@@ -16,7 +16,7 @@ export function ContractsPage() {
         <NavDrawer>
           <button
             type="button"
-            className="p-1.5 md:p-2 rounded-md hover:bg-slate-100 transition-colors text-slate-600 cursor-pointer flex items-center justify-center shrink-0 mr-1"
+            className="p-1.5 md:p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground cursor-pointer flex items-center justify-center shrink-0 mr-1"
             aria-label="Abrir menú"
           >
             <Menu className="size-5 md:size-5" />
@@ -28,12 +28,12 @@ export function ContractsPage() {
         </div>
 
         {/* Tabs */}
-        <div className="ml-auto flex items-center p-1 bg-slate-100 rounded-lg">
+        <div className="ml-auto flex items-center p-1 bg-muted rounded-lg">
           <button
             onClick={() => setActiveTab('contracts')}
             className={cn(
               "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'contracts' ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+              activeTab === 'contracts' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
             <FileText className="size-4" />
@@ -43,7 +43,7 @@ export function ContractsPage() {
             onClick={() => setActiveTab('packages')}
             className={cn(
               "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'packages' ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+              activeTab === 'packages' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
             )}
           >
             <Package className="size-4" />
@@ -51,7 +51,7 @@ export function ContractsPage() {
           </button>
         </div>
       </header>
-      <main className="flex-1 overflow-hidden bg-slate-50 relative p-4 md:p-6">
+      <main className="flex-1 overflow-hidden bg-background relative p-4 md:p-6">
         <AnimatePresence mode="wait">
           {activeTab === 'contracts' ? (
             <motion.div

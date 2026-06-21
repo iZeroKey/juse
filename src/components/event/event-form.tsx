@@ -172,7 +172,7 @@ export function EventForm({
                         <PopoverTrigger asChild>
                           <button
                             type="button"
-                            className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline-none z-10"
+                            className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none z-10"
                           >
                             <CalendarIcon className="h-4 w-4" />
                           </button>
@@ -225,7 +225,7 @@ export function EventForm({
             {/* Duración (read-only) */}
             <div className="space-y-1.5">
               <Label>Duración</Label>
-              <div className="flex h-[42px] sm:h-[42px] w-full min-w-0 items-center gap-2 rounded-lg border border-slate-300 bg-white opacity-50 px-3 py-2.5 text-sm text-slate-500 shadow-sm transition-colors cursor-not-allowed">
+              <div className="flex h-[42px] sm:h-[42px] w-full min-w-0 items-center gap-2 rounded-lg border border-border bg-background opacity-50 px-3 py-2.5 text-sm text-muted-foreground shadow-sm transition-colors cursor-not-allowed">
                 <Clock className="size-4 shrink-0" />
                 <span className="truncate">{durationDisplay}</span>
               </div>
@@ -261,7 +261,7 @@ export function EventForm({
                         "size-8 rounded-full border-2 transition-all duration-200",
                         colorDef.pickerBg,
                         field.value === colorDef.id
-                          ? "border-slate-800 scale-110 shadow-sm"
+                          ? "border-foreground scale-110 shadow-sm"
                           : "border-transparent hover:scale-105 opacity-80 hover:opacity-100"
                       )}
                       aria-label={`Seleccionar color ${colorDef.id}`}
@@ -475,7 +475,7 @@ export function EventForm({
               {...register('observacion')}
               placeholder="Factura, Recibo, u observaciones adicionales..."
               rows={3}
-              className="w-full min-h-[80px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition-colors placeholder:text-slate-400 focus-visible:border-[var(--color-juse-blue)] focus-visible:ring-2 focus-visible:ring-[var(--color-juse-blue)]/20"
+              className="w-full min-h-[80px] rounded-lg border border-border bg-background px-3 py-2 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-[var(--color-juse-blue)] focus-visible:ring-2 focus-visible:ring-[var(--color-juse-blue)]/20"
             />
           </div>
         </motion.div>

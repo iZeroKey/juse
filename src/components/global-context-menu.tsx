@@ -9,6 +9,7 @@ import {
   ContextMenuGroupLabel,
 } from "@/components/ui/context-menu";
 import { Copy, Scissors, Clipboard, RefreshCw, Palette } from "lucide-react";
+import { useTheme } from "@/components/theme-provider";
 
 interface GlobalContextMenuProps {
   children: ReactNode;
@@ -17,6 +18,7 @@ interface GlobalContextMenuProps {
 export function GlobalContextMenu({ children }: GlobalContextMenuProps) {
   const [hasSelection, setHasSelection] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const handleSelectionChange = () => {
@@ -101,7 +103,7 @@ export function GlobalContextMenu({ children }: GlobalContextMenuProps) {
             <ContextMenuItem onClick={handleReload} className="cursor-pointer">
               <RefreshCw className="mr-2 size-4" /> Recargar interfaz
             </ContextMenuItem>
-            <ContextMenuItem onClick={() => console.log("Cambiar tema")} className="cursor-pointer">
+            <ContextMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer">
               <Palette className="mr-2 size-4" /> Cambiar Tema
             </ContextMenuItem>
           </ContextMenuGroup>

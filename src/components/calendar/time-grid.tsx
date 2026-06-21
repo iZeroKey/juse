@@ -77,13 +77,13 @@ function TimeGrid({
     <ScrollArea scrollFade ref={scrollRef} className="h-full w-full">
       <div className="flex" style={{ height: totalHeight }}>
         {/* Hour labels column */}
-        <div className="relative w-14 shrink-0 border-r border-slate-200">
+        <div className="relative w-14 shrink-0 border-r border-border">
           {hours.map((hour) => {
             const top = (hour - gridStartHour) * HOUR_HEIGHT;
             return (
               <span
                 key={hour}
-                className="absolute right-2 font-sans text-[11px] leading-none text-slate-400"
+                className="absolute right-2 font-sans text-[11px] leading-none text-muted-foreground"
                 style={{ top: top - 6 }}
               >
                 {String(hour).padStart(2, "0")}:00
@@ -101,12 +101,12 @@ function TimeGrid({
               <div key={`h-${hour}`}>
                 {/* Full hour line */}
                 <div
-                  className="absolute inset-x-0 border-t border-slate-200/60"
+                  className="absolute inset-x-0 border-t border-border/60"
                   style={{ top }}
                 />
                 {/* Half-hour dashed line */}
                 <div
-                  className="absolute inset-x-0 border-t border-dashed border-slate-200/30"
+                  className="absolute inset-x-0 border-t border-dashed border-border/30"
                   style={{ top: top + HOUR_HEIGHT / 2 }}
                 />
               </div>

@@ -132,7 +132,7 @@ function DayCell({
                 onDayClick(day);
               }
             }}
-            className="cursor-pointer px-1 text-[10px] font-medium text-slate-500 hover:text-slate-800 transition-colors"
+            className="cursor-pointer px-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             +{events.length - 5} más
           </span>
@@ -196,24 +196,24 @@ function DesktopDaySidebar({ date, events, onEventClick, onNewEvent, onEditEvent
 
   if (events.length === 0) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center bg-slate-50/30">
+      <div className="flex h-full w-full flex-col items-center justify-center p-8 text-center bg-muted/30">
         <button
           type="button"
           onClick={() => onNewEvent?.(format(date, 'yyyy-MM-dd'))}
-          className="rounded-full bg-white p-4 shadow-sm mb-4 border border-slate-200 text-slate-400 hover:text-accent hover:border-accent hover:shadow-md transition-all cursor-pointer"
+          className="rounded-full bg-surface p-4 shadow-sm mb-4 border border-border text-muted-foreground hover:text-accent hover:border-accent hover:shadow-md transition-all cursor-pointer"
         >
           <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
           </svg>
         </button>
-        <p className="text-sm font-medium text-slate-600">Sin eventos</p>
-        <p className="text-xs text-slate-400 mt-1">No hay eventos programados para este día.</p>
+        <p className="text-sm font-medium text-muted-foreground">Sin eventos</p>
+        <p className="text-xs text-muted-foreground mt-1">No hay eventos programados para este día.</p>
       </div>
     );
   }
 
   return (
-    <ScrollArea scrollFade className="flex-1 min-h-0 bg-white">
+    <ScrollArea scrollFade className="flex-1 min-h-0 bg-surface">
       <div className="flex flex-col gap-4 p-4">
         {timeBlocks.map((block, blockIndex) => {
           const blockHours = block.endHour - block.startHour;
@@ -223,15 +223,15 @@ function DesktopDaySidebar({ date, events, onEventClick, onNewEvent, onEditEvent
           return (
             <div
               key={blockIndex}
-              className="flex relative bg-white animate-in fade-in duration-500"
+              className="flex relative bg-surface animate-in fade-in duration-500"
               style={{ height: blockHeight }}
             >
               {/* Fades */}
               {block.startHour > 0 && (
-                <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-white to-transparent z-40 pointer-events-none" />
+                <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-surface to-transparent z-40 pointer-events-none" />
               )}
               {block.endHour < 24 && (
-                <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-white to-transparent z-40 pointer-events-none" />
+                <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-surface to-transparent z-40 pointer-events-none" />
               )}
               {/* Current time indicator */}
               {timeOffset !== null && isToday(date) && timeOffset >= block.startHour && timeOffset <= block.endHour && (
@@ -245,7 +245,7 @@ function DesktopDaySidebar({ date, events, onEventClick, onNewEvent, onEditEvent
               )}
 
               {/* Time labels */}
-              <div className="relative w-12 shrink-0 border-r border-slate-200 bg-white/50 backdrop-blur-sm z-10">
+              <div className="relative w-12 shrink-0 border-r border-border bg-surface/50 backdrop-blur-sm z-10">
                 {hours.map((hour) => {
                   if (hour === block.startHour && block.startHour > 0) return null;
                   if (hour === block.endHour && block.endHour < 24) return null;
@@ -255,7 +255,7 @@ function DesktopDaySidebar({ date, events, onEventClick, onNewEvent, onEditEvent
                   return (
                     <span
                       key={hour}
-                      className="absolute right-2 font-sans text-[10px] font-medium text-slate-400"
+                      className="absolute right-2 font-sans text-[10px] font-medium text-muted-foreground"
                       style={{ top: top - 6 }}
                     >
                       {displayHour}:00
@@ -274,13 +274,13 @@ function DesktopDaySidebar({ date, events, onEventClick, onNewEvent, onEditEvent
                     <div key={`line-${hour}`}>
                       {showSolidLine && (
                         <div
-                          className="absolute inset-x-0 border-t border-slate-200/60"
+                          className="absolute inset-x-0 border-t border-border/60"
                           style={{ top }}
                         />
                       )}
                       {hour < block.endHour && (
                         <div
-                          className="absolute inset-x-0 border-t border-dashed border-slate-200/30"
+                          className="absolute inset-x-0 border-t border-dashed border-border/30"
                           style={{ top: top + HOUR_HEIGHT / 2 }}
                         />
                       )}
@@ -369,7 +369,7 @@ export function MonthView({ date, onEventClick, onDayClick, onNewEvent, onEditEv
     <div className="flex h-full flex-col md:flex-row overflow-y-auto md:overflow-hidden border border-border bg-surface">
       <div className="flex flex-none min-h-[400px] md:min-h-0 md:flex-1 flex-col overflow-hidden">
         {/* Day-of-week header row */}
-        <div className="grid grid-cols-7 border-b border-border bg-slate-50/60">
+        <div className="grid grid-cols-7 border-b border-border bg-muted/60">
           {DAY_HEADERS.map((label) => (
             <div
               key={label}
@@ -404,9 +404,9 @@ export function MonthView({ date, onEventClick, onDayClick, onNewEvent, onEditEv
       </div>
 
       {/* Sidebar: Agenda on Mobile, Dynamic Grid on Desktop */}
-      <div className="flex-none md:w-80 lg:w-[400px] border-t md:border-t-0 md:border-l border-border bg-slate-50/30 flex flex-col md:overflow-hidden">
+      <div className="flex-none md:w-80 lg:w-[400px] border-t md:border-t-0 md:border-l border-border bg-muted/30 flex flex-col md:overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-border bg-white z-10">
+        <div className="px-6 py-5 border-b border-border bg-surface z-10">
           <div className="flex items-center gap-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10 text-accent">
               <span className="font-display text-3xl font-bold">
@@ -414,10 +414,10 @@ export function MonthView({ date, onEventClick, onDayClick, onNewEvent, onEditEv
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-bold uppercase tracking-wide text-slate-800">
+              <span className="text-sm font-bold uppercase tracking-wide text-foreground">
                 {format(selectedDay, 'EEEE', { locale: es })}
               </span>
-              <span className="text-xs font-medium text-slate-500 mt-0.5">
+              <span className="text-xs font-medium text-muted-foreground mt-0.5">
                 {format(selectedDay, 'MMMM, yyyy', { locale: es })}
               </span>
             </div>
@@ -438,7 +438,7 @@ export function MonthView({ date, onEventClick, onDayClick, onNewEvent, onEditEv
                 />
               ))
             ) : (
-              <p className="py-8 text-center font-sans text-sm italic text-slate-400 bg-white/50 rounded-lg border border-slate-100 border-dashed">
+              <p className="py-8 text-center font-sans text-sm italic text-muted-foreground bg-surface/50 rounded-lg border border-border border-dashed">
                 Sin eventos para este día
               </p>
             )}

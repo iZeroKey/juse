@@ -221,13 +221,13 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
             
             {/* ── SECCIÓN 0: DETALLES DEL CONTRATO ── */}
             <section className="space-y-5">
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+              <div className="flex items-center gap-2 border-b border-border pb-2">
                 <CalendarIcon className="w-5 h-5 text-[var(--color-juse-blue)]" />
-                <h3 className="font-semibold text-slate-800">Detalles del Contrato</h3>
+                <h3 className="font-semibold text-foreground">Detalles del Contrato</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">N° de Contrato <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">N° de Contrato <span className="text-red-500">*</span></label>
                   <Input
                     {...register('contratoNumber', { required: 'Requerido' })}
                     className={cn(errors.contratoNumber && "border-red-500 focus-visible:ring-red-500")}
@@ -235,7 +235,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                   {errors.contratoNumber && <span className="text-[11px] text-red-500 font-medium block">{errors.contratoNumber.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Fecha de Contrato <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">Fecha de Contrato <span className="text-red-500">*</span></label>
                   <Controller
                     name="fechaEmision"
                     control={control}
@@ -254,7 +254,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                             <PopoverTrigger asChild>
                               <button
                                 type="button"
-                                className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline-none z-10 cursor-pointer"
+                                className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none z-10 cursor-pointer"
                               >
                                 <CalendarIcon className="h-4 w-4" />
                               </button>
@@ -286,13 +286,13 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
 
             {/* ── SECCIÓN 1: DATOS DEL CLIENTE ── */}
             <section className="space-y-5">
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+              <div className="flex items-center gap-2 border-b border-border pb-2">
                 <User className="w-5 h-5 text-[var(--color-juse-blue)]" />
-                <h3 className="font-semibold text-slate-800">Datos del Cliente</h3>
+                <h3 className="font-semibold text-foreground">Datos del Cliente</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-700">Nombres y Apellidos <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">Nombres y Apellidos <span className="text-red-500">*</span></label>
                   <Input
                     {...register('clienteNombre', { required: 'Requerido' })}
                     className={cn(errors.clienteNombre && "border-red-500 focus-visible:ring-red-500")}
@@ -300,19 +300,19 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                   {errors.clienteNombre && <span className="text-[11px] text-red-500 font-medium block">{errors.clienteNombre.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">DNI</label>
+                  <label className="text-sm font-medium text-foreground">DNI</label>
                   <Input
                     {...register('clienteDni')}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Celular</label>
+                  <label className="text-sm font-medium text-foreground">Celular</label>
                   <Input
                     {...register('clienteCelular')}
                   />
                 </div>
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-700">Dirección</label>
+                  <label className="text-sm font-medium text-foreground">Dirección</label>
                   <Input
                     {...register('clienteDireccion')}
                   />
@@ -322,14 +322,14 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
 
             {/* ── SECCIÓN 2: DATOS DEL EVENTO Y PAQUETE ── */}
             <section className="space-y-5">
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+              <div className="flex items-center gap-2 border-b border-border pb-2">
                 <CalendarIcon className="w-5 h-5 text-[var(--color-juse-blue)]" />
-                <h3 className="font-semibold text-slate-800">Datos del Evento y Paquete</h3>
+                <h3 className="font-semibold text-foreground">Datos del Evento y Paquete</h3>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-700">Tipo de Evento <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">Tipo de Evento <span className="text-red-500">*</span></label>
                   <Input
                     {...register('tipoEvento', { required: 'Requerido' })}
                     placeholder="Ej. INFANTIL"
@@ -338,7 +338,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                   {errors.tipoEvento && <span className="text-[11px] text-red-500 font-medium block">{errors.tipoEvento.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Fecha del Evento <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">Fecha del Evento <span className="text-red-500">*</span></label>
                   <Controller
                     name="fechaEvento"
                     control={control}
@@ -385,7 +385,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                   {errors.fechaEvento && <span className="text-[11px] text-red-500 font-medium block">{errors.fechaEvento.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Hora <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">Hora <span className="text-red-500">*</span></label>
                   <Input
                     type="time"
                     {...register('horaEvento', { required: 'Requerido' })}
@@ -396,7 +396,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Seleccionar Paquete <span className="text-red-500">*</span></label>
+                <label className="text-sm font-medium text-foreground">Seleccionar Paquete <span className="text-red-500">*</span></label>
                 <Controller
                   name="paqueteId"
                   control={control}
@@ -440,8 +440,8 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Detalle del Paquete / Especificaciones</label>
-                <div className="w-full min-h-[42px] rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm shadow-sm text-slate-500 cursor-not-allowed whitespace-pre-wrap break-words">
+                <label className="text-sm font-medium text-foreground">Detalle del Paquete / Especificaciones</label>
+                <div className="w-full min-h-[42px] rounded-lg border border-border bg-muted px-3 py-2 text-sm shadow-sm text-muted-foreground cursor-not-allowed whitespace-pre-wrap break-words">
                   {paqueteDetalleValue || <span className="opacity-50">Seleccione un paquete para ver los detalles...</span>}
                 </div>
                 <input type="hidden" {...register('paqueteDetalle')} />
@@ -450,31 +450,31 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
 
             {/* ── SECCIÓN 3: NOMBRES (OPCIONAL) ── */}
             <section className="space-y-5">
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+              <div className="flex items-center gap-2 border-b border-border pb-2">
                 <Baby className="w-5 h-5 text-[var(--color-juse-blue)]" />
-                <h3 className="font-semibold text-slate-800">Nombres de Festejados (Opcional)</h3>
+                <h3 className="font-semibold text-foreground">Nombres de Festejados (Opcional)</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-700">Nombre del Cumpleañero/a</label>
+                  <label className="text-sm font-medium text-foreground">Nombre del Cumpleañero/a</label>
                   <Input
                     {...register('nombreCumpleanero')}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Nombre de Papitos</label>
+                  <label className="text-sm font-medium text-foreground">Nombre de Papitos</label>
                   <Input
                     {...register('nombresPapitos')}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Nombre del Bebé</label>
+                  <label className="text-sm font-medium text-foreground">Nombre del Bebé</label>
                   <Input
                     {...register('nombreBebe')}
                   />
                 </div>
                 <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-700">Información Adicional</label>
+                  <label className="text-sm font-medium text-foreground">Información Adicional</label>
                   <Input
                     {...register('informacionAdicional')}
                     placeholder="Detalles extra, notas, etc."
@@ -485,15 +485,15 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
 
             {/* ── SECCIÓN 4: FINANZAS ── */}
             <section className="space-y-5">
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+              <div className="flex items-center gap-2 border-b border-border pb-2">
                 <CircleDollarSign className="w-5 h-5 text-[var(--color-juse-blue)]" />
-                <h3 className="font-semibold text-slate-800">Finanzas</h3>
+                <h3 className="font-semibold text-foreground">Finanzas</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Precio Total <span className="text-red-500">*</span></label>
+                  <label className="text-sm font-medium text-foreground">Precio Total <span className="text-red-500">*</span></label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">S/</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">S/</span>
                     <Input
                       type="number"
                       step="0.01"
@@ -504,9 +504,9 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                   {errors.precio && <span className="text-[11px] text-red-500 font-medium block">{errors.precio.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">A Cuenta</label>
+                  <label className="text-sm font-medium text-foreground">A Cuenta</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-500">S/</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">S/</span>
                     <Input
                       type="number"
                       step="0.01"
@@ -516,14 +516,14 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Forma de Pago</label>
+                  <label className="text-sm font-medium text-foreground">Forma de Pago</label>
                   <Input
                     {...register('formaPago')}
                     placeholder="Ej. YAPE, BCP, Efectivo"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-slate-700">Movilidad</label>
+                  <label className="text-sm font-medium text-foreground">Movilidad</label>
                   <Input
                     {...register('movilidad')}
                   />
@@ -538,7 +538,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
           >
             <X className="size-4" />
             Cancelar

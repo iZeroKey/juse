@@ -144,7 +144,7 @@ export function ContractEventSheet({ open, onClose, contract }: ContractEventShe
                   </div>
                   
                   <div className="space-y-4">
-                    <div className="rounded-lg bg-slate-50 p-3">
+                    <div className="rounded-lg bg-muted p-3">
                       <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                         {contract.paqueteDetalle || <span className="italic text-muted-foreground">Sin detalles registrados.</span>}
                       </p>
@@ -189,9 +189,9 @@ export function ContractEventSheet({ open, onClose, contract }: ContractEventShe
                   </div>
                   
                   {contract.formaPago && (
-                    <div className="mt-3 flex items-center justify-between py-1 border-t border-slate-100 pt-2">
+                    <div className="mt-3 flex items-center justify-between py-1 border-t border-border pt-2">
                       <span className="text-sm text-muted-foreground">Forma de Pago</span>
-                      <span className="text-sm font-medium text-right uppercase bg-slate-100 px-2 py-0.5 rounded-md text-slate-700">{contract.formaPago}</span>
+                      <span className="text-sm font-medium text-right uppercase bg-muted px-2 py-0.5 rounded-md text-foreground">{contract.formaPago}</span>
                     </div>
                   )}
                 </section>

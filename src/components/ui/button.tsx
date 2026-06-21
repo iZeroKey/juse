@@ -40,7 +40,7 @@ export const buttonVariants = cva(
           "border-transparent text-foreground hover:bg-accent data-pressed:bg-accent *:data-[slot=button-loading-indicator]:text-foreground",
         link: "border-transparent text-foreground underline-offset-4 hover:underline data-pressed:underline *:data-[slot=button-loading-indicator]:text-foreground",
         outline:
-          "bg-slate-100 text-slate-700 hover:bg-slate-200 border-transparent shadow-none",
+          "bg-muted text-foreground hover:bg-muted/80 border-transparent shadow-none",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/90 data-pressed:bg-secondary/90 *:data-[slot=button-loading-indicator]:text-secondary-foreground [:active,[data-pressed]]:bg-secondary/80",
       },

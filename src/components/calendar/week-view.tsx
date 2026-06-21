@@ -66,7 +66,7 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex border-b border-border">
         <div className="w-14 shrink-0" />
         {weekDays.map((d) => {
           const today = isToday(d);
@@ -74,14 +74,14 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
             <div
               key={d.toISOString()}
               className={cn(
-                "flex flex-1 flex-col items-center gap-1 border-l border-slate-200 py-3",
-                today && "bg-slate-50/50"
+                "flex flex-1 flex-col items-center gap-1 border-l border-border py-3",
+                today && "bg-muted/50"
               )}
             >
               <span
                 className={cn(
                   "font-sans text-[11px] font-semibold uppercase tracking-wider",
-                  today ? "text-accent" : "text-slate-500"
+                  today ? "text-accent" : "text-muted-foreground"
                 )}
               >
                 {getDayOfWeekName(d)}
@@ -89,7 +89,7 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
               <span
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full font-display text-base font-semibold",
-                  today ? "bg-accent text-white" : "text-slate-700"
+                  today ? "bg-accent text-white" : "text-muted-foreground"
                 )}
               >
                 {getDayNumber(d)}
@@ -100,7 +100,7 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
       </div>
 
       {/* Grid body */}
-    <ScrollArea scrollFade className="flex-1 min-h-0 bg-white">
+    <ScrollArea scrollFade className="flex-1 min-h-0 bg-surface">
       <div className="flex flex-col gap-4 py-4">
         {timeBlocks.map((block, blockIndex) => {
           const blockHours = block.endHour - block.startHour;
@@ -110,15 +110,15 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
           return (
             <div
               key={blockIndex}
-              className="flex relative bg-white animate-in fade-in duration-500"
+              className="flex relative bg-surface animate-in fade-in duration-500"
               style={{ height: blockHeight }}
             >
               {/* Fades */}
               {block.startHour > 0 && (
-                <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-white to-transparent z-40 pointer-events-none" />
+                <div className="absolute top-0 inset-x-0 h-10 bg-gradient-to-b from-surface to-transparent z-40 pointer-events-none" />
               )}
               {block.endHour < 24 && (
-                <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-white to-transparent z-40 pointer-events-none" />
+                <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-surface to-transparent z-40 pointer-events-none" />
               )}
                 {/* Current time indicator */}
                 {timeOffset !== null && timeOffset >= block.startHour && timeOffset <= block.endHour && (
@@ -132,7 +132,7 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
                 )}
 
                 {/* Time labels */}
-                <div className="relative w-14 shrink-0 border-r border-slate-200 bg-white">
+                <div className="relative w-14 shrink-0 border-r border-border bg-surface">
                   {hours.map((hour) => {
                     if (hour === block.startHour && block.startHour > 0) return null;
                     if (hour === block.endHour && block.endHour < 24) return null;
@@ -142,7 +142,7 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
                     return (
                       <span
                         key={hour}
-                        className="absolute right-2 font-sans text-[11px] leading-none text-slate-400"
+                        className="absolute right-2 font-sans text-[11px] leading-none text-muted-foreground"
                         style={{ top: top - 6 }}
                       >
                         {displayHour}:00
@@ -156,8 +156,8 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
                   <div
                     key={d.toISOString()}
                     className={cn(
-                      "relative flex-1 border-l border-slate-200",
-                      isToday(d) && "bg-indigo-50/10"
+                      "relative flex-1 border-l border-border",
+                      isToday(d) && "bg-accent/10"
                     )}
                   >
                     {/* Hour lines */}
@@ -168,13 +168,13 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick, onEditEvent, onDelete
                         <div key={`line-${hour}`}>
                           {showSolidLine && (
                             <div
-                              className="absolute inset-x-0 border-t border-slate-200/60"
+                              className="absolute inset-x-0 border-t border-border/60"
                               style={{ top }}
                             />
                           )}
                           {hour < block.endHour && (
                             <div
-                              className="absolute inset-x-0 border-t border-dashed border-slate-200/30"
+                              className="absolute inset-x-0 border-t border-dashed border-border/30"
                               style={{ top: top + HOUR_HEIGHT / 2 }}
                             />
                           )}
@@ -244,7 +244,7 @@ function MobileWeekView({ date, onEventClick, onEditEvent, onDeleteEvent }: Week
 
   return (
     <div className="flex h-full flex-col overflow-hidden min-w-0">
-      <ScrollArea scrollFade className="flex-1 min-h-0 bg-slate-50/50 [&>div>div]:!block">
+      <ScrollArea scrollFade className="flex-1 min-h-0 bg-muted/50 [&>div>div]:!block">
         <div className="space-y-6 p-4 pb-12 w-full max-w-full">
           {weekData.map(({ date: d, events: dayEvents }) => {
             const today = isToday(d);
@@ -253,14 +253,14 @@ function MobileWeekView({ date, onEventClick, onEditEvent, onDeleteEvent }: Week
             return (
               <div key={d.toISOString()} className="space-y-3">
                 {/* Day Header */}
-                <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-slate-50 border-b border-transparent">
+                <div className="sticky top-0 z-10 -mx-4 px-4 py-2 bg-muted border-b border-transparent">
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
                         "flex flex-col items-center justify-center w-11 h-11 rounded-xl shrink-0",
                         today
                           ? "bg-accent text-white shadow-sm"
-                          : "bg-white border border-slate-200 text-slate-600"
+                          : "bg-surface border border-border text-muted-foreground"
                       )}
                     >
                       <span className="font-sans text-[10px] font-semibold uppercase leading-none mb-0.5">
@@ -270,7 +270,7 @@ function MobileWeekView({ date, onEventClick, onEditEvent, onDeleteEvent }: Week
                         {getDayNumber(d)}
                       </span>
                     </div>
-                    <div className="h-px flex-1 bg-slate-200" />
+                    <div className="h-px flex-1 bg-border" />
                   </div>
                 </div>
 
@@ -287,7 +287,7 @@ function MobileWeekView({ date, onEventClick, onEditEvent, onDeleteEvent }: Week
                       />
                     ))
                   ) : (
-                    <p className="py-3 text-center font-sans text-sm italic text-slate-400 bg-white/50 rounded-lg border border-slate-100 border-dashed">
+                    <p className="py-3 text-center font-sans text-sm italic text-muted-foreground bg-surface/50 rounded-lg border border-border border-dashed">
                       Sin eventos
                     </p>
                   )}

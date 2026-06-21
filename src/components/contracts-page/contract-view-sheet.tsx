@@ -88,7 +88,7 @@ export function ContractViewSheet({ open, onClose, contract }: ContractViewSheet
                       <DataRow label="Celular" value={formatPhoneNumber(contract.clienteCelular)} />
                     </div>
                     
-                    <div className="mt-2 rounded-lg bg-slate-50 p-3">
+                    <div className="mt-2 rounded-lg bg-muted p-3">
                       <div className="flex items-center gap-2 mb-1">
                         <MapPin className="size-3.5 text-muted-foreground" />
                         <span className="text-xs font-medium text-muted-foreground">Dirección</span>
@@ -149,7 +149,7 @@ export function ContractViewSheet({ open, onClose, contract }: ContractViewSheet
                   </div>
                   
                   <div className="space-y-3">
-                    <div className="rounded-lg bg-slate-50 p-3">
+                    <div className="rounded-lg bg-muted p-3">
                       <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
                         {contract.paqueteDetalle || <span className="italic text-muted-foreground">Sin detalles registrados.</span>}
                       </p>
@@ -194,9 +194,9 @@ export function ContractViewSheet({ open, onClose, contract }: ContractViewSheet
                   </div>
                   
                   {contract.formaPago && (
-                    <div className="mt-3 flex items-center justify-between py-1 border-t border-slate-100 pt-2">
+                    <div className="mt-3 flex items-center justify-between py-1 border-t border-border pt-2">
                       <span className="text-sm text-muted-foreground">Forma de Pago</span>
-                      <span className="text-sm font-medium text-right uppercase bg-slate-100 px-2 py-0.5 rounded-md text-slate-700">{contract.formaPago}</span>
+                      <span className="text-sm font-medium text-right uppercase bg-muted px-2 py-0.5 rounded-md text-foreground">{contract.formaPago}</span>
                     </div>
                   )}
                 </section>

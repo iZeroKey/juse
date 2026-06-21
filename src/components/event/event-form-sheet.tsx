@@ -53,7 +53,7 @@ export function EventFormSheet({ open, onClose, initialData, initialDate, onSubm
               : 'Completa la información para crear un nuevo evento.'}
           </DrawerDescription>
           
-          <div className="w-full grid grid-cols-3 bg-slate-100 p-1 rounded-lg mt-4">
+          <div className="w-full grid grid-cols-3 bg-muted p-1 rounded-lg mt-4">
             {[
               { id: 'general', label: 'General' },
               { id: 'staff', label: 'Staff' },
@@ -67,7 +67,7 @@ export function EventFormSheet({ open, onClose, initialData, initialDate, onSubm
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
                     'relative z-10 rounded-md py-1.5 px-3 text-sm font-medium transition-colors cursor-pointer',
-                    isActive ? 'text-white' : 'text-slate-500 hover:text-slate-900'
+                    isActive ? 'text-white' : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
                   {isActive && (
@@ -98,7 +98,7 @@ export function EventFormSheet({ open, onClose, initialData, initialDate, onSubm
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors"
           >
             <X className="size-4" />
             Cancelar

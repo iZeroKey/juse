@@ -1,11 +1,11 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --duration-450: 450ms;
 
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'DM Sans', system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "DM Sans", system-ui, sans-serif;
 
   --color-background: #f8fafc;
   --color-surface: #ffffff;
@@ -45,20 +45,20 @@
   --color-destructive: var(--color-danger);
   --color-destructive-foreground: #ffffff;
 
-  --color-juse-blue: #2979FF;
+  --color-juse-blue: #2979ff;
   --color-juse-blue-soft: rgba(41, 121, 255, 0.08);
-  --color-juse-red: #FF1744;
+  --color-juse-red: #ff1744;
   --color-juse-red-soft: rgba(255, 23, 68, 0.08);
-  --color-juse-yellow: #FFD600;
+  --color-juse-yellow: #ffd600;
   --color-juse-yellow-soft: rgba(255, 214, 0, 0.15);
 
   --ease-juse-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-juse-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --radius-sm: 0.5rem;   /* 8px */
-  --radius-md: 0.75rem;  /* 12px */
-  --radius-lg: 1rem;     /* 16px */
-  --radius-xl: 1.5rem;   /* 24px */
+  --radius-sm: 0.5rem; /* 8px */
+  --radius-md: 0.75rem; /* 12px */
+  --radius-lg: 1rem; /* 16px */
+  --radius-xl: 1.5rem; /* 24px */
 }
 
 /* ── Base resets ── */
@@ -115,7 +115,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .time-grid-line-half {
-  border-top: 1px dashed color-mix(in srgb, var(--color-border) 50%, transparent);
+  border-top: 1px dashed
+    color-mix(in srgb, var(--color-border) 50%, transparent);
 }
 
 .current-time-line {
@@ -129,7 +130,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .current-time-line::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -4px;
   top: -3px;
@@ -161,6 +162,32 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .dark {
+  --color-background: #09090b;
+  --color-surface: #18181b;
+  --color-surface-glass: rgba(24, 24, 27, 0.72);
+  --color-border: #27272a;
+  --color-border-strong: #3f3f46;
+
+  --color-text-primary: #fafafa;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+
+  --color-primary-foreground: #ffffff;
+
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-text-primary);
+  --color-muted: #27272a;
+  --color-muted-foreground: var(--color-text-secondary);
+  --color-input: var(--color-border);
+  --color-ring: var(--color-accent);
+  --color-destructive: var(--color-danger);
+
+  --color-juse-blue-soft: rgba(41, 121, 255, 0.15);
+  --color-juse-red-soft: rgba(255, 23, 68, 0.15);
+  --color-juse-yellow-soft: rgba(255, 214, 0, 0.2);
+
   --destructive-foreground: var(--color-red-400);
 }
 

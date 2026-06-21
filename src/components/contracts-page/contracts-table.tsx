@@ -64,7 +64,7 @@ export function ContractsTable() {
     <ContextMenu>
       <ContextMenuTrigger className="flex flex-col gap-4 h-full relative" style={{ display: 'flex' }}>
         <div className='flex items-center justify-between shrink-0'>
-          <h2 className='text-lg font-semibold text-slate-800'>Contratos</h2>
+          <h2 className='text-lg font-semibold text-foreground'>Contratos</h2>
           <button
             onClick={handleAddNew}
             className='flex items-center gap-2 bg-[var(--color-juse-blue)] text-white px-4 py-2 rounded-lg hover:brightness-110 transition-all shadow-sm text-sm font-medium cursor-pointer'>
@@ -73,10 +73,10 @@ export function ContractsTable() {
           </button>
         </div>
 
-        <div className='flex-1 bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col'>
+        <div className='flex-1 bg-card border border-border rounded-xl shadow-xs overflow-hidden flex flex-col'>
           <div className='overflow-auto flex-1'>
-            <table className='w-full text-left text-sm text-slate-600'>
-              <thead className='bg-slate-50 text-slate-800 text-xs uppercase font-semibold sticky top-0 border-b border-slate-200 z-10'>
+            <table className='w-full text-left text-sm text-muted-foreground'>
+              <thead className='bg-muted text-foreground text-xs uppercase font-semibold sticky top-0 border-b border-border z-10'>
                 <tr>
                   <th className='px-4 py-3 whitespace-nowrap'>Contrato</th>
                   <th className='px-4 py-3 whitespace-nowrap'>Fecha Evento</th>
@@ -92,10 +92,10 @@ export function ContractsTable() {
                   <th className='px-4 py-3 whitespace-nowrap text-right'>Acciones</th>
                 </tr>
               </thead>
-              <tbody className='divide-y divide-slate-100'>
+              <tbody className='divide-y divide-border'>
                 {contracts.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className='px-4 py-8 text-center text-slate-500'>
+                    <td colSpan={12} className='px-4 py-8 text-center text-muted-foreground'>
                       No hay contratos registrados. Crea uno nuevo para comenzar.
                     </td>
                   </tr>
@@ -104,31 +104,31 @@ export function ContractsTable() {
                     .sort((a, b) => a.contratoNumber.localeCompare(b.contratoNumber))
                     .map((contract) => (
                       <ContextMenu key={contract.id}>
-                        <ContextMenuTrigger render={<tr className='hover:bg-slate-50/50 transition-colors' />}>
+                        <ContextMenuTrigger render={<tr className='hover:bg-muted/50 transition-colors' />}>
                           <td className='px-4 py-3 whitespace-nowrap'>
-                            <div className='font-semibold text-slate-900'>{contract.contratoNumber}</div>
-                            <div className='text-xs text-slate-500'>{contract.fechaEmision}</div>
+                            <div className='font-semibold text-foreground'>{contract.contratoNumber}</div>
+                            <div className='text-xs text-muted-foreground'>{contract.fechaEmision}</div>
                           </td>
                           <td className='px-4 py-3 whitespace-nowrap'>
                             {contract.fechaEvento}
-                            <span className='block text-xs text-slate-400'>{contract.horaEvento}</span>
+                            <span className='block text-xs text-muted-foreground'>{contract.horaEvento}</span>
                           </td>
                           <td className='px-4 py-3'>
-                            <div className='font-medium text-slate-900'>{contract.clienteNombre}</div>
+                            <div className='font-medium text-foreground'>{contract.clienteNombre}</div>
                           </td>
-                          <td className='px-4 py-3 whitespace-nowrap text-slate-600'>
+                          <td className='px-4 py-3 whitespace-nowrap text-muted-foreground'>
                             {formatPhoneNumber(contract.clienteCelular) || "-"}
                           </td>
-                          <td className='px-4 py-3 whitespace-nowrap text-slate-600'>
+                          <td className='px-4 py-3 whitespace-nowrap text-muted-foreground'>
                             {contract.clienteDni || "-"}
                           </td>
-                          <td className='px-4 py-3 text-xs text-slate-600 whitespace-normal min-w-[200px]'>
+                          <td className='px-4 py-3 text-xs text-muted-foreground whitespace-normal min-w-[200px]'>
                             {contract.clienteDireccion || "-"}
                           </td>
-                          <td className='px-4 py-3 whitespace-nowrap text-slate-800 font-medium'>
+                          <td className='px-4 py-3 whitespace-nowrap text-foreground font-medium'>
                             {contract.tipoEvento}
                           </td>
-                          <td className='px-4 py-3 whitespace-nowrap text-slate-800 font-medium'>
+                          <td className='px-4 py-3 whitespace-nowrap text-foreground font-medium'>
                             {packages.find((p) => p.id === contract.paqueteId)?.nroPaquete || "Ver Paquete"}
                           </td>
                           <td className='px-4 py-3 text-right font-medium whitespace-nowrap'>S/ {contract.precio.toFixed(2)}</td>
@@ -136,11 +136,11 @@ export function ContractsTable() {
                           <td className='px-4 py-3 text-right font-medium whitespace-nowrap text-[var(--color-juse-red)]'>S/ {contract.saldo.toFixed(2)}</td>
                           <td className='px-4 py-3 whitespace-nowrap text-right'>
                             <div className='flex items-center justify-end gap-1'>
-                              <button onClick={() => setViewingContract(contract)} className='p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors cursor-pointer' title='Visualizar'><Eye className='size-4' /></button>
-                              <button onClick={() => handleGeneratePDF(contract, "contrato")} className='p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors cursor-pointer' title='Descargar Contrato'><FileText className='size-4' /></button>
-                              <button onClick={() => handleGeneratePDF(contract, "recibo")} className='p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors cursor-pointer' title='Descargar Recibo'><Download className='size-4' /></button>
-                              <button onClick={() => handleEdit(contract)} className='p-1.5 text-slate-400 hover:text-[var(--color-juse-blue)] hover:bg-blue-50 rounded-md transition-colors cursor-pointer' title='Editar'><Edit2 className='size-4' /></button>
-                              <button onClick={() => setContractToDelete(contract)} className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer' title='Eliminar'><Trash2 className='size-4' /></button>
+                              <button onClick={() => setViewingContract(contract)} className='p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer' title='Visualizar'><Eye className='size-4' /></button>
+                              <button onClick={() => handleGeneratePDF(contract, "contrato")} className='p-1.5 text-muted-foreground hover:text-indigo-500 hover:bg-indigo-500/10 rounded-md transition-colors cursor-pointer' title='Descargar Contrato'><FileText className='size-4' /></button>
+                              <button onClick={() => handleGeneratePDF(contract, "recibo")} className='p-1.5 text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10 rounded-md transition-colors cursor-pointer' title='Descargar Recibo'><Download className='size-4' /></button>
+                              <button onClick={() => handleEdit(contract)} className='p-1.5 text-muted-foreground hover:text-[var(--color-juse-blue)] hover:bg-[var(--color-juse-blue-soft)] rounded-md transition-colors cursor-pointer' title='Editar'><Edit2 className='size-4' /></button>
+                              <button onClick={() => setContractToDelete(contract)} className='p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer' title='Eliminar'><Trash2 className='size-4' /></button>
                             </div>
                           </td>
                         </ContextMenuTrigger>
@@ -199,11 +199,11 @@ export function ContractsTable() {
               puede deshacer.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-3 sm:gap-0 mt-2">
+          <DialogFooter className="gap-3 sm:gap-3 mt-2">
             <button
               type="button"
               onClick={() => setContractToDelete(null)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors"
             >
               Cancelar
             </button>

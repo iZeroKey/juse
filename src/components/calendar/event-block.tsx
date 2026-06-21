@@ -34,14 +34,14 @@ function EventBlock({ event, style, onClick, onEdit, onDelete, compact = false }
         className={cn(
           "flex w-full items-center gap-1.5 rounded-full px-2 py-0.5",
           "cursor-pointer overflow-hidden text-left",
-          "transition-colors hover:bg-slate-50"
+          "transition-colors hover:bg-muted"
         )}
       >
         <span
           className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dot)}
           aria-hidden
         />
-        <span className="truncate font-sans text-[11px] text-slate-600">
+        <span className="truncate font-sans text-[11px] text-muted-foreground">
           {event.eventType}
         </span>
         {hasSaldo && (
@@ -76,8 +76,8 @@ function EventBlock({ event, style, onClick, onEdit, onDelete, compact = false }
           whileTap={{ scale: 0.98 }}
           style={{ borderLeftColor: colorValue.includes('var') ? `var(${colorValue.replace('var(', '').replace(')', '')})` : colorValue }}
           className={cn(
-            "w-full h-full overflow-hidden rounded-md border border-slate-200 border-l-[4px] text-left group bg-white cursor-pointer",
-            "transition-all duration-200 hover:shadow-md hover:border-slate-300",
+            "w-full h-full overflow-hidden rounded-md border border-border border-l-[4px] text-left group bg-card cursor-pointer",
+            "transition-all duration-200 hover:shadow-md hover:border-muted-foreground/30",
             isMicro ? "p-0.5 px-1" : "p-1.5"
           )}
         >
@@ -85,10 +85,10 @@ function EventBlock({ event, style, onClick, onEdit, onDelete, compact = false }
       <div className={cn("flex h-full flex-col min-w-0", isMicro ? "gap-0" : "gap-0.5")}>
         {isMicro ? (
           <div className="flex w-full items-center gap-1 h-full min-w-0">
-            <span className={cn("font-display text-[10.5px] font-bold truncate flex-1 min-w-0 text-slate-900")}>
+            <span className={cn("font-display text-[10.5px] font-bold truncate flex-1 min-w-0 text-foreground")}>
               {event.eventType}
             </span>
-            <span className={cn("text-[9px] font-medium shrink-0 whitespace-nowrap text-slate-700 opacity-80")}>
+            <span className={cn("text-[9px] font-medium shrink-0 whitespace-nowrap text-muted-foreground opacity-80")}>
               {event.startTime}
             </span>
             {hasSaldo && <span className="size-1 rounded-full bg-red-500 shrink-0 ml-auto" />}
@@ -96,7 +96,7 @@ function EventBlock({ event, style, onClick, onEdit, onDelete, compact = false }
         ) : (
           <>
             {/* Title Full Width */}
-            <span className={cn("font-display text-xs font-bold leading-tight truncate block w-full text-slate-900")}>
+            <span className={cn("font-display text-xs font-bold leading-tight truncate block w-full text-foreground")}>
               {event.eventType}
             </span>
             
@@ -123,14 +123,14 @@ function EventBlock({ event, style, onClick, onEdit, onDelete, compact = false }
             {!isCompact && (
               <>
                 {/* Location */}
-                <div className="flex w-full items-center gap-0.5 mt-0.5 text-slate-500">
+                <div className="flex w-full items-center gap-0.5 mt-0.5 text-muted-foreground">
                   <MapPin className="size-3 shrink-0" />
                   <span className="text-[10px] font-medium truncate">{event.location}</span>
                 </div>
 
                 {/* Description */}
                 {isLarge && event.observacion && (
-                  <p className="text-[10px] text-slate-500 line-clamp-2 leading-tight mt-0.5">
+                  <p className="text-[10px] text-muted-foreground line-clamp-2 leading-tight mt-0.5">
                     {event.observacion}
                   </p>
                 )}

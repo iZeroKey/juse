@@ -56,11 +56,11 @@ function Calendar({
           defaultClassNames.nav
         ),
         button_previous: cn(
-          "flex items-center justify-center size-(--cell-size) p-0 select-none aria-disabled:opacity-50 border-none rounded-full hover:bg-slate-100 data-[pressed=true]:bg-slate-200 transition-colors cursor-pointer",
+          "flex items-center justify-center size-(--cell-size) p-0 select-none aria-disabled:opacity-50 border-none rounded-full hover:bg-muted data-[pressed=true]:bg-muted/80 transition-colors cursor-pointer",
           defaultClassNames.button_previous
         ),
         button_next: cn(
-          "flex items-center justify-center size-(--cell-size) p-0 select-none aria-disabled:opacity-50 border-none rounded-full hover:bg-slate-100 data-[pressed=true]:bg-slate-200 transition-colors cursor-pointer",
+          "flex items-center justify-center size-(--cell-size) p-0 select-none aria-disabled:opacity-50 border-none rounded-full hover:bg-muted data-[pressed=true]:bg-muted/80 transition-colors cursor-pointer",
           defaultClassNames.button_next
         ),
         month_caption: cn(
@@ -114,7 +114,7 @@ function Calendar({
         range_middle: cn("rounded-none", defaultClassNames.range_middle),
         range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
         today: cn(
-          "rounded-full bg-slate-100 text-accent font-bold data-[selected=true]:bg-accent data-[selected=true]:text-white",
+          "rounded-full bg-muted text-accent font-bold data-[selected=true]:bg-accent data-[selected=true]:text-white",
           defaultClassNames.today
         ),
         outside: cn(
@@ -210,7 +210,7 @@ function CalendarDayButton({
         "data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-accent/10 data-[range-middle=true]:text-accent",
         "data-[range-start=true]:rounded-full data-[range-start=true]:bg-accent data-[range-start=true]:text-white",
         "data-[selected-single=true]:bg-accent data-[selected-single=true]:text-white data-[selected-single=true]:font-bold data-[selected-single=true]:shadow-md",
-        "hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200",
+        "hover:bg-muted hover:text-foreground active:bg-muted/80",
         "[&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
         className

@@ -281,7 +281,7 @@ function EventSheet({
                     </div>
 
                     {event.observacion && (
-                      <div className="mt-2 rounded-lg bg-slate-50 p-3">
+                      <div className="mt-2 rounded-lg bg-muted p-3">
                         <span className="text-xs font-medium text-muted-foreground">
                           Observación
                         </span>
@@ -299,7 +299,7 @@ function EventSheet({
                 <button
                   type="button"
                   onClick={() => setConfirmOpen(true)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
                 >
                   <Trash2 className="size-4" />
                   Eliminar
@@ -329,11 +329,11 @@ function EventSheet({
               puede deshacer.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-3 sm:gap-0 mt-2">
+          <DialogFooter className="gap-3 sm:gap-3 mt-2">
             <button
               type="button"
               onClick={() => setConfirmOpen(false)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
             >
               Cancelar
             </button>

@@ -1,5 +1,6 @@
 import { Menu, Calendar, FileText, X, FolderOpen, Moon } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTheme } from '@/components/theme-provider';
 import {
   Sheet,
   SheetContent,
@@ -16,6 +17,7 @@ interface NavDrawerProps {
 export function NavDrawer({ children }: NavDrawerProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
   const currentView = location.pathname === '/gestion' ? 'contracts' : 'calendar';
 
   const handleNavigation = (path: string) => {
@@ -26,7 +28,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
   };
 
   const handleThemeChange = () => {
-    console.log("Cambio de tema en desarrollo");
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const handleDownloadPath = async () => {
@@ -57,7 +59,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
         ) : (
           <button
             type="button"
-            className="flex items-center justify-center size-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition-colors cursor-pointer"
+            className="flex items-center justify-center size-9 rounded-full bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-colors cursor-pointer"
             aria-label="Menú principal"
           >
             <Menu className="size-5" />
@@ -68,7 +70,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
       <SheetContent side="left" className="w-[280px] p-0 flex flex-col" showCloseButton={false}>
         <SheetHeader className="flex flex-row items-center justify-between p-4 border-b border-border text-left">
           <SheetTitle className="text-lg">Menú</SheetTitle>
-          <SheetClose className="flex items-center justify-center size-8 rounded-full hover:bg-slate-100 transition-colors text-slate-500 hover:text-slate-900 cursor-pointer">
+          <SheetClose className="flex items-center justify-center size-8 rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground cursor-pointer">
             <X className="size-5" />
             <span className="sr-only">Cerrar menú</span>
           </SheetClose>
@@ -78,7 +80,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
           <SheetClose asChild>
             <button 
               onClick={() => handleNavigation('/')}
-              className={`flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors cursor-pointer ${currentView === 'calendar' ? 'bg-slate-100 font-medium text-[var(--color-juse-blue)]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+              className={`flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors cursor-pointer ${currentView === 'calendar' ? 'bg-muted font-medium text-[var(--color-juse-blue)]' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
             >
               <Calendar className="size-5 mr-3" />
               Calendario
@@ -88,7 +90,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
           <SheetClose asChild>
             <button 
               onClick={() => handleNavigation('/gestion')}
-              className={`flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors cursor-pointer ${currentView === 'contracts' ? 'bg-slate-100 font-medium text-[var(--color-juse-blue)]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+              className={`flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors cursor-pointer ${currentView === 'contracts' ? 'bg-muted font-medium text-[var(--color-juse-blue)]' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
             >
               <FileText className="size-5 mr-3" />
               Gestión
@@ -97,19 +99,19 @@ export function NavDrawer({ children }: NavDrawerProps) {
         </div>
 
         {/* ── Settings Section ─────────────────────────────── */}
-        <div className="p-4 border-t border-border bg-slate-50/50">
-          <p className="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Ajustes</p>
+        <div className="p-4 border-t border-border bg-muted/50">
+          <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Ajustes</p>
           <div className="flex flex-col gap-1">
             <button 
               onClick={handleThemeChange}
-              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
             >
               <Moon className="size-5 mr-3" />
               Cambiar Tema
             </button>
             <button 
               onClick={handleDownloadPath}
-              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
             >
               <FolderOpen className="size-5 mr-3" />
               Ruta de Descarga

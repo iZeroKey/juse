@@ -108,7 +108,7 @@ export function ComboboxInput({
       {showTrigger && (
         <ComboboxTrigger
           className={cn(
-            "absolute top-1/2 inline-flex size-7 shrink-0 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md bg-transparent text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-juse-blue)]/20 [&_svg]:size-4 has-[+[data-slot=combobox-clear]]:hidden",
+            "absolute top-1/2 inline-flex size-7 shrink-0 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md bg-transparent text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-juse-blue)]/20 [&_svg]:size-4 has-[+[data-slot=combobox-clear]]:hidden",
             sizeValue === "sm" ? "end-1" : "end-2",
           )}
           {...triggerProps}
@@ -121,7 +121,7 @@ export function ComboboxInput({
       {showClear && (
         <ComboboxClear
           className={cn(
-            "absolute top-1/2 inline-flex size-7 shrink-0 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-transparent text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-juse-blue)]/20 [&_svg]:size-4",
+            "absolute top-1/2 inline-flex size-7 shrink-0 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-transparent text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-juse-blue)]/20 [&_svg]:size-4",
             sizeValue === "sm" ? "end-1" : "end-2",
           )}
           {...clearProps}

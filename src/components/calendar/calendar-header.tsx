@@ -49,7 +49,7 @@ function ViewSwitcher({
   layoutId: string;
 }) {
   return (
-    <div className="flex items-center rounded-lg bg-slate-100 p-1">
+    <div className="flex items-center rounded-lg bg-muted p-1">
       {VIEWS.map((v) => {
         const isActive = view === v.value;
         return (
@@ -116,7 +116,7 @@ export function CalendarHeader({
         <NavDrawer>
           <button
             type="button"
-            className="p-1.5 md:p-2 rounded-md hover:bg-slate-100 transition-colors text-slate-600 cursor-pointer flex items-center justify-center shrink-0 mr-1"
+            className="p-1.5 md:p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground cursor-pointer flex items-center justify-center shrink-0 mr-1"
             aria-label="Abrir menú"
           >
             <Menu className="size-5 md:size-5" />
@@ -131,30 +131,30 @@ export function CalendarHeader({
         <div className="mx-0.5 h-5 w-px bg-border-strong md:mx-1 shrink-0" aria-hidden="true" />
 
         {/* Navigation controls grouped */}
-        <div className="flex items-center rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden h-7 md:h-8 shrink-0">
+        <div className="flex items-center rounded-full border border-border bg-surface shadow-sm overflow-hidden h-7 md:h-8 shrink-0">
           <button
             onClick={handlePrev}
             aria-label="Período anterior"
-            className="flex items-center justify-center h-full w-8 md:w-9 border-r border-slate-200 bg-transparent hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer"
+            className="flex items-center justify-center h-full w-8 md:w-9 border-r border-border bg-transparent hover:bg-muted/50 active:bg-muted transition-colors cursor-pointer"
           >
-            <ChevronLeft className="size-3.5 md:size-4 text-slate-600" />
+            <ChevronLeft className="size-3.5 md:size-4 text-muted-foreground" />
           </button>
 
           <button
             type="button"
             onClick={handleToday}
             className={cn(
-              "flex items-center justify-center h-full px-3 md:px-4 text-xs md:text-[13px] font-semibold transition-colors border-r border-slate-200 cursor-pointer",
+              "flex items-center justify-center h-full px-3 md:px-4 text-xs md:text-[13px] font-semibold transition-colors border-r border-border cursor-pointer",
               isCurrentDateToday
                 ? "text-[var(--color-juse-blue)] bg-[var(--color-juse-blue)]/5 hover:bg-[var(--color-juse-blue)]/10"
-                : "text-slate-700 bg-transparent hover:bg-slate-50 hover:text-slate-900"
+                : "text-muted-foreground bg-transparent hover:bg-muted/50 hover:text-foreground"
             )}
           >
             Hoy
             <span
               className={cn(
                 "ml-1 md:ml-1.5 size-1.5 rounded-full transition-colors",
-                isCurrentDateToday ? "bg-[var(--color-juse-blue)]" : "bg-slate-300"
+                isCurrentDateToday ? "bg-[var(--color-juse-blue)]" : "bg-muted-foreground/30"
               )}
             />
           </button>
@@ -162,9 +162,9 @@ export function CalendarHeader({
           <button
             onClick={handleNext}
             aria-label="Período siguiente"
-            className="flex items-center justify-center h-full w-8 md:w-9 bg-transparent hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer"
+            className="flex items-center justify-center h-full w-8 md:w-9 bg-transparent hover:bg-muted/50 active:bg-muted transition-colors cursor-pointer"
           >
-            <ChevronRight className="size-3.5 md:size-4 text-slate-600" />
+            <ChevronRight className="size-3.5 md:size-4 text-muted-foreground" />
           </button>
         </div>
 

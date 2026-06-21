@@ -43,7 +43,7 @@ export function PackagesTable() {
     <ContextMenu>
       <ContextMenuTrigger className="flex flex-col gap-4 h-full relative" style={{ display: 'flex' }}>
         <div className="flex items-center justify-between shrink-0">
-          <h2 className="text-lg font-semibold text-slate-800">Paquetes</h2>
+          <h2 className="text-lg font-semibold text-foreground">Paquetes</h2>
           <button
             onClick={handleAddNew}
             className="flex items-center gap-2 bg-[var(--color-juse-blue)] text-white px-4 py-2 rounded-lg hover:brightness-110 transition-all shadow-sm text-sm font-medium cursor-pointer"
@@ -53,10 +53,10 @@ export function PackagesTable() {
           </button>
         </div>
 
-        <div className="flex-1 bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden flex flex-col">
+        <div className="flex-1 bg-card border border-border rounded-xl shadow-xs overflow-hidden flex flex-col">
         <div className="overflow-auto flex-1">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50 text-slate-800 text-xs uppercase font-semibold sticky top-0 border-b border-slate-200 z-10">
+          <table className="w-full text-left text-sm text-muted-foreground">
+            <thead className="bg-muted text-foreground text-xs uppercase font-semibold sticky top-0 border-b border-border z-10">
               <tr>
                 <th className="px-4 py-3 whitespace-nowrap">Nro Paquete</th>
                 <th className="px-4 py-3 min-w-[300px]">Especificaciones</th>
@@ -66,18 +66,18 @@ export function PackagesTable() {
                 <th className="px-4 py-3 whitespace-nowrap text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {packages.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                     No hay paquetes registrados. Crea uno nuevo para comenzar.
                   </td>
                 </tr>
               ) : (
                 packages.map((pkg) => (
                   <ContextMenu key={pkg.id}>
-                    <ContextMenuTrigger render={<tr className="hover:bg-slate-50/50 transition-colors" />}>
-                      <td className="px-4 py-3 font-medium text-slate-900 whitespace-nowrap">{pkg.nroPaquete}</td>
+                    <ContextMenuTrigger render={<tr className="hover:bg-muted/50 transition-colors" />}>
+                      <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{pkg.nroPaquete}</td>
                       <td className="px-4 py-3 text-xs leading-relaxed">
                         {Array.isArray(pkg.especificaciones) 
                           ? pkg.especificaciones.reduce((acc: string, curr: any, idx: number, arr: any[]) => {
@@ -92,7 +92,7 @@ export function PackagesTable() {
                       <td className="px-4 py-3 text-right font-medium whitespace-nowrap">{pkg.precio.toFixed(2)}</td>
                       <td className="px-4 py-3 whitespace-nowrap text-xs">{pkg.movilidad}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800">
+                        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
                           {pkg.tipoEvento}
                         </span>
                       </td>
@@ -100,14 +100,14 @@ export function PackagesTable() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => handleEdit(pkg)}
-                            className="p-1.5 text-slate-400 hover:text-[var(--color-juse-blue)] hover:bg-blue-50 rounded-md transition-colors cursor-pointer"
+                            className="p-1.5 text-muted-foreground hover:text-[var(--color-juse-blue)] hover:bg-[var(--color-juse-blue-soft)] rounded-md transition-colors cursor-pointer"
                             title="Editar"
                           >
                             <Edit2 className="size-4" />
                           </button>
                           <button
                             onClick={() => setPackageToDelete(pkg)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                            className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
                             title="Eliminar"
                           >
                             <Trash2 className="size-4" />
@@ -160,11 +160,11 @@ export function PackagesTable() {
               puede deshacer.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-3 sm:gap-0 mt-2">
+          <DialogFooter className="gap-3 sm:gap-3 mt-2">
             <button
               type="button"
               onClick={() => setPackageToDelete(null)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
             >
               Cancelar
             </button>

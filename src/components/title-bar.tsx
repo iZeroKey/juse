@@ -6,7 +6,13 @@ import {
   ContextMenuPopup,
   ContextMenuSeparator,
   ContextMenuTrigger,
+  ContextMenuSub,
+  ContextMenuSubTrigger,
+  ContextMenuSubPopup,
+  ContextMenuRadioGroup,
+  ContextMenuRadioItem,
 } from "@/components/ui/context-menu";
+import { useTheme } from "@/components/theme-provider";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, RefreshCw, Square, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -14,6 +20,7 @@ import { useEffect, useState } from "react";
 export function TitleBar() {
   const [isWindowMaximized, setIsWindowMaximized] = useState(false);
   const [isTauri, setIsTauri] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.__TAURI_INTERNALS__) {
@@ -169,6 +176,20 @@ export function TitleBar() {
             className='cursor-pointer text-red-600'>
             <X className='mr-2 size-4' /> Cerrar
           </ContextMenuItem>
+        </ContextMenuGroup>
+        <ContextMenuSeparator />
+        <ContextMenuGroup>
+          <ContextMenuGroupLabel>Apariencia</ContextMenuGroupLabel>
+          <ContextMenuSub>
+            <ContextMenuSubTrigger inset>Tema</ContextMenuSubTrigger>
+            <ContextMenuSubPopup className="w-48">
+              <ContextMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}>
+                <ContextMenuRadioItem value="light">Claro</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="dark">Oscuro</ContextMenuRadioItem>
+                <ContextMenuRadioItem value="system">Sistema</ContextMenuRadioItem>
+              </ContextMenuRadioGroup>
+            </ContextMenuSubPopup>
+          </ContextMenuSub>
         </ContextMenuGroup>
         <ContextMenuSeparator />
         <ContextMenuGroup>

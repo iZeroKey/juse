@@ -82,7 +82,7 @@ function CurrencyInput({
           readOnly={readOnly}
           className={cn(
             'pl-9 tabular-nums',
-            readOnly && 'bg-slate-50 cursor-default'
+            readOnly && 'bg-muted cursor-default'
           )}
         />
       </div>
