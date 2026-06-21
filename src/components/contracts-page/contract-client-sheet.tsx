@@ -63,7 +63,7 @@ export function ContractClientSheet({ open, onClose, contract }: ContractClientS
                       </div>
                       <div>
                         <span className="text-sm text-muted-foreground flex items-center gap-1"><Phone className="size-3.5"/> Celular</span>
-                        <p className="text-sm font-medium text-foreground">{contract.clienteCelular || '-'}</p>
+                        <p className="text-sm font-medium text-foreground">{formatPhoneNumber(contract.clienteCelular) || '-'}</p>
                       </div>
                     </div>
                   </div>

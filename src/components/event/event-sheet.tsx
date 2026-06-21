@@ -325,21 +325,26 @@ function EventSheet({
           <DialogHeader>
             <DialogTitle>Eliminar evento</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que deseas eliminar este evento? Esta acción no se
+              ¿Estás seguro de que deseas eliminar el evento "{event?.eventType}"? Esta acción no se
               puede deshacer.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
-            <Button
+          <DialogFooter className="gap-3 sm:gap-0 mt-2">
+            <button
               type="button"
-              variant="outline"
               onClick={() => setConfirmOpen(false)}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
             >
               Cancelar
-            </Button>
-            <Button type="button" variant="destructive" onClick={handleDelete}>
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-red)] hover:brightness-110 rounded-lg transition-all shadow-sm"
+            >
+              <Trash2 className="size-4" />
               Eliminar
-            </Button>
+            </button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

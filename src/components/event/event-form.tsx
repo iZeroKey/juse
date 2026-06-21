@@ -3,13 +3,13 @@ import { useForm, Controller } from 'react-hook-form';
 import { Clock, MapPin, CalendarIcon } from 'lucide-react';
 import { format, parseISO, parse, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { EVENT_PALETTE } from '@/lib/calendar-utils';
 import { cn, parseCurrency, calculateDuration, formatDuration } from '@/lib/utils';
 import type { JuseEvent, EventFormValues } from '@/types/event';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 
 import {
@@ -139,11 +139,18 @@ export function EventForm({
 
   return (
     <form id={formId} onSubmit={handleSubmit(processSubmit)} className="flex flex-col h-full">
-      <div className="flex-1">
-        <div className="flex flex-col gap-6 pb-6 pt-2 h-full">
-          <Tabs value={activeTab} className="w-full h-full flex flex-col">
+      <div className="flex-1 relative overflow-x-hidden overflow-y-auto">
+        <AnimatePresence mode="wait">
         {/* ── Tab 1: General ─────────────────────────────── */}
-        <TabsContent value="general" className="space-y-4 pt-4 px-1 pb-1 flex-1">
+        {activeTab === 'general' && (
+        <motion.div 
+          key="general"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-4 pt-4 px-1 pb-1"
+        >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Fecha */}
             <div className="space-y-1.5">
@@ -278,10 +285,19 @@ export function EventForm({
               />
             </div>
           </div>
-        </TabsContent>
+        </motion.div>
+        )}
 
         {/* ── Tab 2: Staff ───────────────────────────────── */}
-        <TabsContent value="staff" className="space-y-4 pt-4 px-1 pb-1">
+        {activeTab === 'staff' && (
+        <motion.div 
+          key="staff"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-4 pt-4 px-1 pb-1"
+        >
           <Controller
             name="animadoras"
             control={control}
@@ -351,10 +367,19 @@ export function EventForm({
               />
             )}
           />
-        </TabsContent>
+        </motion.div>
+        )}
 
         {/* ── Tab 3: Finanzas ────────────────────────────── */}
-        <TabsContent value="finanzas" className="space-y-4 pt-4 px-1 pb-1">
+        {activeTab === 'finanzas' && (
+        <motion.div 
+          key="finanzas"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-4 pt-4 px-1 pb-1"
+        >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Controller
               name="totalEvento"
@@ -453,9 +478,9 @@ export function EventForm({
               className="w-full min-h-[80px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition-colors placeholder:text-slate-400 focus-visible:border-[var(--color-juse-blue)] focus-visible:ring-2 focus-visible:ring-[var(--color-juse-blue)]/20"
             />
           </div>
-        </TabsContent>
-      </Tabs>
-      </div>
+        </motion.div>
+        )}
+        </AnimatePresence>
       </div>
     </form>
   );

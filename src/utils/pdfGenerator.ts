@@ -1,7 +1,8 @@
-import { formatFecha, formatHora } from "@/lib/utils";
+import { formatFecha, formatHora, formatPhoneNumber } from "@/lib/utils";
 import type { JuseContract } from "@/types/contract";
 import { PDFDocument, PDFFont, PDFPage, StandardFonts } from "pdf-lib";
 import { numeroALetras } from "./numberToWords";
+import { sileo } from "sileo";
 
 export async function drawTextAligned(
   page: PDFPage,
@@ -116,22 +117,22 @@ const contratoConfig = {
   contratoNumber: { x: 531, y: 731, size: 10, isBold: true, alignX: "center", alignY: "middle" },
   fechaEmision: { x: 531, y: 718, size: 10, isBold: true, alignX: "center", alignY: "middle" },
   
-  clienteNombre: { x: 210, y: 650, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 2 },
+  clienteNombre: { x: 210, y: 650, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
   fechaEvento: { x: 485, y: 650, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
-  clienteDni: { x: 210, y: 636, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
-  tipoEvento: { x: 485, y: 636, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 2 },
+  clienteDni: { x: 210, y: 637, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
+  tipoEvento: { x: 485, y: 637, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 2 },
   
   clienteDireccion: { x: 210, y: 616, size: 8, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, lineHeight: 11, maxLines: 2 },
   horaEvento: { x: 485, y: 616, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
-  clienteCelular: { x: 210, y: 596, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
-  paqueteId: { x: 485, y: 596, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
+  clienteCelular: { x: 210, y: 595, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
+  paqueteId: { x: 485, y: 595, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, maxLines: 1 },
   
   paqueteDetalle: { x: 305, y: 530, size: 10, isBold: false, alignX: "center", alignY: "middle", maxWidth: 510, lineHeight: 14, maxLines: 3 },
   
-  nombreBebe: { x: 210, y: 454, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, maxLines: 1 },
-  nombresPapitos: { x: 210, y: 437, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, lineHeight: 11, maxLines: 2 },
-  nombreCumpleanero: { x: 210, y: 412, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, maxLines: 1 },
-  informacionAdicional: { x: 210, y: 398, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, lineHeight: 11, maxLines: 1 },
+  nombreBebe: { x: 210, y: 455, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, maxLines: 1 },
+  nombresPapitos: { x: 210, y: 439, size: 9, isBold: false, alignX: "center", alignY: "middle", maxWidth: 165, lineHeight: 11, maxLines: 2 },
+  nombreCumpleanero: { x: 210, y: 414, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, maxLines: 1 },
+  informacionAdicional: { x: 210, y: 397, size: 9, isBold: false, alignX: "center", alignY: "bottom", maxWidth: 165, lineHeight: 11, maxLines: 1 },
 
   formaPago: { x: 443, y: 226, size: 10, isBold: false, alignX: "center", alignY: "bottom" },
   simboloPrecio: { x: 400, y: 213, size: 10, isBold: false, alignX: "left", alignY: "bottom" },
@@ -209,11 +210,74 @@ export async function generarReciboPDF(
   await injectData(page, injectMap, reciboConfig, fontRegular, fontBold);
 
   const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `Recibo_${data.contratoNumber}.pdf`;
-  link.click();
+  
+  if (typeof window !== 'undefined' && window.__TAURI_INTERNALS__) {
+    const { writeFile, mkdir } = await import('@tauri-apps/plugin-fs');
+    const { downloadDir, join } = await import('@tauri-apps/api/path');
+    
+    try {
+      const customPath = localStorage.getItem('downloadPath');
+      let juseDir;
+      
+      if (customPath) {
+        juseDir = customPath;
+      } else {
+        const baseDir = await downloadDir();
+        juseDir = await join(baseDir, 'Juse');
+      }
+      
+      try {
+        await mkdir(juseDir, { recursive: true });
+      } catch (e) {
+        // Ignorar si el directorio ya existe
+      }
+
+      const fileName = `Recibo_${data.contratoNumber}.pdf`;
+      const filePath = await join(juseDir, fileName);
+      
+      await writeFile(filePath, pdfBytes);
+      
+      const folderName = juseDir.split(/[\\/]/).pop();
+      const { invoke } = await import('@tauri-apps/api/core');
+      sileo.success({
+        title: '¡Recibo generado!',
+        description: `Carpeta: ${folderName} / ${fileName}`,
+        duration: 60000,
+        button: {
+          title: 'Abrir recibo',
+          onClick: async () => {
+            try {
+              await invoke('open_local_file', { path: filePath });
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Error guardando el recibo:", err);
+      sileo.error({ title: 'Error', description: 'No se pudo guardar el archivo en Descargas' });
+    }
+  } else {
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Recibo_${data.contratoNumber}.pdf`;
+    link.click();
+    
+    sileo.success({
+      title: '¡Recibo descargado!',
+      description: 'El archivo se descargó en tu navegador',
+      duration: 60000,
+      button: {
+        title: 'Ver recibo',
+        onClick: () => {
+          window.open(url, '_blank');
+        }
+      }
+    });
+  }
 }
 
 export async function generarContratoPDF(
@@ -233,7 +297,7 @@ export async function generarContratoPDF(
     clienteNombre: data.clienteNombre,
     clienteDni: data.clienteDni,
     clienteDireccion: data.clienteDireccion,
-    clienteCelular: data.clienteCelular,
+    clienteCelular: formatPhoneNumber(data.clienteCelular),
 
     // Aplicando formateadores
     fechaEvento: formatFecha(data.fechaEvento),
@@ -268,9 +332,72 @@ export async function generarContratoPDF(
   await injectData(page, injectMap, contratoConfig, fontRegular, fontBold);
 
   const pdfBytes = await pdfDoc.save();
-  const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = `Contrato_${data.contratoNumber}.pdf`;
-  link.click();
+  
+  if (typeof window !== 'undefined' && window.__TAURI_INTERNALS__) {
+    const { writeFile, mkdir } = await import('@tauri-apps/plugin-fs');
+    const { downloadDir, join } = await import('@tauri-apps/api/path');
+    
+    try {
+      const customPath = localStorage.getItem('downloadPath');
+      let juseDir;
+      
+      if (customPath) {
+        juseDir = customPath;
+      } else {
+        const baseDir = await downloadDir();
+        juseDir = await join(baseDir, 'Juse');
+      }
+      
+      try {
+        await mkdir(juseDir, { recursive: true });
+      } catch (e) {
+        // Ignorar si el directorio ya existe
+      }
+
+      const fileName = `Contrato_${data.contratoNumber}.pdf`;
+      const filePath = await join(juseDir, fileName);
+      
+      await writeFile(filePath, pdfBytes);
+      
+      const folderName = juseDir.split(/[\\/]/).pop();
+      const { invoke } = await import('@tauri-apps/api/core');
+      sileo.success({
+        title: '¡Contrato generado!',
+        description: `Carpeta: ${folderName} / ${fileName}`,
+        duration: 60000,
+        button: {
+          title: 'Abrir contrato',
+          onClick: async () => {
+            try {
+              await invoke('open_local_file', { path: filePath });
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Error guardando el contrato:", err);
+      sileo.error({ title: 'Error', description: 'No se pudo guardar el archivo en Descargas' });
+    }
+  } else {
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Contrato_${data.contratoNumber}.pdf`;
+    link.click();
+    
+    sileo.success({
+      title: '¡Contrato descargado!',
+      description: 'El archivo se descargó en tu navegador',
+      duration: 60000,
+      button: {
+        title: 'Ver contrato',
+        onClick: () => {
+          window.open(url, '_blank');
+        }
+      }
+    });
+  }
 }

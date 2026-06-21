@@ -85,7 +85,7 @@ export function ContractViewSheet({ open, onClose, contract }: ContractViewSheet
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                       <DataRow label="Nombre" value={contract.clienteNombre} />
                       <DataRow label="DNI" value={contract.clienteDni} />
-                      <DataRow label="Celular" value={contract.clienteCelular} />
+                      <DataRow label="Celular" value={formatPhoneNumber(contract.clienteCelular)} />
                     </div>
                     
                     <div className="mt-2 rounded-lg bg-slate-50 p-3">

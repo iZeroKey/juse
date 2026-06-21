@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { JusePackage } from '@/types/package';
 import { generateId } from '@/lib/utils';
-import { defaultPackages } from '@/data/seed';
 
 const STORAGE_KEY = 'juse-packages';
 
@@ -19,8 +18,8 @@ function loadPackages(): JusePackage[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPackages));
-      return defaultPackages;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+      return [];
     }
     const parsed = JSON.parse(raw) as any[];
     return parsed.map(pkg => {
@@ -57,7 +56,7 @@ function loadPackages(): JusePackage[] {
       };
     }) as JusePackage[];
   } catch {
-    return defaultPackages;
+    return [];
   }
 }
 

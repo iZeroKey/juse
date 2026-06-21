@@ -46,15 +46,23 @@ export function formatFecha(isoString?: string) {
   return `${parseInt(partes[2])} de ${meses[parseInt(partes[1]) - 1]} de ${partes[0]}`;
 }
 
-export function formatHora(horaString?: string) {
-  if (!horaString) return "";
-  const partes = horaString.split(':');
-  if (partes.length < 2) return horaString;
-  let h = parseInt(partes[0]);
-  const m = partes[1];
-  const ampm = h >= 12 ? 'p. m.' : 'a. m.';
-  h = h % 12;
-  h = h ? h : 12;
-  const hStr = h < 10 ? `0${h}` : h.toString();
-  return `${hStr}:${m} ${ampm}`;
+export function formatHora(horaStr: string): string {
+  // Ej: "14:30" => "02:30 PM"
+  if (!horaStr) return horaStr;
+  const [h, m] = horaStr.split(':');
+  let hi = parseInt(h, 10);
+  const ampm = hi >= 12 ? 'PM' : 'AM';
+  hi = hi % 12;
+  if (hi === 0) hi = 12;
+  const hs = hi.toString().padStart(2, '0');
+  return `${hs}:${m} ${ampm}`;
+}
+
+export function formatPhoneNumber(phone: string | undefined): string {
+  if (!phone) return "";
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 9) {
+    return `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 9)}`;
+  }
+  return phone;
 }

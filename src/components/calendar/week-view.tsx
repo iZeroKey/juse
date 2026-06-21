@@ -68,13 +68,10 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick }: WeekViewProps) {
         {weekDays.map((d) => {
           const today = isToday(d);
           return (
-            <button
+            <div
               key={d.toISOString()}
-              type="button"
-              onClick={() => onDayClick(d)}
               className={cn(
                 "flex flex-1 flex-col items-center gap-1 border-l border-slate-200 py-3",
-                "cursor-pointer transition-colors duration-200 hover:bg-slate-50",
                 today && "bg-slate-50/50"
               )}
             >
@@ -94,7 +91,7 @@ function DesktopWeekGrid({ date, onEventClick, onDayClick }: WeekViewProps) {
               >
                 {getDayNumber(d)}
               </span>
-            </button>
+            </div>
           );
         })}
       </div>

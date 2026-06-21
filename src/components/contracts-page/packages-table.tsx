@@ -3,11 +3,29 @@ import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { usePackages } from '@/hooks/use-packages';
 import type { JusePackage } from '@/types/package';
 import { PackageFormSheet } from './package-form-sheet';
+import { sileo } from 'sileo';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 export function PackagesTable() {
   const { packages, deletePackage } = usePackages();
   const [formOpen, setFormOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<JusePackage | undefined>(undefined);
+  const [packageToDelete, setPackageToDelete] = useState<JusePackage | null>(null);
+
+  const confirmDelete = () => {
+    if (packageToDelete) {
+      deletePackage(packageToDelete.id);
+      sileo.success({ title: 'Paquete eliminado', description: `El paquete "${packageToDelete.nombre}" se ha eliminado exitosamente` });
+      setPackageToDelete(null);
+    }
+  };
 
   const handleEdit = (pkg: JusePackage) => {
     setEditingPackage(pkg);
@@ -84,11 +102,7 @@ export function PackagesTable() {
                           <Edit2 className="size-4" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (window.confirm('¿Eliminar este paquete?')) {
-                              deletePackage(pkg.id);
-                            }
-                          }}
+                          onClick={() => setPackageToDelete(pkg)}
                           className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                           title="Eliminar"
                         >
@@ -109,6 +123,35 @@ export function PackagesTable() {
         onClose={() => setFormOpen(false)}
         initialData={editingPackage}
       />
+
+      <Dialog open={!!packageToDelete} onOpenChange={(open) => !open && setPackageToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar paquete</DialogTitle>
+            <DialogDescription>
+                ¿Estás seguro de que deseas eliminar el paquete "{packageToDelete?.nombre}"? Esta acción no se
+              puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-3 sm:gap-0 mt-2">
+            <button
+              type="button"
+              onClick={() => setPackageToDelete(null)}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={confirmDelete}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-red)] hover:brightness-110 rounded-lg transition-all shadow-sm"
+            >
+              <Trash2 className="size-4" />
+              Eliminar
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

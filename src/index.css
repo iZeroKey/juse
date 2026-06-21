@@ -42,6 +42,8 @@
   --color-muted-foreground: var(--color-text-secondary);
   --color-input: var(--color-border);
   --color-ring: var(--color-accent);
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: #ffffff;
 
   --color-juse-blue: #2979FF;
   --color-juse-blue-soft: rgba(41, 121, 255, 0.08);
@@ -144,14 +146,12 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   color: var(--color-text-primary);
 }
 
-:root {
-  --destructive-foreground: var(--color-red-700);
+/* ── Sileo Overrides ── */
+[data-sileo-viewport] {
+  z-index: 99999 !important;
 }
 
-.dark {
-  --destructive-foreground: var(--color-red-400);
-}
-
-@theme inline {
-  --color-destructive-foreground: var(--destructive-foreground);
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+  app-region: drag;
 }

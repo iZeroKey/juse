@@ -2,11 +2,21 @@ import { useContracts } from "@/hooks/use-contracts";
 import { usePackages } from "@/hooks/use-packages";
 import type { JuseContract } from "@/types/contract";
 import { generarContratoPDF, generarReciboPDF } from "@/utils/pdfGenerator";
+import { sileo } from "sileo";
 import { Download, Edit2, Eye, FileText, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ContractClientSheet } from "./contract-client-sheet";
 import { ContractFormSheet } from "./contract-form-sheet";
 import { ContractViewSheet } from "./contract-view-sheet";
+import { formatPhoneNumber } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 export function ContractsTable() {
   const { contracts, deleteContract } = useContracts();
@@ -21,6 +31,15 @@ export function ContractsTable() {
   const [selectedClientContract, setSelectedClientContract] = useState<
     JuseContract | undefined
   >(undefined);
+  const [contractToDelete, setContractToDelete] = useState<JuseContract | null>(null);
+
+  const confirmDelete = () => {
+    if (contractToDelete) {
+      deleteContract(contractToDelete.id);
+      sileo.success({ title: 'Contrato eliminado', description: `El contrato ${contractToDelete.contratoNumber} se ha eliminado exitosamente` });
+      setContractToDelete(null);
+    }
+  };
 
   const handleEdit = (contract: JuseContract) => {
     setEditingContract(contract);
@@ -111,7 +130,7 @@ export function ContractsTable() {
                         </div>
                       </td>
                       <td className='px-4 py-3 whitespace-nowrap text-slate-600'>
-                        {contract.clienteCelular || "-"}
+                        {formatPhoneNumber(contract.clienteCelular) || "-"}
                       </td>
                       <td className='px-4 py-3 whitespace-nowrap text-slate-600'>
                         {contract.clienteDni || "-"}
@@ -180,11 +199,7 @@ export function ContractsTable() {
                             <Edit2 className='size-4' />
                           </button>
                           <button
-                            onClick={() => {
-                              if (window.confirm("¿Eliminar este contrato?")) {
-                                deleteContract(contract.id);
-                              }
-                            }}
+                            onClick={() => setContractToDelete(contract)}
                             className='p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors'
                             title='Eliminar'>
                             <Trash2 className='size-4' />
@@ -204,6 +219,35 @@ export function ContractsTable() {
         onClose={() => setFormOpen(false)}
         initialData={editingContract}
       />
+
+      <Dialog open={!!contractToDelete} onOpenChange={(open) => !open && setContractToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Eliminar contrato</DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que deseas eliminar el contrato {contractToDelete?.contratoNumber}? Esta acción no se
+              puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-3 sm:gap-0 mt-2">
+            <button
+              type="button"
+              onClick={() => setContractToDelete(null)}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={confirmDelete}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-red)] hover:brightness-110 rounded-lg transition-all shadow-sm"
+            >
+              <Trash2 className="size-4" />
+              Eliminar
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ContractClientSheet
         open={!!selectedClientContract}

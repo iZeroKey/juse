@@ -18,6 +18,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
+import { sileo } from 'sileo';
 
 interface PackageFormSheetProps {
   open: boolean;
@@ -34,7 +35,7 @@ export function PackageFormSheet({ open, onClose, initialData }: PackageFormShee
       nroPaquete: '',
       especificaciones: [{ value: '' }],
       precio: '',
-      movilidad: 'MAS MOVILIDAD',
+      movilidad: '',
       tipoEvento: '',
     }
   });
@@ -82,8 +83,10 @@ export function PackageFormSheet({ open, onClose, initialData }: PackageFormShee
 
     if (initialData) {
       updatePackage(initialData.id, pkgData);
+      sileo.success({ title: 'Paquete actualizado', description: `Los cambios del paquete "${data.nombre}" se han guardado` });
     } else {
       addPackage(pkgData);
+      sileo.success({ title: 'Paquete creado', description: `El paquete "${data.nombre}" ha sido registrado exitosamente` });
     }
     onClose();
   };

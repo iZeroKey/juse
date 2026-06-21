@@ -1,41 +1,31 @@
 import { useState } from 'react';
-import { Package, FileText } from 'lucide-react';
+import { Package, FileText, Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { PackagesTable } from './packages-table';
 import { ContractsTable } from './contracts-table';
-import { defaultPackages, defaultContracts } from '@/data/seed';
 import { NavDrawer } from '@/components/layout/nav-drawer';
 
-interface ContractsPageProps {
-  appView: 'calendar' | 'contracts';
-  onAppViewChange: (view: 'calendar' | 'contracts') => void;
-}
-
-export function ContractsPage({ appView, onAppViewChange }: ContractsPageProps) {
+export function ContractsPage() {
   const [activeTab, setActiveTab] = useState<'contracts' | 'packages'>('contracts');
 
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden">
       <header className="flex items-center gap-4 border-b border-border bg-surface px-4 py-3 shrink-0">
-        <NavDrawer currentView={appView} onViewChange={onAppViewChange} />
-        
-        {/* Wordmark */}
-        <h1 className="select-none font-display text-lg font-bold tracking-tight md:text-xl flex items-center shrink-0">
-          <img src="/juse.png" alt="Juse Logo" className="h-6 md:h-8 object-contain" />
-        </h1>
-        
-        <button
-          onClick={() => {
-            if (window.confirm('¿Borrar datos actuales y cargar los datos de prueba?')) {
-              localStorage.setItem('juse-packages', JSON.stringify(defaultPackages));
-              localStorage.setItem('juse-contracts', JSON.stringify(defaultContracts));
-              window.location.reload();
-            }
-          }}
-          className="ml-4 px-3 py-1.5 text-xs font-medium bg-amber-100 text-amber-800 rounded-md hover:bg-amber-200 transition-colors"
-        >
-          Cargar Datos Demo
-        </button>
+        {/* Navigation Drawer wrapping the Menu Icon */}
+        <NavDrawer>
+          <button
+            type="button"
+            className="p-1.5 md:p-2 rounded-md hover:bg-slate-100 transition-colors text-slate-600 cursor-pointer flex items-center justify-center shrink-0 mr-1"
+            aria-label="Abrir menú"
+          >
+            <Menu className="size-5 md:size-5" />
+          </button>
+        </NavDrawer>
+
+        <div className="select-none font-display text-lg font-bold tracking-tight flex items-center shrink-0">
+          <img src="/juse.png" alt="Juse Logo" className="h-6 md:h-7 object-contain" />
+        </div>
 
         {/* Tabs */}
         <div className="ml-auto flex items-center p-1 bg-slate-100 rounded-lg">
@@ -61,8 +51,32 @@ export function ContractsPage({ appView, onAppViewChange }: ContractsPageProps) 
           </button>
         </div>
       </header>
-      <main className="flex-1 overflow-auto p-4 md:p-6 bg-slate-50">
-        {activeTab === 'contracts' ? <ContractsTable /> : <PackagesTable />}
+      <main className="flex-1 overflow-hidden bg-slate-50 relative p-4 md:p-6">
+        <AnimatePresence mode="wait">
+          {activeTab === 'contracts' ? (
+            <motion.div
+              key="contracts"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-4 md:inset-6"
+            >
+              <ContractsTable />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="packages"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-4 md:inset-6"
+            >
+              <PackagesTable />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );

@@ -8,6 +8,7 @@ import { es } from 'date-fns/locale';
 import { useEffect, useRef } from 'react';
 import { useForm, useWatch, Controller } from 'react-hook-form';
 import { User, Calendar as CalendarIcon, Baby, CircleDollarSign, X, Save } from 'lucide-react';
+import { sileo } from 'sileo';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -191,8 +192,10 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
 
     if (initialData) {
       updateContract(initialData.id, contractData);
+      sileo.success({ title: 'Contrato actualizado', description: `Los cambios del contrato ${data.contratoNumber} se han guardado correctamente` });
     } else {
       addContract(contractData);
+      sileo.success({ title: 'Contrato creado', description: `El contrato ${data.contratoNumber} ha sido registrado exitosamente` });
     }
     onClose();
   };
