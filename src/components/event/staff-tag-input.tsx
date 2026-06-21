@@ -66,8 +66,8 @@ function StaffTagInput({
         aria-label={label}
         onClick={handleContainerClick}
         className={cn(
-          'flex min-h-9 w-full flex-wrap items-center gap-1.5 rounded-md border border-input bg-transparent px-3 py-1.5 shadow-xs transition-[color,box-shadow]',
-          'focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50',
+          'flex min-h-[42px] w-full flex-wrap items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 shadow-sm transition-colors',
+          'focus-within:border-[var(--color-juse-blue)] focus-within:ring-2 focus-within:ring-[var(--color-juse-blue)]/20',
           'cursor-text'
         )}
       >

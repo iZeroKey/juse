@@ -2,8 +2,8 @@
 
 import {
   format,
+  getEventColors,
   getEventsForDate,
-  getEventTypeDotColor,
   getMonthGrid,
   isToday,
 } from '@/lib/calendar-utils';
@@ -25,7 +25,7 @@ import { es } from 'date-fns/locale';
 
 const DAY_HEADERS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'] as const;
 
-const MAX_VISIBLE_PILLS = 3;
+
 
 // ── Types ──────────────────────────────────────────────────
 
@@ -38,32 +38,14 @@ interface MonthViewProps {
 
 // ── Sub-components ─────────────────────────────────────────
 
-function EventPill({ event }: { event: JuseEvent }) {
-  const dotColor = getEventTypeDotColor(event.eventType);
+// EventPill removed in favor of EventDot
+
+function EventDot({ event }: { event: JuseEvent }) {
+  const { dot } = getEventColors(event.color);
 
   return (
     <div
-      className={cn(
-        'hidden w-full items-center gap-1.5 rounded-md px-1.5 py-0.5 text-left',
-        'text-[11px] leading-tight text-text-primary/80',
-        'md:flex',
-      )}
-    >
-      <span
-        className={cn('size-1.5 shrink-0 rounded-full', dotColor)}
-        aria-hidden="true"
-      />
-      <span className="truncate">{event.eventType}</span>
-    </div>
-  );
-}
-
-function EventDotMobile({ event }: { event: JuseEvent }) {
-  const dotColor = getEventTypeDotColor(event.eventType);
-
-  return (
-    <div
-      className={cn('size-1.5 rounded-full', dotColor)}
+      className={cn('size-1.5 md:size-2 rounded-full', dot)}
       aria-label={`${event.eventType} — ${event.location}`}
     />
   );
@@ -85,7 +67,6 @@ function DayCell({
   const isCurrentMonth = day.getMonth() === currentMonth;
   const dayIsToday = isToday(day);
   const dayNumber = format(day, 'd');
-  const overflowCount = events.length - MAX_VISIBLE_PILLS;
 
   const handleDayClick = useCallback(() => {
     onDayClick(day);
@@ -111,25 +92,28 @@ function DayCell({
       )}
     >
       {/* Day number */}
-      <span
+      <motion.span
+        initial={false}
+        animate={isSelected ? { scale: [0.8, 1] } : { scale: 1 }}
+        transition={{ type: "spring", stiffness: 500, damping: 20 }}
         className={cn(
-          'mb-1 flex size-6 md:size-7 items-center justify-center rounded-full text-xs md:text-sm font-medium transition-colors',
+          'mb-0 flex size-6 md:size-7 items-center justify-center rounded-full text-xs md:text-sm font-medium transition-colors',
           isSelected
-            ? 'bg-accent text-white font-semibold shadow-sm'
+            ? 'bg-[var(--color-juse-blue)] text-white font-semibold shadow-sm'
             : dayIsToday
-              ? 'bg-accent/15 text-accent font-semibold'
+              ? 'bg-[var(--color-juse-blue-soft)] text-[var(--color-juse-blue)] font-semibold'
               : 'text-text-primary',
         )}
       >
         {dayNumber}
-      </span>
+      </motion.span>
 
-      {/* Desktop: event pills */}
-      <div className="hidden w-full flex-col gap-0.5 md:flex">
-        {events.slice(0, MAX_VISIBLE_PILLS).map((event) => (
-          <EventPill key={event.id} event={event} />
+      {/* Desktop: event dots */}
+      <div className="hidden w-full flex-row flex-wrap gap-1 md:flex items-center mt-1">
+        {events.slice(0, 5).map((event) => (
+          <EventDot key={event.id} event={event} />
         ))}
-        {overflowCount > 0 && (
+        {events.length > 5 && (
           <span
             role="button"
             tabIndex={0}
@@ -140,20 +124,17 @@ function DayCell({
                 onDayClick(day);
               }
             }}
-            className="mt-0.5 cursor-pointer px-1.5 text-[11px] font-medium text-accent hover:underline"
+            className="cursor-pointer px-1 text-[10px] font-medium text-slate-500 hover:text-slate-800 transition-colors"
           >
-            +{overflowCount} más
+            +{events.length - 5} más
           </span>
         )}
       </div>
 
       {/* Mobile: colored dots only */}
-      <div className="flex flex-wrap gap-1 md:hidden">
+      <div className="flex flex-wrap gap-1 md:hidden mt-1 items-center">
         {events.slice(0, 5).map((event) => (
-          <EventDotMobile
-            key={event.id}
-            event={event}
-          />
+          <EventDot key={event.id} event={event} />
         ))}
         {events.length > 5 && (
           <span className="text-[9px] text-text-secondary font-medium">
@@ -306,7 +287,6 @@ function DesktopDaySidebar({
                   const heightPx = durationMin * (HOUR_HEIGHT / 60);
                   const widthPct = 100 / totalColumns;
                   const leftPct = column * widthPct;
-
                   return (
                       <EventBlock
                         key={event.id}

@@ -1,18 +1,19 @@
-import * as React from 'react';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-import { useMediaQuery } from '@/hooks/use-media-query';
+import { Button } from '@/components/ui/button';
 import {
   Drawer,
-  DrawerPopup,
-  DrawerHeader,
-  DrawerTitle,
   DrawerDescription,
-  DrawerPanel,
   DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
 } from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
-import { Check, X } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { X, Save } from 'lucide-react';
+
+import * as React from 'react';
 
 import { EventForm } from '@/components/event/event-form';
 import type { JuseEvent } from '@/types/event';
@@ -22,7 +23,7 @@ interface EventFormSheetProps {
   onClose: () => void;
   initialData?: JuseEvent;
   initialDate?: string;
-  onSubmit: (data: Omit<JuseEvent, 'id' | 'duration' | 'saldo' | 'createdAt' | 'updatedAt'>) => void;
+  onSubmit: (data: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>) => void;
   onCancel: () => void;
 }
 
@@ -42,7 +43,7 @@ export function EventFormSheet({ open, onClose, initialData, initialDate, onSubm
       onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}
       position={isDesktop ? 'right' : 'bottom'}
     >
-      <DrawerPopup variant="inset" showBar={!isDesktop} showCloseButton className="h-[85vh] sm:h-auto flex flex-col">
+      <DrawerPopup variant="inset" showBar className="h-[85vh] sm:h-auto flex flex-col">
         <DrawerHeader className="pb-2 shrink-0">
           <DrawerTitle className="font-display text-xl">
             {initialData ? 'Editar Evento' : 'Nuevo Evento'}
@@ -84,7 +85,7 @@ export function EventFormSheet({ open, onClose, initialData, initialDate, onSubm
             })}
           </div>
         </DrawerHeader>
-        <DrawerPanel className="flex-1 overflow-y-auto min-h-0">
+        <DrawerPanel>
           <EventForm
             formId="event-form"
             activeTab={activeTab}
@@ -94,21 +95,23 @@ export function EventFormSheet({ open, onClose, initialData, initialDate, onSubm
             onCancel={onCancel}
           />
         </DrawerPanel>
-        <DrawerFooter variant="bare" className="shrink-0 pt-2 pb-6 px-6 mt-auto">
-          <div className="flex items-center justify-end gap-3 w-full">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              <X className="w-4 h-4 mr-2" />
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              form="event-form"
-              className="bg-accent text-white hover:bg-accent-hover"
-            >
-              <Check className="w-4 h-4 mr-2" />
-              {initialData ? 'Actualizar Evento' : 'Guardar Evento'}
-            </Button>
-          </div>
+        <DrawerFooter variant="bare" className="shrink-0 flex gap-3 flex-row pt-4 px-4 sm:px-6">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+          >
+            <X className="size-4" />
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            form="event-form"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-blue)] hover:brightness-110 rounded-lg transition-all shadow-sm"
+          >
+            <Save className="size-4" />
+            {initialData ? 'Actualizar Evento' : 'Guardar Evento'}
+          </button>
         </DrawerFooter>
       </DrawerPopup>
     </Drawer>

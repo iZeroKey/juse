@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 interface TimeGridProps {
   gridStartHour?: number;
@@ -10,7 +10,7 @@ interface TimeGridProps {
   showCurrentTime?: boolean;
 }
 
-const HOUR_HEIGHT = 60; // px per hour
+export const HOUR_HEIGHT = 80; // px per hour
 
 function getCurrentTimeOffset(gridStartHour: number, gridEndHour: number): number | null {
   const now = new Date();
@@ -132,6 +132,6 @@ function TimeGrid({
   );
 }
 
-export { TimeGrid, HOUR_HEIGHT };
+export { TimeGrid };
 export type { TimeGridProps };
 export default TimeGrid;

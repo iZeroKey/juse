@@ -2,12 +2,11 @@
 
 import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle } from "lucide-react";
+import { MapPin } from "lucide-react";
 import type { JuseEvent } from "@/types/event";
-import { cn } from "@/lib/utils";
+import { cn, calculateDuration } from "@/lib/utils";
 import {
-  getEventTypeColor,
-  getEventTypeDotColor,
+  getEventColors,
 } from "@/lib/calendar-utils";
 
 interface EventBlockProps {
@@ -18,15 +17,9 @@ interface EventBlockProps {
 }
 
 function EventBlock({ event, style, onClick, compact = false }: EventBlockProps) {
-  const colorClasses = getEventTypeColor(event.eventType);
-  const dotColor = getEventTypeDotColor(event.eventType);
+  const { bg, text, dot, colorValue } = getEventColors(event.color);
   const hasSaldo = event.saldo > 0;
   const missingStaff = event.dj.length === 0 || event.animadoras.length === 0;
-
-  // Extract border color from the colorClasses string for the left accent
-  const borderAccent = colorClasses
-    .split(" ")
-    .find((c) => c.startsWith("border-"));
 
   if (compact) {
     return (
@@ -43,7 +36,7 @@ function EventBlock({ event, style, onClick, compact = false }: EventBlockProps)
         )}
       >
         <span
-          className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dotColor)}
+          className={cn("h-1.5 w-1.5 shrink-0 rounded-full", dot)}
           aria-hidden
         />
         <span className="truncate font-sans text-[11px] text-slate-600">
@@ -58,51 +51,106 @@ function EventBlock({ event, style, onClick, compact = false }: EventBlockProps)
       </motion.button>
     );
   }
+  
+  // Logic for responsive rendering based on time
+  const duration = calculateDuration(event.startTime, event.endTime);
+  const isMicro = duration <= 30;
+  const isCompact = duration > 30 && duration <= 60;
+  const isLarge = duration > 90;
 
   return (
     <motion.button
       type="button"
-      layoutId={`event-${event.id}`}
       onClick={onClick}
-      whileHover={{ scale: 1.02, zIndex: 20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{
+        duration: 0.2,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+      whileHover={{ zIndex: 20 }}
       whileTap={{ scale: 0.98 }}
-      style={style}
+      style={{ ...style, borderLeftColor: colorValue.includes('var') ? `var(${colorValue.replace('var(', '').replace(')', '')})` : colorValue }}
       className={cn(
-        "absolute overflow-hidden rounded-md border-l-[3px] border border-transparent px-2 py-1.5",
-        "cursor-pointer text-left backdrop-blur-sm bg-white/40",
-        "transition-all duration-200 hover:shadow-lg hover:border-slate-200/50 hover:brightness-[1.02]",
-        colorClasses,
-        borderAccent
+        "absolute overflow-hidden rounded-md border border-slate-200 border-l-[4px] text-left group bg-white",
+        "transition-all duration-200 hover:shadow-md hover:border-slate-300",
+        isMicro ? "p-0.5 px-1" : "p-1.5"
       )}
     >
-      {/* Title row */}
-      <div className="flex items-start gap-1">
-        <span className="min-w-0 flex-1 truncate font-display text-[11px] font-semibold leading-tight">
-          {event.eventType} — {event.location}
-        </span>
+      {/* Content Container */}
+      <div className={cn("flex h-full flex-col min-w-0", isMicro ? "gap-0" : "gap-0.5")}>
+        {isMicro ? (
+          <div className="flex w-full items-center gap-1 h-full min-w-0">
+            <span className={cn("font-display text-[10.5px] font-bold truncate flex-1 min-w-0 text-slate-900")}>
+              {event.eventType}
+            </span>
+            <span className={cn("text-[9px] font-medium shrink-0 whitespace-nowrap text-slate-700 opacity-80")}>
+              {event.startTime}
+            </span>
+            {hasSaldo && <span className="size-1 rounded-full bg-red-500 shrink-0 ml-auto" />}
+          </div>
+        ) : (
+          <>
+            {/* Title Full Width */}
+            <span className={cn("font-display text-xs font-bold leading-tight truncate block w-full text-slate-900")}>
+              {event.eventType}
+            </span>
+            
+            {/* Time Pill Row (Below title, strictly single line) */}
+            <div className="flex w-full items-center justify-between mt-px">
+              <span className={cn(
+                "inline-block rounded-sm px-1 py-0.5 text-[9.5px] font-semibold leading-none",
+                "whitespace-nowrap truncate max-w-[85%]", 
+                bg, text
+              )}>
+                {isCompact ? event.startTime : `${event.startTime} - ${event.endTime}`}
+              </span>
+              
+              {/* Extremely compact badges if Compact */}
+              {isCompact && (hasSaldo || missingStaff) && (
+                <div className="flex items-center gap-0.5 shrink-0 pl-0.5">
+                  {hasSaldo && <span className={cn("size-1.5 rounded-full", dot)} />}
+                  {missingStaff && <span className="size-1.5 rounded-full bg-amber-500" />}
+                </div>
+              )}
+            </div>
 
-        {/* Status indicators */}
-        <span className="flex shrink-0 items-center gap-1 pt-px">
-          {hasSaldo && (
-            <span
-              className="h-2 w-2 rounded-full bg-red-500"
-              title={`Saldo pendiente: S/ ${event.saldo.toFixed(2)}`}
-              aria-label="Saldo pendiente"
-            />
-          )}
-          {missingStaff && (
-            <AlertTriangle
-              className="h-3 w-3 text-amber-500"
-              aria-label="Personal incompleto"
-            />
-          )}
-        </span>
+            {/* Normal/Large Details */}
+            {!isCompact && (
+              <>
+                {/* Location */}
+                <div className="flex w-full items-center gap-0.5 mt-0.5 text-slate-500">
+                  <MapPin className="size-3 shrink-0" />
+                  <span className="text-[10px] font-medium truncate">{event.location}</span>
+                </div>
+
+                {/* Description */}
+                {isLarge && event.observacion && (
+                  <p className="text-[10px] text-slate-500 line-clamp-2 leading-tight mt-0.5">
+                    {event.observacion}
+                  </p>
+                )}
+
+                {/* Full Badges */}
+                {(hasSaldo || missingStaff) && (
+                  <div className="flex shrink-0 flex-wrap items-center gap-1 mt-auto pt-1">
+                    {hasSaldo && (
+                      <span className="px-1 py-px rounded bg-red-500 text-white text-[9px] font-bold">
+                        Saldo
+                      </span>
+                    )}
+                    {missingStaff && (
+                      <span className="flex items-center gap-0.5 px-1 py-px rounded bg-amber-100 text-amber-700 text-[9px] font-bold">
+                        Staff
+                      </span>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
       </div>
-
-      {/* Time subtitle */}
-      <p className="mt-0.5 truncate font-sans text-[10px] leading-tight opacity-70">
-        {event.startTime} – {event.endTime}
-      </p>
     </motion.button>
   );
 }

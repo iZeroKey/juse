@@ -1,40 +1,39 @@
-import * as React from 'react';
-import {
-  Clock,
-  MapPin,
-  Pencil,
-  Trash2,
-  FileText,
-  AlertTriangle,
-  Calendar,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { format, parse } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { cn, formatCurrency, formatDuration } from '@/lib/utils';
-import type { JuseEvent } from '@/types/event';
-import { getEventTypeColor } from '@/lib/calendar-utils';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import {
-  Drawer,
-  DrawerPopup,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerPanel,
-  DrawerFooter,
-} from '@/components/ui/drawer';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Drawer,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle
+} from '@/components/ui/drawer';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { cn, formatCurrency, formatDuration } from '@/lib/utils';
+import type { JuseEvent } from '@/types/event';
+import { format, parse } from 'date-fns';
+import { es } from 'date-fns/locale';
+import {
+  AlertTriangle,
+  Calendar,
+  Clock,
+  MapPin,
+  Pencil,
+  Trash2
+} from 'lucide-react';
+import * as React from 'react';
+import { toast } from 'sonner';
 
 interface EventSheetProps {
   event: JuseEvent | null;
@@ -140,7 +139,7 @@ function EventSheet({
         onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}
         position={isDesktop ? 'right' : 'bottom'}
       >
-        <DrawerPopup variant="inset" showBar={!isDesktop} showCloseButton>
+        <DrawerPopup variant="inset" showBar>
           {event && (
             <>
               {/* Header */}
@@ -155,15 +154,6 @@ function EventSheet({
                       {event.location || 'Sin ubicación'}
                     </DrawerDescription>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      'shrink-0 border text-xs',
-                      getEventTypeColor(event.eventType)
-                    )}
-                  >
-                    {event.eventType}
-                  </Badge>
                 </div>
                 {/* Warning badges */}
                 {(event.dj.length === 0 || event.animadoras.length === 0) && (
@@ -247,7 +237,7 @@ function EventSheet({
                       />
                       <StaffSection label="DJ" people={event.dj} warn />
                       <StaffSection
-                        label="Staff Adicional"
+                        label="Staff"
                         people={event.staffAdicional}
                       />
                       <StaffSection
@@ -299,7 +289,7 @@ function EventSheet({
                     </div>
 
                     {event.observacion && (
-                      <div className="mt-2 rounded-md bg-slate-50 p-3">
+                      <div className="mt-2 rounded-lg bg-slate-50 p-3">
                         <span className="text-xs font-medium text-muted-foreground">
                           Observación
                         </span>
@@ -313,35 +303,23 @@ function EventSheet({
               </DrawerPanel>
 
               {/* Footer actions */}
-              <DrawerFooter variant="bare" className="flex-row justify-end border-none px-6 pb-6 pt-2 gap-2">
-                <Button
+              <DrawerFooter variant="bare" className="shrink-0 flex gap-3 flex-row pt-4 px-4 sm:px-6">
+                <button
                   type="button"
-                  variant="outline"
-                  size="icon"
-                  aria-label="Editar evento"
-                  onClick={() => event && onEdit(event)}
-                >
-                  <Pencil className="size-4" />
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
                   onClick={() => setConfirmOpen(true)}
-                  className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                  aria-label="Eliminar evento"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
                 >
                   <Trash2 className="size-4" />
-                </Button>
-                <Button
+                  Eliminar
+                </button>
+                <button
                   type="button"
-                  onClick={handleReceipt}
-                  className="ml-auto bg-accent text-white hover:bg-accent-hover"
+                  onClick={() => event && onEdit(event)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-blue)] hover:brightness-110 rounded-lg transition-all shadow-sm"
                 >
-                  <FileText className="size-4" />
-                  Generar Recibo
-                </Button>
+                  <Pencil className="size-4" />
+                  Editar Evento
+                </button>
               </DrawerFooter>
             </>
           )}

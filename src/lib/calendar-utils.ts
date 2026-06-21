@@ -176,33 +176,41 @@ export function getDayNumber(date: Date): number {
   return parseInt(format(date, 'd'), 10);
 }
 
-// Helper to get a color for event types
-const EVENT_TYPE_COLORS: Record<string, string> = {
-  'Gincana': 'bg-violet-500/15 border-violet-500/30 text-violet-800',
-  'Revelación de Género': 'bg-pink-500/15 border-pink-500/30 text-pink-800',
-  'Baby Shower': 'bg-sky-500/15 border-sky-500/30 text-sky-800',
-  'Cumpleaños': 'bg-amber-500/15 border-amber-500/30 text-amber-800',
-  'Boda': 'bg-rose-500/15 border-rose-500/30 text-rose-800',
-  'Corporativo': 'bg-slate-500/15 border-slate-500/30 text-slate-800',
-  'Personalizado': 'bg-teal-500/15 border-teal-500/30 text-teal-800',
+// --- Event Colors Palette ---
+
+export type EventColorDef = {
+  id: string;
+  bg: string;
+  border: string;
+  borderLeft: string;
+  text: string;
+  dot: string;
+  pickerBg: string; // Used for the color picker circles
+  colorValue: string; // Raw CSS value for inline styles
 };
 
-export function getEventTypeColor(eventType: string): string {
-  return EVENT_TYPE_COLORS[eventType] ?? 'bg-indigo-100 border-indigo-300 text-indigo-800';
+export const EVENT_PALETTE: EventColorDef[] = [
+  { id: 'blue', bg: 'bg-[var(--color-juse-blue-soft)]', border: 'border-[var(--color-juse-blue)]', borderLeft: 'border-l-[var(--color-juse-blue)]', text: 'text-[var(--color-juse-blue)]', dot: 'bg-[var(--color-juse-blue)]', pickerBg: 'bg-blue-500', colorValue: 'var(--color-juse-blue)' },
+  { id: 'red', bg: 'bg-[var(--color-juse-red-soft)]', border: 'border-[var(--color-juse-red)]', borderLeft: 'border-l-[var(--color-juse-red)]', text: 'text-[var(--color-juse-red)]', dot: 'bg-[var(--color-juse-red)]', pickerBg: 'bg-red-500', colorValue: 'var(--color-juse-red)' },
+  { id: 'yellow', bg: 'bg-[var(--color-juse-yellow-soft)]', border: 'border-[var(--color-juse-yellow)]', borderLeft: 'border-l-[var(--color-juse-yellow)]', text: 'text-[#d97706]', dot: 'bg-[var(--color-juse-yellow)]', pickerBg: 'bg-yellow-500', colorValue: 'var(--color-juse-yellow)' },
+  { id: 'green', bg: 'bg-emerald-50', border: 'border-emerald-500', borderLeft: 'border-l-emerald-500', text: 'text-emerald-700', dot: 'bg-emerald-500', pickerBg: 'bg-emerald-500', colorValue: '#10b981' }, // emerald-500
+  { id: 'purple', bg: 'bg-purple-50', border: 'border-purple-500', borderLeft: 'border-l-purple-500', text: 'text-purple-700', dot: 'bg-purple-500', pickerBg: 'bg-purple-500', colorValue: '#a855f7' }, // purple-500
+  { id: 'pink', bg: 'bg-pink-50', border: 'border-pink-500', borderLeft: 'border-l-pink-500', text: 'text-pink-700', dot: 'bg-pink-500', pickerBg: 'bg-pink-500', colorValue: '#ec4899' }, // pink-500
+];
+
+export function getEventColors(colorId?: string): EventColorDef {
+  const found = EVENT_PALETTE.find(c => c.id === colorId);
+  return found || EVENT_PALETTE[0]; // Defaults to blue
 }
 
-const EVENT_TYPE_DOT_COLORS: Record<string, string> = {
-  'Gincana': 'bg-violet-500',
-  'Revelación de Género': 'bg-pink-500',
-  'Baby Shower': 'bg-sky-500',
-  'Cumpleaños': 'bg-amber-500',
-  'Boda': 'bg-rose-500',
-  'Corporativo': 'bg-slate-500',
-  'Personalizado': 'bg-teal-500',
-};
+export function getEventTypeColor(_eventType: string): string {
+  // Backwards compatibility for old events without color ID
+  return getEventColors('blue').bg + ' ' + getEventColors('blue').border + ' ' + getEventColors('blue').text;
+}
 
-export function getEventTypeDotColor(eventType: string): string {
-  return EVENT_TYPE_DOT_COLORS[eventType] ?? 'bg-indigo-500';
+export function getEventTypeDotColor(_eventType: string): string {
+  // Backwards compatibility
+  return getEventColors('blue').dot;
 }
 
 export interface TimeBlock {

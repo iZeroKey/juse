@@ -2,13 +2,12 @@
 
 import { useCallback, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { addWeeks, addMonths } from 'date-fns';
+import { addWeeks, addMonths, isToday } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { NavDrawer } from '@/components/layout/nav-drawer';
 import { formatDateHeader } from '@/lib/calendar-utils';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 import type { CalendarView } from '@/types/event';
-import { useEvents } from '@/hooks/use-events';
 
 // ── Constants ──────────────────────────────────────────────
 
@@ -25,6 +24,8 @@ interface CalendarHeaderProps {
   onViewChange: (view: CalendarView) => void;
   onNavigate: (date: Date) => void;
   onNewEvent: () => void;
+  appView: 'calendar' | 'contracts';
+  onAppViewChange: (view: 'calendar' | 'contracts') => void;
 }
 
 // ── Helpers ────────────────────────────────────────────────
@@ -68,7 +69,7 @@ function ViewSwitcher({
             {isActive && (
               <motion.span
                 layoutId={layoutId}
-                className="absolute inset-0 rounded-md bg-accent"
+                className="absolute inset-0 rounded-md bg-[var(--color-juse-blue)]"
                 style={{ zIndex: -1 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
@@ -91,6 +92,8 @@ export function CalendarHeader({
   onViewChange,
   onNavigate,
   onNewEvent,
+  appView,
+  onAppViewChange,
 }: CalendarHeaderProps) {
   const switcherLayoutId = useId();
 
@@ -107,53 +110,63 @@ export function CalendarHeader({
   }, [onNavigate]);
 
   const dateLabel = formatDateHeader(currentDate, view);
+  const isCurrentDateToday = isToday(currentDate);
 
   return (
     <header className="flex items-center justify-between gap-2 border-b border-border bg-surface px-3 py-2 md:px-5 md:py-3">
       {/* ── Left section ── */}
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+        {/* Navigation Drawer */}
+        <NavDrawer currentView={appView} onViewChange={onAppViewChange} />
+
         {/* Wordmark */}
-        <h1 className="select-none font-display text-lg font-bold tracking-tight md:text-xl">
-          <span className="text-accent">J</span>
-          <span className="text-text-primary">USE</span>
+        <h1 className="select-none font-display text-lg font-bold tracking-tight md:text-xl flex items-center shrink-0">
+          <img src="/juse.png" alt="Juse Logo" className="h-6 md:h-8 object-contain" />
         </h1>
 
         {/* Separator */}
-        <div className="mx-0.5 h-5 w-px bg-border-strong md:mx-1" aria-hidden="true" />
+        <div className="mx-0.5 h-5 w-px bg-border-strong md:mx-1 shrink-0" aria-hidden="true" />
 
-        {/* Navigation controls */}
-        <div className="flex items-center gap-0.5">
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={handlePrev}
-            aria-label="Período anterior"
-            className="rounded-full size-8 border-slate-200"
-          >
-            <ChevronLeft className="size-4" />
-          </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
+        {/* Navigation controls grouped */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
             onClick={handleToday}
-            className="rounded-full px-4 h-8 text-xs font-semibold text-accent border-slate-200 hover:bg-slate-50 hover:text-accent"
+            className={cn(
+              "flex items-center justify-center h-8 px-3.5 text-xs font-semibold shadow-xs transition-colors rounded-[14px] border",
+              isCurrentDateToday
+                ? "text-[var(--color-juse-blue)] bg-[var(--color-juse-blue)]/5 border-[var(--color-juse-blue)]/30 hover:bg-[var(--color-juse-blue)]/10"
+                : "text-slate-700 bg-white border-slate-200 hover:bg-slate-50 hover:text-slate-900"
+            )}
           >
             Hoy
-          </Button>
+            <span
+              className={cn(
+                "ml-1.5 size-1.5 rounded-full transition-colors",
+                isCurrentDateToday ? "bg-[var(--color-juse-blue)]" : "bg-slate-300"
+              )}
+            />
+          </button>
 
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={handleNext}
-            aria-label="Período siguiente"
-            className="rounded-full size-8 border-slate-200"
-          >
-            <ChevronRight className="size-4" />
-          </Button>
+          <div className="flex items-center rounded-[14px] border border-slate-200 bg-white shadow-xs overflow-hidden h-8">
+            <button
+              onClick={handlePrev}
+              aria-label="Período anterior"
+              className="flex items-center justify-center h-full w-9 border-r border-slate-200 bg-transparent hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            >
+              <ChevronLeft className="size-4 text-slate-600" />
+            </button>
+            <button
+              onClick={handleNext}
+              aria-label="Período siguiente"
+              className="flex items-center justify-center h-full w-9 bg-transparent hover:bg-slate-50 active:bg-slate-100 transition-colors"
+            >
+              <ChevronRight className="size-4 text-slate-600" />
+            </button>
+          </div>
         </div>
 
-        {/* Date label (hidden on mobile) */}
+        {/* Date label */}
         <AnimatePresence mode="wait">
           <motion.span
             key={dateLabel}
@@ -161,7 +174,7 @@ export function CalendarHeader({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="hidden text-sm font-medium capitalize text-text-secondary md:block"
+            className="truncate text-sm font-medium capitalize text-text-secondary block"
           >
             {dateLabel}
           </motion.span>
@@ -169,13 +182,15 @@ export function CalendarHeader({
       </div>
 
       {/* ── Right section ── */}
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex items-center gap-2 md:gap-3 shrink-0">
         {/* View switcher */}
         <ViewSwitcher
           view={view}
           onViewChange={onViewChange}
           layoutId={switcherLayoutId}
         />
+
+
 
 
 
@@ -187,11 +202,11 @@ export function CalendarHeader({
           whileTap={{ scale: 0.96 }}
           className={cn(
             'inline-flex items-center justify-center gap-2 font-medium text-white cursor-pointer',
-            'bg-accent hover:bg-accent-hover transition-colors',
+            'bg-[var(--color-juse-red)] hover:brightness-110 transition-all shadow-sm hover:shadow-md',
             // Mobile: circle FAB
             'size-9 rounded-full text-sm',
             // Desktop: pill with label
-            'md:h-9 md:w-auto md:rounded-lg md:px-4',
+            'md:h-9 md:w-auto md:rounded-full md:px-4',
           )}
           aria-label="Nuevo Evento"
         >

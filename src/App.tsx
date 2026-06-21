@@ -8,12 +8,14 @@ import { WeekView } from '@/components/calendar/week-view';
 import { MonthView } from '@/components/calendar/month-view';
 import { EventSheet } from '@/components/event/event-sheet';
 import { EventFormSheet } from '@/components/event/event-form-sheet';
+import { ContractsPage } from '@/components/contracts-page/contracts-page';
 
 export default function App() {
   const { addEvent, updateEvent, deleteEvent, getEvent } = useEvents();
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [view, setView] = useState<CalendarView>('week');
+  const [appView, setAppView] = useState<'calendar' | 'contracts'>('calendar');
   const [selectedEvent, setSelectedEvent] = useState<JuseEvent | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
@@ -41,7 +43,7 @@ export default function App() {
     setSelectedEvent(null);
   }, [deleteEvent]);
 
-  const handleFormSubmit = useCallback((data: Omit<JuseEvent, 'id' | 'duration' | 'saldo' | 'createdAt' | 'updatedAt'>) => {
+  const handleFormSubmit = useCallback((data: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>) => {
     if (editingEvent) {
       updateEvent(editingEvent.id, data);
       // Refresh the selected event if viewing details
@@ -60,53 +62,79 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-dvh bg-background overflow-hidden">
-      <CalendarHeader
-        currentDate={currentDate}
-        view={view}
-        onViewChange={setView}
-        onNavigate={setCurrentDate}
-        onNewEvent={() => handleNewEvent(format(currentDate, 'yyyy-MM-dd'))}
-      />
+    <div className="flex flex-col h-dvh bg-background overflow-hidden relative">
+      <AnimatePresence mode="wait">
+        {appView === 'contracts' ? (
+          <motion.div
+            key="contracts"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute inset-0 z-0 bg-background"
+          >
+            <ContractsPage appView={appView} onAppViewChange={setAppView} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="calendar"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute inset-0 z-0 bg-background flex flex-col"
+          >
+            <CalendarHeader
+              currentDate={currentDate}
+              view={view}
+              onViewChange={setView}
+              onNavigate={setCurrentDate}
+              onNewEvent={() => handleNewEvent(format(currentDate, 'yyyy-MM-dd'))}
+              appView={appView}
+              onAppViewChange={setAppView}
+            />
 
-      <main className="flex-1 overflow-hidden">
-        <AnimatePresence mode="wait">
-          {view === 'week' && (
-            <motion.div
-              key="week"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
-              <WeekView
-                date={currentDate}
-                onEventClick={handleEventClick}
-                onDayClick={handleDayClick}
-              />
-            </motion.div>
-          )}
+            <main className="flex-1 overflow-hidden relative">
+              <AnimatePresence mode="wait">
+                {view === 'week' && (
+                  <motion.div
+                    key="week"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0"
+                  >
+                    <WeekView
+                      date={currentDate}
+                      onEventClick={handleEventClick}
+                      onDayClick={handleDayClick}
+                    />
+                  </motion.div>
+                )}
 
-          {view === 'month' && (
-            <motion.div
-              key="month"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
-              <MonthView
-                date={currentDate}
-                onEventClick={handleEventClick}
-                onDayClick={handleDayClick}
-                onNewEvent={handleNewEvent}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
+                {view === 'month' && (
+                  <motion.div
+                    key="month"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0"
+                  >
+                    <MonthView
+                      date={currentDate}
+                      onEventClick={handleEventClick}
+                      onDayClick={handleDayClick}
+                      onNewEvent={handleNewEvent}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </main>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Event Detail Sheet */}
       <EventSheet

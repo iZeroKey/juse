@@ -6,7 +6,7 @@ const STORAGE_KEY = 'juse-events';
 
 interface EventsContextValue {
   events: JuseEvent[];
-  addEvent: (event: Omit<JuseEvent, 'id' | 'duration' | 'saldo' | 'createdAt' | 'updatedAt'>) => JuseEvent;
+  addEvent: (event: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>) => JuseEvent;
   updateEvent: (id: string, updates: Partial<JuseEvent>) => void;
   deleteEvent: (id: string) => void;
   getEvent: (id: string) => JuseEvent | undefined;
@@ -43,15 +43,17 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
     saveEvents(events);
   }, [events]);
 
-  const addEvent = useCallback((eventData: Omit<JuseEvent, 'id' | 'duration' | 'saldo' | 'createdAt' | 'updatedAt'>): JuseEvent => {
-    const now = new Date().toISOString();
-    const computed = enrichEvent(eventData);
+  const addEvent = useCallback((eventData: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>): JuseEvent => {
+    const id = generateId();
+    const duration = calculateDuration(eventData.startTime, eventData.endTime);
+    // saldo is now provided by the form
+    
     const newEvent: JuseEvent = {
       ...eventData,
-      ...computed,
-      id: generateId(),
-      createdAt: now,
-      updatedAt: now,
+      duration,
+      id: id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     setEvents((prev) => [...prev, newEvent]);
     return newEvent;

@@ -6,6 +6,7 @@ export interface JuseEvent {
   endTime: string;       // "18:00"
   duration: number;      // Auto-calculated in minutes
   eventType: string;
+  color?: string;        // ID of the color palette to use
   location: string;
 
   // Staff
@@ -53,6 +54,7 @@ export interface EventFormValues {
   startTime: string;
   endTime: string;
   eventType: string;
+  color: string;
   location: string;
   animadoras: string[];
   bailarinas: string[];
@@ -62,6 +64,7 @@ export interface EventFormValues {
   totalEvento: string;
   movilidad: string;
   adelanto: string;
+  saldo: string;
   pagoPersonal: string;
   ganancia: string;
   observacion: string;

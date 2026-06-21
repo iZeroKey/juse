@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { Clock, MapPin, CalendarIcon } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, parse, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { motion } from 'framer-motion';
-import { cn, calculateDuration, formatDuration, parseCurrency } from '@/lib/utils';
+
+import { EVENT_PALETTE } from '@/lib/calendar-utils';
+import { cn, parseCurrency, calculateDuration, formatDuration } from '@/lib/utils';
 import type { JuseEvent, EventFormValues } from '@/types/event';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,17 +28,18 @@ interface EventFormProps {
   initialData?: JuseEvent;
   initialDate?: string;
   onSubmit: (
-    data: Omit<JuseEvent, 'id' | 'duration' | 'saldo' | 'createdAt' | 'updatedAt'>
+    data: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>
   ) => void;
   onCancel: () => void;
 }
 
 function eventToFormValues(event: JuseEvent): EventFormValues {
   return {
-    date: event.date,
+    date: event.date ? format(parseISO(event.date), 'dd/MM/yyyy') : '',
     startTime: event.startTime,
     endTime: event.endTime,
     eventType: event.eventType,
+    color: event.color || 'blue',
     location: event.location,
     animadoras: event.animadoras,
     bailarinas: event.bailarinas,
@@ -47,6 +49,7 @@ function eventToFormValues(event: JuseEvent): EventFormValues {
     totalEvento: event.totalEvento.toFixed(2),
     movilidad: event.movilidad.toFixed(2),
     adelanto: event.adelanto.toFixed(2),
+    saldo: event.saldo.toFixed(2),
     pagoPersonal: event.pagoPersonal.toFixed(2),
     ganancia: event.ganancia.toFixed(2),
     observacion: event.observacion,
@@ -58,6 +61,7 @@ const defaultFormValues: EventFormValues = {
   startTime: '',
   endTime: '',
   eventType: '',
+  color: 'blue',
   location: '',
   animadoras: [],
   bailarinas: [],
@@ -67,6 +71,7 @@ const defaultFormValues: EventFormValues = {
   totalEvento: '',
   movilidad: '',
   adelanto: '',
+  saldo: '',
   pagoPersonal: '',
   ganancia: '',
   observacion: '',
@@ -78,16 +83,13 @@ export function EventForm({
   initialData,
   initialDate,
   onSubmit,
-  onCancel,
 }: EventFormProps) {
-  const isEditing = !!initialData;
-
-  const { register, handleSubmit, control, watch } =
+  const { register, handleSubmit, control, watch, setValue } =
     useForm<EventFormValues>({
       defaultValues: initialData
         ? eventToFormValues(initialData)
         : initialDate
-        ? { ...defaultFormValues, date: initialDate }
+        ? { ...defaultFormValues, date: format(parseISO(initialDate), 'dd/MM/yyyy') }
         : defaultFormValues,
     });
 
@@ -101,21 +103,25 @@ export function EventForm({
   const durationMinutes = calculateDuration(startTime, endTime);
   const durationDisplay = formatDuration(durationMinutes);
 
-  // Derived: saldo
-  const saldoValue = React.useMemo(() => {
+  // Auto-calculate saldo when total or adelanto changes
+  React.useEffect(() => {
     const total = parseCurrency(totalEventoStr);
     const adelanto = parseCurrency(adelantoStr);
-    return Math.max(0, total - adelanto);
-  }, [totalEventoStr, adelantoStr]);
-
-  const saldoDisplay = saldoValue.toFixed(2);
+    const calculatedSaldo = Math.max(0, total - adelanto);
+    setValue('saldo', calculatedSaldo > 0 ? calculatedSaldo.toFixed(2) : '0.00', { shouldDirty: true });
+  }, [totalEventoStr, adelantoStr, setValue]);
 
   const processSubmit = (data: EventFormValues) => {
+    // Convert dd/MM/yyyy back to yyyy-MM-dd for backend storage
+    const parsedDate = parse(data.date, 'dd/MM/yyyy', new Date());
+    const isoDate = isValid(parsedDate) ? format(parsedDate, 'yyyy-MM-dd') : data.date;
+
     onSubmit({
-      date: data.date,
+      date: isoDate,
       startTime: data.startTime,
       endTime: data.endTime,
       eventType: data.eventType,
+      color: data.color,
       location: data.location,
       animadoras: data.animadoras,
       bailarinas: data.bailarinas,
@@ -125,6 +131,7 @@ export function EventForm({
       totalEvento: parseCurrency(data.totalEvento),
       movilidad: parseCurrency(data.movilidad),
       adelanto: parseCurrency(data.adelanto),
+      saldo: parseCurrency(data.saldo),
       pagoPersonal: parseCurrency(data.pagoPersonal),
       ganancia: parseCurrency(data.ganancia),
       observacion: data.observacion,
@@ -141,43 +148,49 @@ export function EventForm({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Fecha */}
             <div className="space-y-1.5">
-              <Label htmlFor="date">Fecha</Label>
+              <Label htmlFor="date">Fecha <span className="text-red-500">*</span></Label>
               <Controller
                 name="date"
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal px-3 relative overflow-hidden h-10 bg-transparent hover:bg-transparent",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        <span className="truncate block w-full">
-                          {field.value ? (
-                            format(parseISO(field.value), "PPP", { locale: es })
-                          ) : (
-                            "dd/mm/aaaa"
-                          )}
-                        </span>
-                        <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 shrink-0 bg-background" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-[100]" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? parseISO(field.value) : undefined}
-                        onSelect={(date) => {
-                          field.onChange(date ? format(date, "yyyy-MM-dd") : "");
-                        }}
-                        locale={es}
+                render={({ field, fieldState: { error } }) => {
+                  let dateObj = undefined;
+                  if (field.value) {
+                    const parsed = parse(field.value, 'dd/MM/yyyy', new Date());
+                    if (isValid(parsed)) dateObj = parsed;
+                  }
+
+                  return (
+                    <div className="relative flex items-center">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            type="button"
+                            className="absolute left-0 top-0 h-full px-3 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline-none z-10"
+                          >
+                            <CalendarIcon className="h-4 w-4" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 z-[100]" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={dateObj}
+                            onSelect={(date) => {
+                              field.onChange(date ? format(date, "dd/MM/yyyy") : "");
+                            }}
+                            locale={es}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <Input
+                        {...field}
+                        type="text"
+                        placeholder="dd/mm/aaaa"
+                        className={cn("pl-10", error && "border-red-500 focus-visible:ring-red-500")}
                       />
-                    </PopoverContent>
-                  </Popover>
-                )}
+                    </div>
+                  );
+                }}
               />
             </div>
 
@@ -206,9 +219,9 @@ export function EventForm({
             {/* Duración (read-only) */}
             <div className="space-y-1.5">
               <Label>Duración</Label>
-              <div className="flex h-10 items-center gap-2 rounded-md border border-input bg-slate-50 px-3 text-sm text-muted-foreground">
+              <div className="flex h-[42px] sm:h-[42px] w-full min-w-0 items-center gap-2 rounded-lg border border-slate-300 bg-white opacity-50 px-3 py-2.5 text-sm text-slate-500 shadow-sm transition-colors cursor-not-allowed">
                 <Clock className="size-4 shrink-0" />
-                <span>{durationDisplay}</span>
+                <span className="truncate">{durationDisplay}</span>
               </div>
             </div>
           </div>
@@ -222,6 +235,34 @@ export function EventForm({
               id="eventType"
               placeholder="Ej: Cumpleaños infantil, Boda, etc."
               {...register('eventType', { required: true })}
+            />
+          </div>
+
+          {/* Color del Evento */}
+          <div className="space-y-1.5 pt-1">
+            <Label>Color de la Tarjeta</Label>
+            <Controller
+              name="color"
+              control={control}
+              render={({ field }) => (
+                <div className="flex flex-wrap gap-2">
+                  {EVENT_PALETTE.map((colorDef) => (
+                    <button
+                      key={colorDef.id}
+                      type="button"
+                      onClick={() => field.onChange(colorDef.id)}
+                      className={cn(
+                        "size-8 rounded-full border-2 transition-all duration-200",
+                        colorDef.pickerBg,
+                        field.value === colorDef.id
+                          ? "border-slate-800 scale-110 shadow-sm"
+                          : "border-transparent hover:scale-105 opacity-80 hover:opacity-100"
+                      )}
+                      aria-label={`Seleccionar color ${colorDef.id}`}
+                    />
+                  ))}
+                </div>
+              )}
             />
           </div>
 
@@ -290,10 +331,10 @@ export function EventForm({
             render={({ field }) => (
               <StaffTagInput
                 id="staffAdicional"
-                label="Staff Adicional"
+                label="Staff"
                 value={field.value}
                 onChange={field.onChange}
-                placeholder="Staff adicional"
+                placeholder="Staff"
               />
             )}
           />
@@ -355,15 +396,21 @@ export function EventForm({
               )}
             />
 
-            {/* Saldo — read-only, auto-calculated */}
-            <CurrencyInput
-              id="saldo"
-              label="Saldo"
-              value={saldoDisplay}
-              onChange={() => {}}
-              readOnly
-              className={cn(
-                saldoValue > 0 && '[&_input]:text-red-600 [&_input]:font-medium'
+            <Controller
+              name="saldo"
+              control={control}
+              render={({ field }) => (
+                <CurrencyInput
+                  id="saldo"
+                  label="Saldo"
+                  value={field.value}
+                  onChange={field.onChange}
+                  readOnly
+                  className={cn(
+                    'opacity-80 pointer-events-none',
+                    parseCurrency(field.value) > 0 && '[&_input]:text-red-600 [&_input]:font-medium'
+                  )}
+                />
               )}
             />
 
@@ -398,13 +445,13 @@ export function EventForm({
 
           {/* Observación / Documento */}
           <div className="space-y-1.5">
-            <Label htmlFor="observacionTexto">Tipo de Documento / Observación</Label>
+            <Label htmlFor="observacionTexto">Observación</Label>
             <textarea
               id="observacionTexto"
               {...register('observacion')}
               placeholder="Factura, Recibo, u observaciones adicionales..."
               rows={3}
-              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="w-full min-h-[80px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition-colors placeholder:text-slate-400 focus-visible:border-[var(--color-juse-blue)] focus-visible:ring-2 focus-visible:ring-[var(--color-juse-blue)]/20"
             />
           </div>
         </TabsContent>

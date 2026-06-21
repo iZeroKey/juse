@@ -13,7 +13,7 @@ import {
 } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 
 function Calendar({
   className,
@@ -56,13 +56,11 @@ function Calendar({
           defaultClassNames.nav
         ),
         button_previous: cn(
-          buttonVariants({ variant: buttonVariant }),
-          "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
+          "flex items-center justify-center size-(--cell-size) p-0 select-none aria-disabled:opacity-50 border-none rounded-full hover:bg-slate-100 data-[pressed=true]:bg-slate-200 transition-colors cursor-pointer",
           defaultClassNames.button_previous
         ),
         button_next: cn(
-          buttonVariants({ variant: buttonVariant }),
-          "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
+          "flex items-center justify-center size-(--cell-size) p-0 select-none aria-disabled:opacity-50 border-none rounded-full hover:bg-slate-100 data-[pressed=true]:bg-slate-200 transition-colors cursor-pointer",
           defaultClassNames.button_next
         ),
         month_caption: cn(
@@ -103,10 +101,10 @@ function Calendar({
           defaultClassNames.week_number
         ),
         day: cn(
-          "group/day relative aspect-square h-full w-full p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-r-md",
+          "group/day relative aspect-square h-full w-full p-0 text-center select-none [&:last-child[data-selected=true]_button]:rounded-full",
           props.showWeekNumber
-            ? "[&:nth-child(2)[data-selected=true]_button]:rounded-l-md"
-            : "[&:first-child[data-selected=true]_button]:rounded-l-md",
+            ? "[&:nth-child(2)[data-selected=true]_button]:rounded-full"
+            : "[&:first-child[data-selected=true]_button]:rounded-full",
           defaultClassNames.day
         ),
         range_start: cn(
@@ -116,7 +114,7 @@ function Calendar({
         range_middle: cn("rounded-none", defaultClassNames.range_middle),
         range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
         today: cn(
-          "rounded-md bg-slate-100 text-accent font-bold data-[selected=true]:bg-accent data-[selected=true]:text-white data-[selected=true]:rounded-md",
+          "rounded-full bg-slate-100 text-accent font-bold data-[selected=true]:bg-accent data-[selected=true]:text-white",
           defaultClassNames.today
         ),
         outside: cn(
@@ -192,10 +190,9 @@ function CalendarDayButton({
   }, [modifiers.focused])
 
   return (
-    <Button
+    <button
       ref={ref}
-      variant="ghost"
-      size="icon"
+      type="button"
       data-day={day.date.toLocaleDateString()}
       data-selected-single={
         modifiers.selected &&
@@ -207,7 +204,14 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        "flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-end=true]:bg-accent data-[range-end=true]:text-white data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-accent/50 data-[range-middle=true]:text-white data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md data-[range-start=true]:bg-accent data-[range-start=true]:text-white data-[selected-single=true]:bg-accent data-[selected-single=true]:text-white hover:bg-slate-100 hover:text-slate-900 [&>span]:text-xs [&>span]:opacity-70",
+        "flex items-center justify-center aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal rounded-full border-none transition-colors cursor-pointer outline-none",
+        "group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-2 group-data-[focused=true]/day:ring-ring",
+        "data-[range-end=true]:rounded-full data-[range-end=true]:bg-accent data-[range-end=true]:text-white",
+        "data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-accent/10 data-[range-middle=true]:text-accent",
+        "data-[range-start=true]:rounded-full data-[range-start=true]:bg-accent data-[range-start=true]:text-white",
+        "data-[selected-single=true]:bg-accent data-[selected-single=true]:text-white data-[selected-single=true]:font-bold data-[selected-single=true]:shadow-md",
+        "hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200",
+        "[&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,
         className
       )}
