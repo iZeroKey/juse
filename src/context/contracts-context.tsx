@@ -1,8 +1,12 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { JuseContract } from '@/types/contract';
 import { generateId } from '@/lib/utils';
-import { defaultContracts } from '@/data/seed';
-import { loadData, saveData } from '@/lib/storage';
+import {
+  getContractsFromDB,
+  insertContractToDB,
+  updateContractInDB,
+  deleteContractFromDB
+} from '@/lib/db';
 
 const STORAGE_KEY = 'juse-contracts.json';
 
@@ -45,41 +49,50 @@ export function ContractsProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    loadData<JuseContract[]>(STORAGE_KEY, defaultContracts).then(data => {
+    // Initial load from SQLite
+    getContractsFromDB().then(data => {
       setContracts(data);
+      setIsLoaded(true);
+    }).catch(err => {
+      console.error("Failed to load contracts from SQLite", err);
       setIsLoaded(true);
     });
   }, []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      saveData(STORAGE_KEY, contracts);
-    }
-  }, [contracts, isLoaded]);
 
   const addContract = useCallback((contractData: Omit<JuseContract, 'id' | 'createdAt' | 'updatedAt'>): JuseContract => {
     const newContract: JuseContract = {
       ...contractData,
       id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
     };
     
-    setContracts((prev) => [...prev, newContract]);
+    // Add to state immediately
+    setContracts((prev) => [newContract, ...prev]);
+    // Save to SQLite
+    insertContractToDB(newContract).catch(err => console.error(err));
+    
     return newContract;
-  }, [contracts]);
+  }, []);
 
   const updateContract = useCallback((id: string, updates: Partial<JuseContract>) => {
+    const updatedWithTime = { ...updates, updatedAt: new Date().toISOString().split('T')[0] };
+    
+    // Update state immediately
     setContracts((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
-        return { ...c, ...updates, updatedAt: new Date().toISOString() };
+        return { ...c, ...updatedWithTime };
       })
     );
+    
+    // Save to SQLite
+    updateContractInDB(id, updatedWithTime).catch(err => console.error(err));
   }, []);
 
   const deleteContract = useCallback((id: string) => {
     setContracts((prev) => prev.filter((c) => c.id !== id));
+    deleteContractFromDB(id).catch(err => console.error(err));
   }, []);
 
   const getContract = useCallback((id: string) => {

@@ -1,9 +1,12 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { JusePackage } from '@/types/package';
 import { generateId } from '@/lib/utils';
-import { loadData, saveData } from '@/lib/storage';
-
-const STORAGE_KEY = 'juse-packages.json';
+import {
+  getPackagesFromDB,
+  insertPackageToDB,
+  updatePackageInDB,
+  deletePackageFromDB
+} from '@/lib/db';
 
 interface PackagesContextValue {
   packages: JusePackage[];
@@ -23,40 +26,45 @@ export function PackagesProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    loadData<JusePackage[]>(STORAGE_KEY, []).then(data => {
+    getPackagesFromDB().then(data => {
       setPackages(data);
+      setIsLoaded(true);
+    }).catch(err => {
+      console.error("Failed to load packages from SQLite", err);
       setIsLoaded(true);
     });
   }, []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      saveData(STORAGE_KEY, packages);
-    }
-  }, [packages, isLoaded]);
 
   const addPackage = useCallback((pkgData: Omit<JusePackage, 'id' | 'createdAt' | 'updatedAt'>): JusePackage => {
     const newPkg: JusePackage = {
       ...pkgData,
       id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
     };
-    setPackages((prev) => [...prev, newPkg]);
+    
+    setPackages((prev) => [newPkg, ...prev]);
+    insertPackageToDB(newPkg).catch(console.error);
+    
     return newPkg;
   }, []);
 
   const updatePackage = useCallback((id: string, updates: Partial<JusePackage>) => {
+    const updatedWithTime = { ...updates, updatedAt: new Date().toISOString().split('T')[0] };
+    
     setPackages((prev) =>
       prev.map((p) => {
         if (p.id !== id) return p;
-        return { ...p, ...updates, updatedAt: new Date().toISOString() };
+        return { ...p, ...updatedWithTime };
       })
     );
+    
+    updatePackageInDB(id, updatedWithTime).catch(console.error);
   }, []);
 
   const deletePackage = useCallback((id: string) => {
     setPackages((prev) => prev.filter((p) => p.id !== id));
+    deletePackageFromDB(id).catch(console.error);
   }, []);
 
   const getPackage = useCallback((id: string) => {

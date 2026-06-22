@@ -3,7 +3,7 @@ import { usePackages } from "@/hooks/use-packages";
 import type { JuseContract } from "@/types/contract";
 import { generarContratoPDF, generarReciboPDF } from "@/utils/pdfGenerator";
 import { sileo } from "sileo";
-import { Download, Edit2, Eye, FileText, Plus, Trash2, FileSignature, ArrowUpDown, ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { Download, Edit2, Eye, FileText, Plus, Trash2, FileSignature, ArrowUpDown, ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Database } from "lucide-react";
 import { useState, useMemo } from "react";
 import {
   useReactTable,
@@ -13,6 +13,7 @@ import {
   flexRender,
   type SortingState,
 } from '@tanstack/react-table';
+import { migrateFromJSON } from "@/lib/db";
 import {
   Select,
   SelectContent,
@@ -61,7 +62,7 @@ export function ContractsTable() {
   const [fromDateStr, setFromDateStr] = useState('');
   const [toDateStr, setToDateStr] = useState('');
 
-  const parseDate = (val: string) => {
+  const parseDateForFilter = (val: string) => {
     if (!val) return 0;
     if (val.includes('-')) return new Date(val).getTime();
     const parts = val.split('/');
@@ -73,7 +74,7 @@ export function ContractsTable() {
     return contracts.filter((contract) => {
       if (!fromDateStr && !toDateStr) return true;
       
-      const time = parseDate(contract.fechaEvento);
+      const time = parseDateForFilter(contract.fechaEvento);
       if (!time) return false;
       
       const eventDate = new Date(time);
@@ -115,11 +116,6 @@ export function ContractsTable() {
     {
       accessorKey: 'fechaEvento',
       header: 'Fecha Evento',
-      sortingFn: (rowA: any, rowB: any, columnId: string) => {
-        const dateA = parseDate(rowA.getValue(columnId));
-        const dateB = parseDate(rowB.getValue(columnId));
-        return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
-      },
       cell: (info: any) => (
         <>
           {info.getValue()}
@@ -179,19 +175,34 @@ export function ContractsTable() {
     }
   ], []);
 
+  const [pagination, setPagination] = useState(() => {
+    const saved = localStorage.getItem('contractsPageSize');
+    return {
+      pageIndex: 0,
+      pageSize: saved ? parseInt(saved, 10) : 10,
+    };
+  });
+
   const table = useReactTable({
     data: filteredContracts,
     columns,
-    state: { sorting },
+    state: { 
+      sorting,
+      pagination,
+    },
     onSortingChange: setSorting,
+    onPaginationChange: (updater) => {
+      setPagination((old) => {
+        const newPagination = typeof updater === 'function' ? updater(old) : updater;
+        if (old.pageSize !== newPagination.pageSize) {
+          localStorage.setItem('contractsPageSize', newPagination.pageSize.toString());
+        }
+        return newPagination;
+      });
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
   });
 
   const confirmDelete = () => {

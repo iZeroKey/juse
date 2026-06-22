@@ -48,13 +48,13 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
   const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm<ContractFormValues>({
     defaultValues: {
       contratoNumber: '',
-      fechaEmision: format(new Date(), 'dd/MM/yyyy'),
+      fechaEmision: format(new Date(), 'yyyy-MM-dd'),
       clienteNombre: '',
       clienteDni: '',
       clienteDireccion: '',
       clienteCelular: '',
       tipoEvento: EVENT_TYPES[0],
-      fechaEvento: format(new Date(), 'dd/MM/yyyy'),
+      fechaEvento: format(new Date(), 'yyyy-MM-dd'),
       horaEvento: '16:00',
       paqueteId: '',
       paqueteNombre: '',
@@ -75,13 +75,13 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
       if (initialData) {
         reset({
           contratoNumber: initialData.contratoNumber,
-          fechaEmision: initialData.fechaEmision,
+          fechaEmision: initialData.fechaEmision, // Already yyyy-MM-dd from SQLite
           clienteNombre: initialData.clienteNombre,
           clienteDni: initialData.clienteDni,
           clienteDireccion: initialData.clienteDireccion,
           clienteCelular: initialData.clienteCelular,
           tipoEvento: initialData.tipoEvento,
-          fechaEvento: initialData.fechaEvento ? format(parseISO(initialData.fechaEvento), 'dd/MM/yyyy') : '',
+          fechaEvento: initialData.fechaEvento, // Already yyyy-MM-dd from SQLite
           horaEvento: initialData.horaEvento,
           paqueteId: initialData?.paqueteId || '',
           paqueteNombre: initialData?.paqueteNombre || '',
@@ -98,13 +98,13 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
       } else {
         reset({
           contratoNumber: generateContractNumber(contracts, new Date().getFullYear()),
-          fechaEmision: format(new Date(), 'dd/MM/yyyy'),
+          fechaEmision: format(new Date(), 'yyyy-MM-dd'),
           clienteNombre: '',
           clienteDni: '',
           clienteDireccion: '',
           clienteCelular: '',
           tipoEvento: '',
-          fechaEvento: format(new Date(), 'dd/MM/yyyy'),
+          fechaEvento: format(new Date(), 'yyyy-MM-dd'),
           horaEvento: '16:00',
           paqueteNombre: '',
           paqueteDetalle: '',
@@ -132,9 +132,6 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
     const aCuentaNum = Number(parseFloat(data.aCuenta || '0').toFixed(2));
     const saldoNum = Number((precioNum - aCuentaNum).toFixed(2));
 
-    const parsedFechaEvento = parse(data.fechaEvento, 'dd/MM/yyyy', new Date());
-    const isoFechaEvento = isValid(parsedFechaEvento) ? format(parsedFechaEvento, 'yyyy-MM-dd') : data.fechaEvento;
-
     const contractData = {
       contratoNumber: data.contratoNumber,
       fechaEmision: data.fechaEmision,
@@ -143,7 +140,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
       clienteDireccion: data.clienteDireccion,
       clienteCelular: data.clienteCelular,
       tipoEvento: data.tipoEvento,
-      fechaEvento: isoFechaEvento,
+      fechaEvento: data.fechaEvento,
       horaEvento: data.horaEvento,
       paqueteNombre: data.paqueteNombre,
       paqueteDetalle: data.paqueteDetalle,
@@ -208,12 +205,10 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                     control={control}
                     rules={{ required: 'Requerido' }}
                     render={({ field }) => {
-                      let isoValue = "";
                       let dateObj = undefined;
                       if (field.value) {
-                        const parsed = parse(field.value, 'dd/MM/yyyy', new Date());
+                        const parsed = parse(field.value, 'yyyy-MM-dd', new Date());
                         if (isValid(parsed)) {
-                           isoValue = format(parsed, 'yyyy-MM-dd');
                            dateObj = parsed;
                         }
                       }
@@ -234,7 +229,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                                 mode="single"
                                 selected={dateObj}
                                 onSelect={(date) => {
-                                  field.onChange(date ? format(date, "dd/MM/yyyy") : "");
+                                  field.onChange(date ? format(date, "yyyy-MM-dd") : "");
                                 }}
                                 locale={es}
                               />
@@ -243,12 +238,9 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                           <Input
                             {...field}
                             type="date"
-                            value={isoValue}
+                            value={field.value}
                             onChange={(e) => {
-                              const val = e.target.value;
-                              if (!val) { field.onChange(""); return; }
-                              const p = parse(val, 'yyyy-MM-dd', new Date());
-                              if (isValid(p)) field.onChange(format(p, "dd/MM/yyyy"));
+                              field.onChange(e.target.value);
                             }}
                             className={cn("pl-10 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0", errors.fechaEmision && "border-red-500 focus-visible:ring-red-500")}
                           />
@@ -319,12 +311,10 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                     control={control}
                     rules={{ required: 'Requerido' }}
                     render={({ field }) => {
-                      let isoValue = "";
                       let dateObj = undefined;
                       if (field.value) {
-                        const parsed = parse(field.value, 'dd/MM/yyyy', new Date());
+                        const parsed = parse(field.value, 'yyyy-MM-dd', new Date());
                         if (isValid(parsed)) {
-                           isoValue = format(parsed, 'yyyy-MM-dd');
                            dateObj = parsed;
                         }
                       }
@@ -345,7 +335,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                                 mode="single"
                                 selected={dateObj}
                                 onSelect={(date) => {
-                                  field.onChange(date ? format(date, "dd/MM/yyyy") : "");
+                                  field.onChange(date ? format(date, "yyyy-MM-dd") : "");
                                 }}
                                 locale={es}
                               />
@@ -354,12 +344,9 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                           <Input
                             {...field}
                             type="date"
-                            value={isoValue}
+                            value={field.value}
                             onChange={(e) => {
-                              const val = e.target.value;
-                              if (!val) { field.onChange(""); return; }
-                              const p = parse(val, 'yyyy-MM-dd', new Date());
-                              if (isValid(p)) field.onChange(format(p, "dd/MM/yyyy"));
+                              field.onChange(e.target.value);
                             }}
                             className={cn("pl-10 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0", errors.fechaEvento && "border-red-500 focus-visible:ring-red-500")}
                           />

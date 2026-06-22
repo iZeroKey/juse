@@ -70,6 +70,13 @@ function SheetContent({
             "inset-x-0 bottom-0 h-auto border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
           className
         )}
+        onInteractOutside={(e) => {
+          const target = e.target as Element;
+          if (target.closest?.('#titlebar') || target.closest?.('[data-slot="context-menu-popup"]')) {
+            e.preventDefault();
+          }
+          if (props.onInteractOutside) props.onInteractOutside(e);
+        }}
         {...props}
       >
         <GlobalContextMenu>

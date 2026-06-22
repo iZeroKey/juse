@@ -182,6 +182,13 @@ export async function generarReciboPDF(
   const url = "/recibo.pdf";
   const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const now = new Date();
+  pdfDoc.setTitle(`Recibo Juse Show - ${data.contratoNumber}`);
+  pdfDoc.setAuthor("Juse Show");
+  pdfDoc.setCreator("Juse Show");
+  pdfDoc.setProducer("Juse Show");
+  pdfDoc.setCreationDate(now);
+  pdfDoc.setModificationDate(now);
 
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -209,7 +216,7 @@ export async function generarReciboPDF(
 
   await injectData(page, injectMap, reciboConfig, fontRegular, fontBold);
 
-  const pdfBytes = await pdfDoc.save();
+  const pdfBytes = await pdfDoc.save({ updateMetadata: false });
   
   if (typeof window !== 'undefined' && window.__TAURI_INTERNALS__) {
     const { writeFile, mkdir } = await import('@tauri-apps/plugin-fs');
@@ -223,7 +230,7 @@ export async function generarReciboPDF(
         juseDir = customPath;
       } else {
         const baseDir = await downloadDir();
-        juseDir = await join(baseDir, 'Juse');
+        juseDir = await join(baseDir, 'Juse Show');
       }
       
       try {
@@ -286,6 +293,13 @@ export async function generarContratoPDF(
   const url = "/contrato.pdf";
   const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer());
   const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  const now = new Date();
+  pdfDoc.setTitle(`Contrato Juse Show - ${data.contratoNumber}`);
+  pdfDoc.setAuthor("Juse Show");
+  pdfDoc.setCreator("Juse Show");
+  pdfDoc.setProducer("Juse Show");
+  pdfDoc.setCreationDate(now);
+  pdfDoc.setModificationDate(now);
 
   const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
@@ -331,7 +345,7 @@ export async function generarContratoPDF(
 
   await injectData(page, injectMap, contratoConfig, fontRegular, fontBold);
 
-  const pdfBytes = await pdfDoc.save();
+  const pdfBytes = await pdfDoc.save({ updateMetadata: false });
   
   if (typeof window !== 'undefined' && window.__TAURI_INTERNALS__) {
     const { writeFile, mkdir } = await import('@tauri-apps/plugin-fs');
@@ -345,7 +359,7 @@ export async function generarContratoPDF(
         juseDir = customPath;
       } else {
         const baseDir = await downloadDir();
-        juseDir = await join(baseDir, 'Juse');
+        juseDir = await join(baseDir, 'Juse Show');
       }
       
       try {

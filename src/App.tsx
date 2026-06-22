@@ -107,7 +107,7 @@ export default function App() {
           </NavDrawer>
 
           <div className="select-none font-display text-lg font-bold tracking-tight flex items-center shrink-0">
-            <img src="/juse.png" alt="Juse Logo" className="h-6 md:h-7 object-contain" />
+            <img src="/juse.png" alt="Juse Show Logo" className="h-6 md:h-7 object-contain" />
           </div>
 
           <div className="mx-0.5 h-5 w-px bg-border-strong md:mx-1 shrink-0" aria-hidden="true" />

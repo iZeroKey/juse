@@ -1,9 +1,12 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { JuseEvent } from '@/types/event';
 import { generateId, calculateDuration } from '@/lib/utils';
-import { loadData, saveData } from '@/lib/storage';
-
-const STORAGE_KEY = 'juse-events.json';
+import {
+  getEventsFromDB,
+  insertEventToDB,
+  updateEventInDB,
+  deleteEventFromDB
+} from '@/lib/db';
 
 interface EventsContextValue {
   events: JuseEvent[];
@@ -29,17 +32,14 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    loadData<JuseEvent[]>(STORAGE_KEY, []).then(data => {
+    getEventsFromDB().then(data => {
       setEvents(data);
+      setIsLoaded(true);
+    }).catch(err => {
+      console.error("Failed to load events from SQLite", err);
       setIsLoaded(true);
     });
   }, []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      saveData(STORAGE_KEY, events);
-    }
-  }, [events, isLoaded]);
 
   const addEvent = useCallback((eventData: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>): JuseEvent => {
     const id = generateId();
@@ -50,26 +50,37 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
       ...eventData,
       duration,
       id: id,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
     };
+    
     setEvents((prev) => [...prev, newEvent]);
+    insertEventToDB(newEvent).catch(console.error);
+    
     return newEvent;
   }, []);
 
   const updateEvent = useCallback((id: string, updates: Partial<JuseEvent>) => {
+    let updatedEventMerged: JuseEvent | undefined = undefined;
+
     setEvents((prev) =>
       prev.map((e) => {
         if (e.id !== id) return e;
-        const merged = { ...e, ...updates, updatedAt: new Date().toISOString() };
+        const merged = { ...e, ...updates, updatedAt: new Date().toISOString().split('T')[0] };
         const computed = enrichEvent(merged);
-        return { ...merged, ...computed };
+        updatedEventMerged = { ...merged, ...computed };
+        return updatedEventMerged;
       })
     );
+    
+    if (updatedEventMerged) {
+      updateEventInDB(id, updatedEventMerged).catch(console.error);
+    }
   }, []);
 
   const deleteEvent = useCallback((id: string) => {
     setEvents((prev) => prev.filter((e) => e.id !== id));
+    deleteEventFromDB(id).catch(console.error);
   }, []);
 
   const getEvent = useCallback((id: string) => {

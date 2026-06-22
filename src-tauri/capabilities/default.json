@@ -10,6 +10,10 @@
     "dialog:default",
     "fs:default",
     "shell:default",
+    "sql:default",
+    "sql:allow-load",
+    "sql:allow-execute",
+    "sql:allow-select",
     "core:window:allow-close",
     "core:window:allow-minimize",
     "core:window:allow-maximize",
@@ -19,7 +23,7 @@
     "fs:allow-app-write",
     {
       "identifier": "shell:allow-open",
-      "allow": [{ "url": "^.*$", "path": "^.*$", "open": "^.*$" }]
+      "allow": [".*"]
     },
     "fs:allow-download-write",
     "fs:allow-download-read",

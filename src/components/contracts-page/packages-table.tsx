@@ -73,19 +73,34 @@ export function PackagesTable() {
     }
   ], []);
 
+  const [pagination, setPagination] = useState(() => {
+    const saved = localStorage.getItem('packagesPageSize');
+    return {
+      pageIndex: 0,
+      pageSize: saved ? parseInt(saved, 10) : 10,
+    };
+  });
+
   const table = useReactTable({
     data: packages,
     columns,
-    state: { sorting },
+    state: { 
+      sorting,
+      pagination,
+    },
     onSortingChange: setSorting,
+    onPaginationChange: (updater) => {
+      setPagination((old) => {
+        const newPagination = typeof updater === 'function' ? updater(old) : updater;
+        if (old.pageSize !== newPagination.pageSize) {
+          localStorage.setItem('packagesPageSize', newPagination.pageSize.toString());
+        }
+        return newPagination;
+      });
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
   });
 
   const confirmDelete = () => {
@@ -125,24 +140,23 @@ export function PackagesTable() {
         <div className="overflow-auto flex-1">
           <table className="w-full text-left text-sm text-muted-foreground">
             <thead className="bg-muted text-foreground text-xs uppercase font-semibold sticky top-0 border-b border-border z-10">
-              <tr>
-                {table.getHeaderGroups().map(headerGroup => (
-                  <tr key={headerGroup.id} className="contents">
-                    {headerGroup.headers.map(header => {
-                      const meta = header.column.columnDef.meta as any;
-                      return (
-                        <th
-                          key={header.id}
-                          onClick={header.column.getToggleSortingHandler()}
-                          className={`px-4 py-3 whitespace-nowrap cursor-pointer hover:bg-muted-foreground/10 transition-colors select-none ${meta?.className || ''}`}
-                        >
-                          <div className={`flex items-center gap-1.5 ${meta?.className?.includes('justify-end') ? 'justify-end' : ''}`}>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            <div className="flex flex-col items-center justify-center opacity-50 relative w-3 h-3 ml-1">
-                              <ArrowUpDown 
-                                className={`w-3 h-3 absolute transition-all duration-300 ${
-                                  header.column.getIsSorted() ? "opacity-0 scale-50" : "opacity-100 scale-100"
-                                }`} 
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => {
+                    const meta = header.column.columnDef.meta as any;
+                    return (
+                      <th
+                        key={header.id}
+                        onClick={header.column.getToggleSortingHandler()}
+                        className={`px-4 py-3 whitespace-nowrap cursor-pointer hover:bg-muted-foreground/10 transition-colors select-none ${meta?.className || ''}`}
+                      >
+                        <div className={`flex items-center gap-1.5 ${meta?.className?.includes('justify-end') ? 'justify-end' : ''}`}>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          <div className="flex flex-col items-center justify-center opacity-50 relative w-3 h-3 ml-1">
+                            <ArrowUpDown 
+                              className={`w-3 h-3 absolute transition-all duration-300 ${
+                                header.column.getIsSorted() ? "opacity-0 scale-50" : "opacity-100 scale-100"
+                              }`} 
                               />
                               <ArrowDown 
                                 className={`w-3 h-3 absolute transition-all duration-300 ${
@@ -159,7 +173,6 @@ export function PackagesTable() {
                     <th className="px-4 py-3 whitespace-nowrap text-right">Acciones</th>
                   </tr>
                 ))}
-              </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {table.getRowModel().rows.length === 0 ? (
@@ -300,8 +313,7 @@ export function PackagesTable() {
           <DialogHeader>
             <DialogTitle>Eliminar paquete</DialogTitle>
             <DialogDescription>
-                ¿Estás seguro de que deseas eliminar el paquete "{packageToDelete?.nombre}"? Esta acción no se
-              puede deshacer.
+              ¿Estás seguro de que deseas eliminar el paquete "{packageToDelete?.nroPaquete}"? Esta acción no se puede deshacer.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-3 sm:gap-3 mt-2">

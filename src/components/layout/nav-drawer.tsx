@@ -1,6 +1,8 @@
-import { Menu, Calendar, FileText, X, FolderOpen, Moon } from 'lucide-react';
+import { useState } from 'react';
+import { Menu, Calendar, FileText, X, FolderOpen, Moon, Database } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/components/theme-provider';
+import { DataManagementModal } from './data-management-modal';
 import {
   Sheet,
   SheetContent,
@@ -19,6 +21,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const currentView = location.pathname === '/gestion' ? 'contracts' : 'calendar';
+  const [dataModalOpen, setDataModalOpen] = useState(false);
 
   const handleNavigation = (path: string) => {
     // Delay view change to allow sheet close animation to complete
@@ -110,6 +113,13 @@ export function NavDrawer({ children }: NavDrawerProps) {
               Cambiar Tema
             </button>
             <button 
+              onClick={() => setDataModalOpen(true)}
+              className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
+            >
+              <Database className="size-5 mr-3" />
+              Importar / Exportar
+            </button>
+            <button 
               onClick={handleDownloadPath}
               className="flex items-center w-full text-left py-2.5 px-3 rounded-md transition-colors text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
             >
@@ -119,6 +129,7 @@ export function NavDrawer({ children }: NavDrawerProps) {
           </div>
         </div>
       </SheetContent>
+      <DataManagementModal open={dataModalOpen} onOpenChange={setDataModalOpen} />
     </Sheet>
   );
 }

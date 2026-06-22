@@ -124,7 +124,7 @@ export function CalendarHeader({
         </NavDrawer>
 
         <div className="select-none font-display text-lg font-bold tracking-tight flex items-center shrink-0">
-          <img src="/juse.png" alt="Juse Logo" className="h-6 md:h-7 object-contain" />
+          <img src="/juse.png" alt="Juse Show Logo" className="h-6 md:h-7 object-contain" />
         </div>
 
         {/* Separator */}
