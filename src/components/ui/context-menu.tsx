@@ -61,7 +61,12 @@ export function ContextMenuPopup({
             className,
           )}
           data-slot='context-menu-popup'
-          {...props}>
+          {...props}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            props.onContextMenu?.(e);
+          }}>
           <div className='max-h-(--available-height) w-full overflow-y-auto p-1'>
             {children}
           </div>
