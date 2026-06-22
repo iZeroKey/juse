@@ -1,5 +1,20 @@
 import { useState, useMemo } from 'react';
-import { Plus, Edit2, Trash2, ArrowUpDown, ArrowDown, ArrowUp } from 'lucide-react';
+import { Plus, Edit2, Trash2, ArrowUpDown, ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+  flexRender,
+  type SortingState,
+} from '@tanstack/react-table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { usePackages } from '@/hooks/use-packages';
 import { ContextMenu, ContextMenuTrigger, ContextMenuPopup, ContextMenuItem, ContextMenuSeparator, ContextMenuGroup, ContextMenuGroupLabel } from "@/components/ui/context-menu";
 import type { JusePackage } from '@/types/package';
@@ -20,34 +35,58 @@ export function PackagesTable() {
   const [editingPackage, setEditingPackage] = useState<JusePackage | undefined>(undefined);
   const [packageToDelete, setPackageToDelete] = useState<JusePackage | null>(null);
 
-  type SortColumn = 'nroPaquete' | 'especificaciones' | 'precio' | 'movilidad' | 'tipoEvento';
-  const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sorting, setSorting] = useState<SortingState>([]);
 
-  const handleSort = (column: SortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
+  const columns = useMemo(() => [
+    {
+      accessorKey: 'nroPaquete',
+      header: 'Nro Paquete',
+      cell: (info: any) => <div className="font-medium text-foreground whitespace-nowrap">{info.getValue()}</div>
+    },
+    {
+      accessorKey: 'especificaciones',
+      header: 'Especificaciones',
+      cell: (info: any) => <div className="text-xs leading-relaxed whitespace-normal">{String(info.getValue() || '')}</div>,
+      meta: { className: 'min-w-[300px]' }
+    },
+    {
+      accessorKey: 'precio',
+      header: 'Precio (S/)',
+      cell: (info: any) => <div className="text-right font-medium whitespace-nowrap">{Number(info.getValue() || 0).toFixed(2)}</div>,
+      meta: { className: 'text-right justify-end' }
+    },
+    {
+      accessorKey: 'movilidad',
+      header: 'Movilidad',
+      cell: (info: any) => <div className="whitespace-nowrap text-xs">{info.getValue()}</div>
+    },
+    {
+      accessorKey: 'tipoEvento',
+      header: 'Tipo Evento',
+      cell: (info: any) => (
+        <div className="whitespace-nowrap">
+          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
+            {info.getValue()}
+          </span>
+        </div>
+      )
     }
-  };
+  ], []);
 
-  const sortedPackages = useMemo(() => {
-    return [...packages].sort((a, b) => {
-      if (!sortColumn) return 0;
-      
-      let aVal: any = a[sortColumn as keyof JusePackage];
-      let bVal: any = b[sortColumn as keyof JusePackage];
-      
-      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-      
-      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [packages, sortColumn, sortDirection]);
+  const table = useReactTable({
+    data: packages,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
 
   const confirmDelete = () => {
     if (packageToDelete) {
@@ -87,100 +126,158 @@ export function PackagesTable() {
           <table className="w-full text-left text-sm text-muted-foreground">
             <thead className="bg-muted text-foreground text-xs uppercase font-semibold sticky top-0 border-b border-border z-10">
               <tr>
-                {[
-                  { key: 'nroPaquete', label: 'Nro Paquete' },
-                  { key: 'especificaciones', label: 'Especificaciones', className: 'min-w-[300px]' },
-                  { key: 'precio', label: 'Precio (S/)', className: 'text-right justify-end' },
-                  { key: 'movilidad', label: 'Movilidad' },
-                  { key: 'tipoEvento', label: 'Tipo Evento' }
-                ].map((col) => (
-                  <th
-                    key={col.key}
-                    onClick={() => handleSort(col.key as SortColumn)}
-                    className={`px-4 py-3 whitespace-nowrap cursor-pointer hover:bg-muted-foreground/10 transition-colors select-none ${col.className || ''}`}
-                  >
-                    <div className={`flex items-center gap-1.5 ${col.className?.includes('justify-end') ? 'justify-end' : ''}`}>
-                      {col.label}
-                      <div className="flex flex-col items-center justify-center opacity-50 relative w-3 h-3 ml-1">
-                        <ArrowUpDown 
-                          className={`w-3 h-3 absolute transition-all duration-300 ${
-                            sortColumn === col.key ? "opacity-0 scale-50" : "opacity-100 scale-100"
-                          }`} 
-                        />
-                        <ArrowDown 
-                          className={`w-3 h-3 absolute transition-all duration-300 ${
-                            sortColumn !== col.key ? "opacity-0 scale-50" : "opacity-100 scale-100"
-                          } ${
-                            sortColumn === col.key && sortDirection === 'asc' ? "rotate-180" : "rotate-0"
-                          }`} 
-                        />
-                      </div>
-                    </div>
-                  </th>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id} className="contents">
+                    {headerGroup.headers.map(header => {
+                      const meta = header.column.columnDef.meta as any;
+                      return (
+                        <th
+                          key={header.id}
+                          onClick={header.column.getToggleSortingHandler()}
+                          className={`px-4 py-3 whitespace-nowrap cursor-pointer hover:bg-muted-foreground/10 transition-colors select-none ${meta?.className || ''}`}
+                        >
+                          <div className={`flex items-center gap-1.5 ${meta?.className?.includes('justify-end') ? 'justify-end' : ''}`}>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            <div className="flex flex-col items-center justify-center opacity-50 relative w-3 h-3 ml-1">
+                              <ArrowUpDown 
+                                className={`w-3 h-3 absolute transition-all duration-300 ${
+                                  header.column.getIsSorted() ? "opacity-0 scale-50" : "opacity-100 scale-100"
+                                }`} 
+                              />
+                              <ArrowDown 
+                                className={`w-3 h-3 absolute transition-all duration-300 ${
+                                  !header.column.getIsSorted() ? "opacity-0 scale-50" : "opacity-100 scale-100"
+                                } ${
+                                  header.column.getIsSorted() === 'asc' ? "rotate-180" : "rotate-0"
+                                }`} 
+                              />
+                            </div>
+                          </div>
+                        </th>
+                      );
+                    })}
+                    <th className="px-4 py-3 whitespace-nowrap text-right">Acciones</th>
+                  </tr>
                 ))}
-                <th className="px-4 py-3 whitespace-nowrap text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {packages.length === 0 ? (
+              {table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                     No hay paquetes registrados. Crea uno nuevo para comenzar.
                   </td>
                 </tr>
               ) : (
-                sortedPackages.map((pkg) => (
-                  <ContextMenu key={pkg.id}>
-                    <ContextMenuTrigger render={<tr className="hover:bg-muted/50 transition-colors" />}>
-                      <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">{pkg.nroPaquete}</td>
-                      <td className="px-4 py-3 text-xs leading-relaxed">
-                        {String(pkg.especificaciones || '')}
-                      </td>
-                      <td className="px-4 py-3 text-right font-medium whitespace-nowrap">{pkg.precio.toFixed(2)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-xs">{pkg.movilidad}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-foreground">
-                          {pkg.tipoEvento}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 whitespace-nowrap text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => handleEdit(pkg)}
-                            className="p-1.5 text-muted-foreground hover:text-[var(--color-juse-blue)] hover:bg-[var(--color-juse-blue-soft)] rounded-md transition-colors cursor-pointer"
-                            title="Editar"
-                          >
-                            <Edit2 className="size-4" />
-                          </button>
-                          <button
-                            onClick={() => setPackageToDelete(pkg)}
-                            className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="size-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </ContextMenuTrigger>
-                    <ContextMenuPopup>
-                      <ContextMenuGroup>
-                        <ContextMenuGroupLabel>Paquete</ContextMenuGroupLabel>
-                        <ContextMenuItem onClick={() => handleEdit(pkg)} className="cursor-pointer">
-                          <Edit2 className="mr-2 size-4" /> Editar
-                        </ContextMenuItem>
-                        <ContextMenuSeparator />
-                        <ContextMenuItem onClick={() => setPackageToDelete(pkg)} className="text-red-600 cursor-pointer">
-                          <Trash2 className="mr-2 size-4" /> Eliminar
-                        </ContextMenuItem>
-                      </ContextMenuGroup>
-                    </ContextMenuPopup>
-                  </ContextMenu>
-                ))
+                table.getRowModel().rows.map((row) => {
+                  const pkg = row.original;
+                  return (
+                    <ContextMenu key={pkg.id}>
+                      <ContextMenuTrigger render={<tr className="hover:bg-muted/50 transition-colors" />}>
+                        {row.getVisibleCells().map(cell => {
+                          const meta = cell.column.columnDef.meta as any;
+                          return (
+                            <td key={cell.id} className={`px-4 py-3 ${meta?.className?.includes('justify-end') ? 'text-right' : ''}`}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </td>
+                          );
+                        })}
+                        <td className="px-4 py-3 whitespace-nowrap text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleEdit(pkg)}
+                              className="p-1.5 text-muted-foreground hover:text-[var(--color-juse-blue)] hover:bg-[var(--color-juse-blue-soft)] rounded-md transition-colors cursor-pointer"
+                              title="Editar"
+                            >
+                              <Edit2 className="size-4" />
+                            </button>
+                            <button
+                              onClick={() => setPackageToDelete(pkg)}
+                              className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </ContextMenuTrigger>
+                      <ContextMenuPopup>
+                        <ContextMenuGroup>
+                          <ContextMenuGroupLabel>Paquete</ContextMenuGroupLabel>
+                          <ContextMenuItem onClick={() => handleEdit(pkg)} className="cursor-pointer">
+                            <Edit2 className="mr-2 size-4" /> Editar
+                          </ContextMenuItem>
+                          <ContextMenuSeparator />
+                          <ContextMenuItem onClick={() => setPackageToDelete(pkg)} className="text-red-600 cursor-pointer">
+                            <Trash2 className="mr-2 size-4" /> Eliminar
+                          </ContextMenuItem>
+                        </ContextMenuGroup>
+                      </ContextMenuPopup>
+                    </ContextMenu>
+                  );
+                })
               )}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/30">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Mostrar</span>
+              <Select
+                value={String(table.getState().pagination.pageSize)}
+                onValueChange={(value) => table.setPageSize(Number(value))}
+              >
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map(pageSize => (
+                    <SelectItem key={pageSize} value={String(pageSize)}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span>filas</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                Página <strong className="text-foreground">{table.getState().pagination.pageIndex + 1}</strong> de <strong className="text-foreground">{table.getPageCount()}</strong>
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => table.setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </button>
+                <button
+                  className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <button
+                  className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
       </ContextMenuTrigger>
       <ContextMenuPopup>
         <ContextMenuGroup>

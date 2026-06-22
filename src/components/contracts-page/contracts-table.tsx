@@ -3,8 +3,23 @@ import { usePackages } from "@/hooks/use-packages";
 import type { JuseContract } from "@/types/contract";
 import { generarContratoPDF, generarReciboPDF } from "@/utils/pdfGenerator";
 import { sileo } from "sileo";
-import { Download, Edit2, Eye, FileText, Plus, Trash2, FileSignature, ArrowUpDown, ArrowDown, ArrowUp } from "lucide-react";
+import { Download, Edit2, Eye, FileText, Plus, Trash2, FileSignature, ArrowUpDown, ArrowDown, ArrowUp, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useState, useMemo } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+  flexRender,
+  type SortingState,
+} from '@tanstack/react-table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ContractClientSheet } from "./contract-client-sheet";
 import { ContractFormSheet } from "./contract-form-sheet";
 import { ContractViewSheet } from "./contract-view-sheet";
@@ -42,20 +57,9 @@ export function ContractsTable() {
   >(undefined);
   const [contractToDelete, setContractToDelete] = useState<JuseContract | null>(null);
   
-  type SortColumn = 'contratoNumber' | 'fechaEvento' | 'clienteNombre' | 'clienteCelular' | 'clienteDni' | 'clienteDireccion' | 'tipoEvento' | 'paqueteNombre' | 'precio' | 'aCuenta' | 'saldo';
-  const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [fromDateStr, setFromDateStr] = useState('');
   const [toDateStr, setToDateStr] = useState('');
-
-  const handleSort = (column: SortColumn) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortColumn(column);
-      setSortDirection('asc');
-    }
-  };
 
   const parseDate = (val: string) => {
     if (!val) return 0;
@@ -97,32 +101,98 @@ export function ContractsTable() {
     });
   }, [contracts, fromDateStr, toDateStr]);
 
-  const sortedContracts = useMemo(() => {
-    return [...filteredContracts].sort((a, b) => {
-      if (!sortColumn) return 0;
-      
-      let aVal: any = a[sortColumn as keyof JuseContract];
-      let bVal: any = b[sortColumn as keyof JuseContract];
-      
-      if (sortColumn === 'fechaEvento') {
-        aVal = parseDate(aVal);
-        bVal = parseDate(bVal);
-      } else if (sortColumn === 'paqueteNombre') {
-        const pA = a.paqueteNombre || '';
-        const pB = b.paqueteNombre || '';
-        if (pA < pB) return sortDirection === 'asc' ? -1 : 1;
-        if (pA > pB) return sortDirection === 'asc' ? 1 : -1;
-        return 0;
-      } else {
-        if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-        if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-      }
-      
-      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [filteredContracts, sortColumn, sortDirection]);
+  const columns = useMemo(() => [
+    {
+      accessorKey: 'contratoNumber',
+      header: 'Contrato',
+      cell: (info: any) => (
+        <>
+          <div className='font-semibold text-foreground'>{info.getValue()}</div>
+          <div className='text-xs text-muted-foreground'>{info.row.original.fechaEmision}</div>
+        </>
+      )
+    },
+    {
+      accessorKey: 'fechaEvento',
+      header: 'Fecha Evento',
+      sortingFn: (rowA: any, rowB: any, columnId: string) => {
+        const dateA = parseDate(rowA.getValue(columnId));
+        const dateB = parseDate(rowB.getValue(columnId));
+        return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+      },
+      cell: (info: any) => (
+        <>
+          {info.getValue()}
+          <span className='block text-xs text-muted-foreground'>{info.row.original.horaEvento}</span>
+        </>
+      )
+    },
+    {
+      accessorKey: 'clienteNombre',
+      header: 'Cliente',
+      cell: (info: any) => <div className='font-medium text-foreground'>{info.getValue()}</div>,
+      meta: { className: 'min-w-[200px]' }
+    },
+    {
+      accessorKey: 'clienteCelular',
+      header: 'Teléfono',
+      cell: (info: any) => <div className='text-muted-foreground'>{formatPhoneNumber(info.getValue()) || "-"}</div>
+    },
+    {
+      accessorKey: 'clienteDni',
+      header: 'DNI',
+      cell: (info: any) => <div className='text-muted-foreground'>{info.getValue() || "-"}</div>
+    },
+    {
+      accessorKey: 'clienteDireccion',
+      header: 'Ubicación',
+      cell: (info: any) => <div className='text-xs text-muted-foreground whitespace-normal min-w-[200px]'>{info.getValue() || "-"}</div>,
+      meta: { className: 'min-w-[200px]' }
+    },
+    {
+      accessorKey: 'tipoEvento',
+      header: 'Tipo Evento',
+      cell: (info: any) => <div className='text-foreground font-medium'>{info.getValue()}</div>
+    },
+    {
+      accessorKey: 'paqueteNombre',
+      header: 'Paquete',
+      cell: (info: any) => <div className='text-foreground font-medium'>{info.getValue() || "Sin Nombre"}</div>
+    },
+    {
+      accessorKey: 'precio',
+      header: 'Precio',
+      cell: (info: any) => <div className='font-medium whitespace-nowrap'>S/ {Number(info.getValue() || 0).toFixed(2)}</div>,
+      meta: { className: 'text-right justify-end' }
+    },
+    {
+      accessorKey: 'aCuenta',
+      header: 'A Cuenta',
+      cell: (info: any) => <div className='font-medium whitespace-nowrap'>S/ {Number(info.getValue() || 0).toFixed(2)}</div>,
+      meta: { className: 'text-right justify-end' }
+    },
+    {
+      accessorKey: 'saldo',
+      header: 'Saldo',
+      cell: (info: any) => <div className='font-medium whitespace-nowrap text-[var(--color-juse-red)]'>S/ {Number(info.getValue() || 0).toFixed(2)}</div>,
+      meta: { className: 'text-right justify-end' }
+    }
+  ], []);
+
+  const table = useReactTable({
+    data: filteredContracts,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 10,
+      },
+    },
+  });
 
   const confirmDelete = () => {
     if (contractToDelete) {
@@ -238,88 +308,61 @@ export function ContractsTable() {
           <div className='overflow-auto flex-1'>
             <table className='w-full text-left text-sm text-muted-foreground'>
               <thead className='bg-muted text-foreground text-xs uppercase font-semibold sticky top-0 border-b border-border z-10'>
-                <tr>
-                  {[
-                    { key: 'contratoNumber', label: 'Contrato' },
-                    { key: 'fechaEvento', label: 'Fecha Evento' },
-                    { key: 'clienteNombre', label: 'Cliente', className: 'min-w-[200px]' },
-                    { key: 'clienteCelular', label: 'Teléfono' },
-                    { key: 'clienteDni', label: 'DNI' },
-                    { key: 'clienteDireccion', label: 'Ubicación', className: 'min-w-[200px]' },
-                    { key: 'tipoEvento', label: 'Tipo Evento' },
-                    { key: 'paqueteNombre', label: 'Paquete' },
-                    { key: 'precio', label: 'Precio', className: 'text-right justify-end' },
-                    { key: 'aCuenta', label: 'A Cuenta', className: 'text-right justify-end' },
-                    { key: 'saldo', label: 'Saldo', className: 'text-right justify-end' },
-                  ].map((col) => (
-                    <th
-                      key={col.key}
-                      onClick={() => handleSort(col.key as SortColumn)}
-                      className={`px-4 py-3 whitespace-nowrap cursor-pointer hover:bg-muted-foreground/10 transition-colors select-none ${col.className || ''}`}
-                    >
-                      <div className={`flex items-center gap-1.5 ${col.className?.includes('justify-end') ? 'justify-end' : ''}`}>
-                        {col.label}
-                        <div className="flex flex-col items-center justify-center opacity-50 relative w-3 h-3 ml-1">
-                          <ArrowUpDown 
-                            className={cn(
-                              "w-3 h-3 absolute transition-all duration-300",
-                              sortColumn === col.key ? "opacity-0 scale-50" : "opacity-100 scale-100"
-                            )} 
-                          />
-                          <ArrowDown 
-                            className={cn(
-                              "w-3 h-3 absolute transition-all duration-300",
-                              sortColumn !== col.key ? "opacity-0 scale-50" : "opacity-100 scale-100",
-                              sortColumn === col.key && sortDirection === 'asc' ? "rotate-180" : "rotate-0"
-                            )} 
-                          />
-                        </div>
-                      </div>
-                    </th>
-                  ))}
-                  <th className='px-4 py-3 whitespace-nowrap text-right'>Acciones</th>
-                </tr>
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id} className="contents">
+                    {headerGroup.headers.map(header => {
+                      const meta = header.column.columnDef.meta as any;
+                      return (
+                        <th
+                          key={header.id}
+                          onClick={header.column.getToggleSortingHandler()}
+                          className={`px-4 py-3 whitespace-nowrap cursor-pointer hover:bg-muted-foreground/10 transition-colors select-none ${meta?.className || ''}`}
+                        >
+                          <div className={`flex items-center gap-1.5 ${meta?.className?.includes('justify-end') ? 'justify-end' : ''}`}>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            <div className="flex flex-col items-center justify-center opacity-50 relative w-3 h-3 ml-1">
+                              <ArrowUpDown 
+                                className={`w-3 h-3 absolute transition-all duration-300 ${
+                                  header.column.getIsSorted() ? "opacity-0 scale-50" : "opacity-100 scale-100"
+                                }`} 
+                              />
+                              <ArrowDown 
+                                className={`w-3 h-3 absolute transition-all duration-300 ${
+                                  !header.column.getIsSorted() ? "opacity-0 scale-50" : "opacity-100 scale-100"
+                                } ${
+                                  header.column.getIsSorted() === 'asc' ? "rotate-180" : "rotate-0"
+                                }`} 
+                              />
+                            </div>
+                          </div>
+                        </th>
+                      );
+                    })}
+                    <th className='px-4 py-3 whitespace-nowrap text-right'>Acciones</th>
+                  </tr>
+                ))}
               </thead>
               <tbody className='divide-y divide-border'>
-                {sortedContracts.length === 0 ? (
+                {table.getRowModel().rows.length === 0 ? (
                   <tr>
                     <td colSpan={12} className='px-4 py-8 text-center text-muted-foreground'>
                       {(fromDateStr || toDateStr) ? 'No hay contratos en este rango de fechas.' : 'No hay contratos registrados. Crea uno nuevo para comenzar.'}
                     </td>
                   </tr>
                 ) : (
-                  sortedContracts.map((contract) => (
+                  table.getRowModel().rows.map((row) => {
+                    const contract = row.original;
+                    return (
                       <ContextMenu key={contract.id}>
                         <ContextMenuTrigger render={<tr className='hover:bg-muted/50 transition-colors' />}>
-                          <td className='px-4 py-3 whitespace-nowrap'>
-                            <div className='font-semibold text-foreground'>{contract.contratoNumber}</div>
-                            <div className='text-xs text-muted-foreground'>{contract.fechaEmision}</div>
-                          </td>
-                          <td className='px-4 py-3 whitespace-nowrap'>
-                            {contract.fechaEvento}
-                            <span className='block text-xs text-muted-foreground'>{contract.horaEvento}</span>
-                          </td>
-                          <td className='px-4 py-3'>
-                            <div className='font-medium text-foreground'>{contract.clienteNombre}</div>
-                          </td>
-                          <td className='px-4 py-3 whitespace-nowrap text-muted-foreground'>
-                            {formatPhoneNumber(contract.clienteCelular) || "-"}
-                          </td>
-                          <td className='px-4 py-3 whitespace-nowrap text-muted-foreground'>
-                            {contract.clienteDni || "-"}
-                          </td>
-                          <td className='px-4 py-3 text-xs text-muted-foreground whitespace-normal min-w-[200px]'>
-                            {contract.clienteDireccion || "-"}
-                          </td>
-                          <td className='px-4 py-3 whitespace-nowrap text-foreground font-medium'>
-                            {contract.tipoEvento}
-                          </td>
-                          <td className='px-4 py-3 whitespace-nowrap text-foreground font-medium'>
-                            {contract.paqueteNombre || "Sin Nombre"}
-                          </td>
-                          <td className='px-4 py-3 text-right font-medium whitespace-nowrap'>S/ {contract.precio.toFixed(2)}</td>
-                          <td className='px-4 py-3 text-right font-medium whitespace-nowrap'>S/ {contract.aCuenta.toFixed(2)}</td>
-                          <td className='px-4 py-3 text-right font-medium whitespace-nowrap text-[var(--color-juse-red)]'>S/ {contract.saldo.toFixed(2)}</td>
+                          {row.getVisibleCells().map(cell => {
+                            const meta = cell.column.columnDef.meta as any;
+                            return (
+                              <td key={cell.id} className={`px-4 py-3 whitespace-nowrap ${meta?.className?.includes('justify-end') ? 'text-right' : ''}`}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </td>
+                            );
+                          })}
                           <td className='px-4 py-3 whitespace-nowrap text-right'>
                             <div className='flex items-center justify-end gap-1'>
                               <button onClick={() => setViewingContract(contract)} className='p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors cursor-pointer' title='Visualizar'><Eye className='size-4' /></button>
@@ -353,10 +396,68 @@ export function ContractsTable() {
                         </ContextMenuGroup>
                         </ContextMenuPopup>
                       </ContextMenu>
-                    ))
+                    );
+                  })
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-muted/30">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Mostrar</span>
+              <Select
+                value={String(table.getState().pagination.pageSize)}
+                onValueChange={(value) => table.setPageSize(Number(value))}
+              >
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map(pageSize => (
+                    <SelectItem key={pageSize} value={String(pageSize)}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span>filas</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                Página <strong className="text-foreground">{table.getState().pagination.pageIndex + 1}</strong> de <strong className="text-foreground">{table.getPageCount()}</strong>
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => table.setPageIndex(0)}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </button>
+                <button
+                  className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <button
+                  className="h-8 w-8 p-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  disabled={!table.getCanNextPage()}
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </ContextMenuTrigger>
