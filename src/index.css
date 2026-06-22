@@ -33,7 +33,6 @@
   --color-success: #10b981;
   --color-success-soft: #ecfdf5;
 
-  /* Shadcn UI required backgrounds and borders */
   --color-popover: var(--color-surface);
   --color-popover-foreground: var(--color-text-primary);
   --color-card: var(--color-surface);
@@ -55,13 +54,11 @@
   --ease-juse-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-juse-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --radius-sm: 0.5rem; /* 8px */
-  --radius-md: 0.75rem; /* 12px */
-  --radius-lg: 1rem; /* 16px */
-  --radius-xl: 1.5rem; /* 24px */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
 }
-
-/* ── Base resets ── */
 
 *,
 *::before,
@@ -80,8 +77,6 @@ body {
   color: var(--color-text-primary);
   min-height: 100dvh;
 }
-
-/* ── Scrollbar styling ── */
 
 ::selection {
   background-color: var(--color-accent-muted);
@@ -106,14 +101,10 @@ body {
   background: var(--color-text-muted);
 }
 
-/* ── Hide WebKit native time input icon ── */
-
 input[type="time"]::-webkit-calendar-picker-indicator {
   display: none;
   -webkit-appearance: none;
 }
-
-/* ── Calendar time grid ── */
 
 .time-grid-line {
   border-top: 1px solid var(--color-border);
@@ -145,21 +136,18 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   background-color: var(--color-danger);
 }
 
-/* ── Selection states ── */
-
 ::selection {
   background-color: var(--color-accent-muted);
   color: var(--color-text-primary);
 }
 
-/* ── Sileo Overrides ── */
 [data-sileo-viewport] {
   z-index: 99999 !important;
 }
 
 [data-tauri-drag-region] {
   -webkit-app-region: drag;
-  app-region: drag;
+  shape-margin: drag;
 }
 
 :root {
@@ -200,7 +188,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   --color-destructive-foreground: var(--destructive-foreground);
 }
 
-/* ── Theme Reveal View Transition ── */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -222,7 +209,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   }
 }
 
-/* Disable transitions during view transitions to prevent elements fading */
 html.theme-transitioning,
 html.theme-transitioning *,
 html.theme-transitioning *::before,
@@ -230,13 +216,12 @@ html.theme-transitioning *::after {
   transition: none !important;
 }
 
-/* Hide number spin buttons */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 input[type="number"] {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
-

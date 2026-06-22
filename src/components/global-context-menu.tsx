@@ -1,15 +1,14 @@
-import { useState, useEffect, ReactNode } from "react";
+import { useTheme } from "@/components/theme-provider";
 import {
   ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuPopup,
-  ContextMenuItem,
-  ContextMenuSeparator,
   ContextMenuGroup,
   ContextMenuGroupLabel,
+  ContextMenuItem,
+  ContextMenuPopup,
+  ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Copy, Scissors, Clipboard, RefreshCw, Palette } from "lucide-react";
-import { useTheme } from "@/components/theme-provider";
+import { Clipboard, Copy, Palette, RefreshCw, Scissors } from "lucide-react";
+import { type ReactNode, useEffect, useState } from "react";
 
 interface GlobalContextMenuProps {
   children: ReactNode;
@@ -28,9 +27,10 @@ export function GlobalContextMenu({ children }: GlobalContextMenuProps) {
 
     const handleFocusChange = () => {
       const activeElement = document.activeElement;
-      const isInput = activeElement?.tagName === 'INPUT' || 
-                      activeElement?.tagName === 'TEXTAREA' || 
-                      activeElement?.getAttribute('contenteditable') === 'true';
+      const isInput =
+        activeElement?.tagName === "INPUT" ||
+        activeElement?.tagName === "TEXTAREA" ||
+        activeElement?.getAttribute("contenteditable") === "true";
       setIsInputFocused(isInput);
     };
 
@@ -50,8 +50,8 @@ export function GlobalContextMenu({ children }: GlobalContextMenuProps) {
     if (text) {
       try {
         await navigator.clipboard.writeText(text);
-      } catch (e) {
-        document.execCommand('copy');
+      } catch {
+        document.execCommand("copy");
       }
     }
   };
@@ -59,7 +59,7 @@ export function GlobalContextMenu({ children }: GlobalContextMenuProps) {
   const handleCut = async () => {
     handleCopy();
     if (isInputFocused) {
-      document.execCommand('cut');
+      document.execCommand("cut");
     }
   };
 
@@ -67,7 +67,7 @@ export function GlobalContextMenu({ children }: GlobalContextMenuProps) {
     if (isInputFocused && document.activeElement) {
       try {
         const text = await navigator.clipboard.readText();
-        document.execCommand('insertText', false, text);
+        document.execCommand("insertText", false, text);
       } catch (e) {
         console.error("Paste failed", e);
       }
@@ -80,31 +80,42 @@ export function GlobalContextMenu({ children }: GlobalContextMenuProps) {
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="flex-1 flex flex-col h-full w-full">
+      <ContextMenuTrigger className='flex-1 flex flex-col h-full w-full'>
         {children}
       </ContextMenuTrigger>
       <ContextMenuPopup>
         {hasSelection || isInputFocused ? (
           <ContextMenuGroup>
             <ContextMenuGroupLabel>Texto</ContextMenuGroupLabel>
-            <ContextMenuItem onClick={handleCut} disabled={!hasSelection || !isInputFocused} className="cursor-pointer">
-              <Scissors className="mr-2 size-4" /> Cortar
+            <ContextMenuItem
+              onClick={handleCut}
+              disabled={!hasSelection || !isInputFocused}
+              className='cursor-pointer'>
+              <Scissors className='mr-2 size-4' /> Cortar
             </ContextMenuItem>
-            <ContextMenuItem onClick={handleCopy} disabled={!hasSelection} className="cursor-pointer">
-              <Copy className="mr-2 size-4" /> Copiar
+            <ContextMenuItem
+              onClick={handleCopy}
+              disabled={!hasSelection}
+              className='cursor-pointer'>
+              <Copy className='mr-2 size-4' /> Copiar
             </ContextMenuItem>
-            <ContextMenuItem onClick={handlePaste} disabled={!isInputFocused} className="cursor-pointer">
-              <Clipboard className="mr-2 size-4" /> Pegar
+            <ContextMenuItem
+              onClick={handlePaste}
+              disabled={!isInputFocused}
+              className='cursor-pointer'>
+              <Clipboard className='mr-2 size-4' /> Pegar
             </ContextMenuItem>
           </ContextMenuGroup>
         ) : (
           <ContextMenuGroup>
             <ContextMenuGroupLabel>Sistema</ContextMenuGroupLabel>
-            <ContextMenuItem onClick={handleReload} className="cursor-pointer">
-              <RefreshCw className="mr-2 size-4" /> Recargar interfaz
+            <ContextMenuItem onClick={handleReload} className='cursor-pointer'>
+              <RefreshCw className='mr-2 size-4' /> Recargar interfaz
             </ContextMenuItem>
-            <ContextMenuItem onClick={(e) => setTheme(theme === 'dark' ? 'light' : 'dark', e)} className="cursor-pointer">
-              <Palette className="mr-2 size-4" /> Cambiar Tema
+            <ContextMenuItem
+              onClick={(e) => setTheme(theme === "dark" ? "light" : "dark", e)}
+              className='cursor-pointer'>
+              <Palette className='mr-2 size-4' /> Cambiar Tema
             </ContextMenuItem>
           </ContextMenuGroup>
         )}

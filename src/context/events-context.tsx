@@ -1,16 +1,18 @@
-import React, { createContext, useCallback, useEffect, useState } from 'react';
-import type { JuseEvent } from '@/types/event';
-import { generateId, calculateDuration } from '@/lib/utils';
 import {
+  deleteEventFromDB,
   getEventsFromDB,
   insertEventToDB,
   updateEventInDB,
-  deleteEventFromDB
-} from '@/lib/db';
+} from "@/lib/db";
+import { calculateDuration, generateId } from "@/lib/utils";
+import type { JuseEvent } from "@/types/event";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 
 interface EventsContextValue {
   events: JuseEvent[];
-  addEvent: (event: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>) => JuseEvent;
+  addEvent: (
+    event: Omit<JuseEvent, "id" | "duration" | "createdAt" | "updatedAt">,
+  ) => JuseEvent;
   updateEvent: (id: string, updates: Partial<JuseEvent>) => void;
   deleteEvent: (id: string) => void;
   getEvent: (id: string) => JuseEvent | undefined;
@@ -20,7 +22,14 @@ interface EventsContextValue {
 
 export const EventsContext = createContext<EventsContextValue | null>(null);
 
-function enrichEvent(event: Partial<JuseEvent> & { startTime: string; endTime: string; totalEvento: number; adelanto: number }): Pick<JuseEvent, 'duration' | 'saldo'> {
+function enrichEvent(
+  event: Partial<JuseEvent> & {
+    startTime: string;
+    endTime: string;
+    totalEvento: number;
+    adelanto: number;
+  },
+): Pick<JuseEvent, "duration" | "saldo"> {
   return {
     duration: calculateDuration(event.startTime, event.endTime),
     saldo: event.totalEvento - event.adelanto,
@@ -32,33 +41,42 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    getEventsFromDB().then(data => {
-      setEvents(data);
-      setIsLoaded(true);
-    }).catch(err => {
-      console.error("Failed to load events from SQLite", err);
-      setIsLoaded(true);
-    });
+    getEventsFromDB()
+      .then((data) => {
+        setEvents(data);
+        setIsLoaded(true);
+      })
+      .catch((err) => {
+        console.error("Failed to load events from SQLite", err);
+        setIsLoaded(true);
+      });
   }, []);
 
-  const addEvent = useCallback((eventData: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>): JuseEvent => {
-    const id = generateId();
-    const duration = calculateDuration(eventData.startTime, eventData.endTime);
-    // saldo is now provided by the form
-    
-    const newEvent: JuseEvent = {
-      ...eventData,
-      duration,
-      id: id,
-      createdAt: new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
-    };
-    
-    setEvents((prev) => [...prev, newEvent]);
-    insertEventToDB(newEvent).catch(console.error);
-    
-    return newEvent;
-  }, []);
+  const addEvent = useCallback(
+    (
+      eventData: Omit<JuseEvent, "id" | "duration" | "createdAt" | "updatedAt">,
+    ): JuseEvent => {
+      const id = generateId();
+      const duration = calculateDuration(
+        eventData.startTime,
+        eventData.endTime,
+      );
+
+      const newEvent: JuseEvent = {
+        ...eventData,
+        duration,
+        id: id,
+        createdAt: new Date().toISOString().split("T")[0],
+        updatedAt: new Date().toISOString().split("T")[0],
+      };
+
+      setEvents((prev) => [...prev, newEvent]);
+      insertEventToDB(newEvent).catch(console.error);
+
+      return newEvent;
+    },
+    [],
+  );
 
   const updateEvent = useCallback((id: string, updates: Partial<JuseEvent>) => {
     let updatedEventMerged: JuseEvent | undefined = undefined;
@@ -66,13 +84,17 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
     setEvents((prev) =>
       prev.map((e) => {
         if (e.id !== id) return e;
-        const merged = { ...e, ...updates, updatedAt: new Date().toISOString().split('T')[0] };
+        const merged = {
+          ...e,
+          ...updates,
+          updatedAt: new Date().toISOString().split("T")[0],
+        };
         const computed = enrichEvent(merged);
         updatedEventMerged = { ...merged, ...computed };
         return updatedEventMerged;
-      })
+      }),
     );
-    
+
     if (updatedEventMerged) {
       updateEventInDB(id, updatedEventMerged).catch(console.error);
     }
@@ -83,16 +105,28 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
     deleteEventFromDB(id).catch(console.error);
   }, []);
 
-  const getEvent = useCallback((id: string) => {
-    return events.find((e) => e.id === id);
-  }, [events]);
+  const getEvent = useCallback(
+    (id: string) => {
+      return events.find((e) => e.id === id);
+    },
+    [events],
+  );
 
   const replaceEvents = useCallback((newEvents: JuseEvent[]) => {
     setEvents(newEvents);
   }, []);
 
   return (
-    <EventsContext.Provider value={{ events, addEvent, updateEvent, deleteEvent, getEvent, replaceEvents, isLoaded }}>
+    <EventsContext.Provider
+      value={{
+        events,
+        addEvent,
+        updateEvent,
+        deleteEvent,
+        getEvent,
+        replaceEvents,
+        isLoaded,
+      }}>
       {isLoaded ? children : null}
     </EventsContext.Provider>
   );

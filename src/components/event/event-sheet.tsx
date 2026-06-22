@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from "@/components/ui/badge";
+
 import {
   Dialog,
   DialogContent,
@@ -7,7 +7,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerDescription,
@@ -15,23 +15,23 @@ import {
   DrawerHeader,
   DrawerPanel,
   DrawerPopup,
-  DrawerTitle
-} from '@/components/ui/drawer';
-import { Separator } from '@/components/ui/separator';
-import { useMediaQuery } from '@/hooks/use-media-query';
-import { cn, formatCurrency, formatDuration } from '@/lib/utils';
-import type { JuseEvent } from '@/types/event';
-import { format, parse } from 'date-fns';
-import { es } from 'date-fns/locale';
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Separator } from "@/components/ui/separator";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { cn, formatCurrency, formatDuration } from "@/lib/utils";
+import type { JuseEvent } from "@/types/event";
+import { format, parse } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   AlertTriangle,
   Calendar,
   Clock,
   MapPin,
   Pencil,
-  Trash2
-} from 'lucide-react';
-import * as React from 'react';
+  Trash2,
+} from "lucide-react";
+import * as React from "react";
 
 interface EventSheetProps {
   event: JuseEvent | null;
@@ -43,7 +43,7 @@ interface EventSheetProps {
 }
 
 function formatFullDate(dateStr: string): string {
-  const date = parse(dateStr, 'yyyy-MM-dd', new Date());
+  const date = parse(dateStr, "yyyy-MM-dd", new Date());
   return format(date, "EEEE d 'de' MMMM, yyyy", { locale: es });
 }
 
@@ -61,27 +61,26 @@ function StaffSection({
   warn?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-foreground">{label}</span>
+    <div className='flex flex-col gap-1.5'>
+      <div className='flex items-center gap-2'>
+        <span className='text-sm font-medium text-foreground'>{label}</span>
         {warn && people.length === 0 && (
-          <AlertTriangle className="size-3.5 text-amber-500" />
+          <AlertTriangle className='size-3.5 text-amber-500' />
         )}
       </div>
       {people.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
+        <div className='flex flex-wrap gap-1.5'>
           {people.map((person) => (
             <Badge
               key={person}
-              variant="secondary"
-              className="bg-accent-soft text-accent"
-            >
+              variant='secondary'
+              className='bg-accent-soft text-accent'>
               {person}
             </Badge>
           ))}
         </div>
       ) : (
-        <span className="text-sm text-muted-foreground">Sin asignar</span>
+        <span className='text-sm text-muted-foreground'>Sin asignar</span>
       )}
     </div>
   );
@@ -98,8 +97,12 @@ function FinanceRow({
 }) {
   return (
     <>
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <span className={cn('text-sm font-medium text-right tabular-nums', className)}>
+      <span className='text-sm text-muted-foreground'>{label}</span>
+      <span
+        className={cn(
+          "text-sm font-medium text-right tabular-nums",
+          className,
+        )}>
         {value}
       </span>
     </>
@@ -115,7 +118,7 @@ function EventSheet({
   children,
 }: EventSheetProps) {
   const [confirmOpen, setConfirmOpen] = React.useState(false);
-  const isDesktop = useMediaQuery('(min-width: 768px)');
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const handleDelete = () => {
     if (!event) return;
@@ -128,82 +131,77 @@ function EventSheet({
     <>
       <Drawer
         open={open}
-        onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}
-        position={isDesktop ? 'right' : 'bottom'}
-      >
-        <DrawerPopup variant="inset" showBar>
+        onOpenChange={(isOpen) => {
+          if (!isOpen) onClose();
+        }}
+        position={isDesktop ? "right" : "bottom"}>
+        <DrawerPopup variant='inset' showBar>
           {event && (
             <>
-              {/* Header */}
               <DrawerHeader>
-                <div className="flex items-start gap-3 pr-8">
-                  <div className="flex-1 space-y-1">
-                    <DrawerTitle className="font-display text-lg">
+                <div className='flex items-start gap-3 pr-8'>
+                  <div className='flex-1 space-y-1'>
+                    <DrawerTitle className='font-display text-lg'>
                       {event.eventType}
                     </DrawerTitle>
-                    <DrawerDescription className="flex items-center gap-1.5">
-                      <MapPin className="size-3.5" />
-                      {event.location || 'Sin ubicación'}
+                    <DrawerDescription className='flex items-center gap-1.5'>
+                      <MapPin className='size-3.5' />
+                      {event.location || "Sin ubicación"}
                     </DrawerDescription>
                   </div>
                 </div>
-                {/* Warning badges */}
+
                 {(event.dj.length === 0 || event.animadoras.length === 0) && (
-                  <div className="flex items-center gap-1.5 pt-2">
-                    <AlertTriangle className="size-3.5 text-amber-500" />
-                    <span className="text-xs text-amber-600">
+                  <div className='flex items-center gap-1.5 pt-2'>
+                    <AlertTriangle className='size-3.5 text-amber-500' />
+                    <span className='text-xs text-amber-600'>
                       {event.dj.length === 0 && event.animadoras.length === 0
-                        ? 'Sin DJ ni animadora asignados'
+                        ? "Sin DJ ni animadora asignados"
                         : event.dj.length === 0
-                          ? 'Sin DJ asignado'
-                          : 'Sin animadora asignada'}
+                          ? "Sin DJ asignado"
+                          : "Sin animadora asignada"}
                     </span>
                   </div>
                 )}
                 {event.saldo > 0 && (
-                  <div className="flex items-center gap-1.5 pt-1">
-                    <span className="size-2 rounded-full bg-red-500" />
-                    <span className="text-xs text-red-600">
+                  <div className='flex items-center gap-1.5 pt-1'>
+                    <span className='size-2 rounded-full bg-red-500' />
+                    <span className='text-xs text-red-600'>
                       Saldo pendiente: {formatCurrency(event.saldo)}
                     </span>
                   </div>
                 )}
               </DrawerHeader>
 
-              {/* Scrollable content */}
               <DrawerPanel>
-                <div className="space-y-6">
-                  {/* ── Información General ─────────────── */}
-                  <section className="space-y-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <div className='space-y-6'>
+                  <section className='space-y-3'>
+                    <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
                       Información General
                     </h3>
 
-                    <div className="space-y-2.5">
-                      {/* Date */}
-                      <div className="flex items-center gap-3">
-                        <Calendar className="size-4 shrink-0 text-muted-foreground" />
-                        <span className="text-sm capitalize">
+                    <div className='space-y-2.5'>
+                      <div className='flex items-center gap-3'>
+                        <Calendar className='size-4 shrink-0 text-muted-foreground' />
+                        <span className='text-sm capitalize'>
                           {formatFullDate(event.date)}
                         </span>
                       </div>
 
-                      {/* Time range */}
-                      <div className="flex items-center gap-3">
-                        <Clock className="size-4 shrink-0 text-muted-foreground" />
-                        <span className="text-sm">
+                      <div className='flex items-center gap-3'>
+                        <Clock className='size-4 shrink-0 text-muted-foreground' />
+                        <span className='text-sm'>
                           {formatTimeRange(event.startTime, event.endTime)}
                         </span>
-                        <Badge variant="secondary" className="ml-auto text-xs">
+                        <Badge variant='secondary' className='ml-auto text-xs'>
                           {formatDuration(event.duration)}
                         </Badge>
                       </div>
 
-                      {/* Location */}
-                      <div className="flex items-center gap-3">
-                        <MapPin className="size-4 shrink-0 text-muted-foreground" />
-                        <span className="text-sm">
-                          {event.location || 'Sin ubicación'}
+                      <div className='flex items-center gap-3'>
+                        <MapPin className='size-4 shrink-0 text-muted-foreground' />
+                        <span className='text-sm'>
+                          {event.location || "Sin ubicación"}
                         </span>
                       </div>
                     </div>
@@ -211,81 +209,76 @@ function EventSheet({
 
                   <Separator />
 
-                  {/* ── Staff ───────────────────────────── */}
-                  <section className="space-y-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <section className='space-y-3'>
+                    <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
                       Staff
                     </h3>
 
-                    <div className="space-y-3">
+                    <div className='space-y-3'>
                       <StaffSection
-                        label="Animadora(s)"
+                        label='Animadora(s)'
                         people={event.animadoras}
                         warn
                       />
                       <StaffSection
-                        label="Bailarinas / Staff Lúdico"
+                        label='Bailarinas / Staff Lúdico'
                         people={event.bailarinas}
                       />
-                      <StaffSection label="DJ" people={event.dj} warn />
+                      <StaffSection label='DJ' people={event.dj} warn />
                       <StaffSection
-                        label="Staff"
+                        label='Staff'
                         people={event.staffAdicional}
                       />
-                      <StaffSection
-                        label="Muñecos"
-                        people={event.munecos}
-                      />
+                      <StaffSection label='Muñecos' people={event.munecos} />
                     </div>
                   </section>
 
                   <Separator />
 
-                  {/* ── Finanzas ────────────────────────── */}
-                  <section className="space-y-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <section className='space-y-3'>
+                    <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
                       Finanzas
                     </h3>
 
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                    <div className='grid grid-cols-2 gap-x-4 gap-y-2'>
                       <FinanceRow
-                        label="Total Evento"
+                        label='Total Evento'
                         value={formatCurrency(event.totalEvento)}
-                        className="text-base font-semibold"
+                        className='text-base font-semibold'
                       />
                       <FinanceRow
-                        label="Movilidad"
+                        label='Movilidad'
                         value={formatCurrency(event.movilidad)}
                       />
                       <FinanceRow
-                        label="Adelanto"
+                        label='Adelanto'
                         value={formatCurrency(event.adelanto)}
                       />
                       <FinanceRow
-                        label="Saldo"
+                        label='Saldo'
                         value={formatCurrency(event.saldo)}
                         className={cn(
                           event.saldo > 0
-                            ? 'text-red-600 font-semibold'
-                            : 'text-emerald-600 font-semibold'
+                            ? "text-red-600 font-semibold"
+                            : "text-emerald-600 font-semibold",
                         )}
                       />
                       <FinanceRow
-                        label="Pago Personal"
+                        label='Pago Personal'
                         value={formatCurrency(event.pagoPersonal)}
                       />
                       <FinanceRow
-                        label="Ganancia"
+                        label='Ganancia'
                         value={formatCurrency(event.ganancia)}
                       />
                     </div>
 
                     {event.observacion && (
-                      <div className="mt-2 rounded-lg bg-muted p-3">
-                        <span className="text-xs font-medium text-muted-foreground">
+                      <div className='mt-2 rounded-lg bg-muted p-3'>
+                        <span className='text-xs font-medium text-muted-foreground'>
                           Observación
                         </span>
-                        <p className="mt-1 text-sm text-foreground">
+                        <p className='mt-1 text-sm text-foreground'>
                           {event.observacion}
                         </p>
                       </div>
@@ -294,22 +287,21 @@ function EventSheet({
                 </div>
               </DrawerPanel>
 
-              {/* Footer actions */}
-              <DrawerFooter variant="bare" className="shrink-0 flex gap-3 flex-row pt-4 px-4 sm:px-6">
+              <DrawerFooter
+                variant='bare'
+                className='shrink-0 flex gap-3 flex-row pt-4 px-4 sm:px-6'>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => setConfirmOpen(true)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
-                >
-                  <Trash2 className="size-4" />
+                  className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer'>
+                  <Trash2 className='size-4' />
                   Eliminar
                 </button>
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => event && onEdit(event)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-blue)] hover:brightness-110 rounded-lg transition-all shadow-sm cursor-pointer"
-                >
-                  <Pencil className="size-4" />
+                  className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-(--color-juse-blue) hover:brightness-110 rounded-lg transition-all shadow-sm cursor-pointer'>
+                  <Pencil className='size-4' />
                   Editar Evento
                 </button>
               </DrawerFooter>
@@ -319,30 +311,27 @@ function EventSheet({
         {children}
       </Drawer>
 
-      {/* ── Delete confirmation dialog ─────────────────── */}
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Eliminar evento</DialogTitle>
             <DialogDescription>
-              ¿Estás seguro de que deseas eliminar el evento "{event?.eventType}"? Esta acción no se
-              puede deshacer.
+              ¿Estás seguro de que deseas eliminar el evento "{event?.eventType}
+              "? Esta acción no se puede deshacer.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-3 sm:gap-3 mt-2">
+          <DialogFooter className='gap-3 sm:gap-3 mt-2'>
             <button
-              type="button"
+              type='button'
               onClick={() => setConfirmOpen(false)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer"
-            >
+              className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer'>
               Cancelar
             </button>
             <button
-              type="button"
+              type='button'
               onClick={handleDelete}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--color-juse-red)] hover:brightness-110 rounded-lg transition-all shadow-sm cursor-pointer"
-            >
-              <Trash2 className="size-4" />
+              className='flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-(--color-juse-red) hover:brightness-110 rounded-lg transition-all shadow-sm cursor-pointer'>
+              <Trash2 className='size-4' />
               Eliminar
             </button>
           </DialogFooter>

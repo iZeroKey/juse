@@ -1,30 +1,31 @@
+import { useTheme } from "@/components/theme-provider";
 import {
   ContextMenu,
   ContextMenuGroup,
   ContextMenuGroupLabel,
   ContextMenuItem,
   ContextMenuPopup,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-  ContextMenuSub,
-  ContextMenuSubTrigger,
-  ContextMenuSubPopup,
   ContextMenuRadioGroup,
   ContextMenuRadioItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubPopup,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useTheme } from "@/components/theme-provider";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, RefreshCw, Square, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function TitleBar() {
   const [isWindowMaximized, setIsWindowMaximized] = useState(false);
-  const [isTauri, setIsTauri] = useState(false);
+  const [isTauri] = useState(
+    () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window,
+  );
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    if (typeof window !== "undefined" && window.__TAURI_INTERNALS__) {
-      setIsTauri(true);
+    if (isTauri) {
       const appWindow = getCurrentWindow();
       appWindow.isMaximized().then(setIsWindowMaximized);
 
@@ -36,7 +37,7 @@ export function TitleBar() {
         unlisten.then((f) => f());
       };
     }
-  }, []);
+  }, [isTauri]);
 
   if (!isTauri) return null;
 
@@ -45,7 +46,7 @@ export function TitleBar() {
       <ContextMenuTrigger className='w-full pointer-events-auto'>
         <div
           id='titlebar'
-          className='pointer-events-auto relative h-10 border-b border-border bg-background flex select-none items-center justify-between z-[10000] shrink-0'
+          className='pointer-events-auto relative h-10 border-b border-border bg-background flex select-none items-center justify-between z-10000 shrink-0'
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}>
           <div
@@ -54,9 +55,11 @@ export function TitleBar() {
             onMouseDown={(e) => {
               if (e.buttons === 1) {
                 e.preventDefault();
-                e.detail === 2
-                  ? getCurrentWindow().toggleMaximize()
-                  : getCurrentWindow().startDragging();
+                if (e.detail === 2) {
+                  getCurrentWindow().toggleMaximize();
+                } else {
+                  getCurrentWindow().startDragging();
+                }
               }
             }}>
             <span className='pointer-events-none'>Juse Show</span>
@@ -180,11 +183,33 @@ export function TitleBar() {
           <ContextMenuGroupLabel>Apariencia</ContextMenuGroupLabel>
           <ContextMenuSub>
             <ContextMenuSubTrigger inset>Tema</ContextMenuSubTrigger>
-            <ContextMenuSubPopup className="w-48">
-              <ContextMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as 'light' | 'dark' | 'system')}>
-                <ContextMenuRadioItem value="light" onSelect={(e) => setTheme('light', e)}>Claro</ContextMenuRadioItem>
-                <ContextMenuRadioItem value="dark" onSelect={(e) => setTheme('dark', e)}>Oscuro</ContextMenuRadioItem>
-                <ContextMenuRadioItem value="system" onSelect={(e) => setTheme('system', e)}>Sistema</ContextMenuRadioItem>
+            <ContextMenuSubPopup className='w-48'>
+              <ContextMenuRadioGroup
+                value={theme}
+                onValueChange={(value) =>
+                  setTheme(value as "light" | "dark" | "system")
+                }>
+                <ContextMenuRadioItem
+                  value='light'
+                  onSelect={(e) =>
+                    setTheme("light", e as unknown as React.MouseEvent)
+                  }>
+                  Claro
+                </ContextMenuRadioItem>
+                <ContextMenuRadioItem
+                  value='dark'
+                  onSelect={(e) =>
+                    setTheme("dark", e as unknown as React.MouseEvent)
+                  }>
+                  Oscuro
+                </ContextMenuRadioItem>
+                <ContextMenuRadioItem
+                  value='system'
+                  onSelect={(e) =>
+                    setTheme("system", e as unknown as React.MouseEvent)
+                  }>
+                  Sistema
+                </ContextMenuRadioItem>
               </ContextMenuRadioGroup>
             </ContextMenuSubPopup>
           </ContextMenuSub>

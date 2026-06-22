@@ -1,5 +1,9 @@
 "use client";
 
+import { GlobalContextMenu } from "@/components/global-context-menu";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { Checkbox as CheckboxPrimitive } from "@base-ui/react/checkbox";
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer";
 import { mergeProps } from "@base-ui/react/merge-props";
@@ -9,10 +13,6 @@ import { useRender } from "@base-ui/react/use-render";
 import { ChevronRightIcon, XIcon } from "lucide-react";
 import type React from "react";
 import { createContext, useContext } from "react";
-import { GlobalContextMenu } from "@/components/global-context-menu";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 type DrawerPosition = "right" | "left" | "top" | "bottom";
 
@@ -46,15 +46,30 @@ export function Drawer({
       <DrawerPrimitive.Root
         swipeDirection={swipeDirection ?? directionMap[position]}
         modal={props.modal ?? "trap-focus"}
-        onOpenChange={(open, details) => {
-          if (!open && details && details.reason === 'outsidePress') {
-            const target = details.event?.target as Element;
-            if (target?.closest?.('#titlebar') || target?.closest?.('[data-slot="context-menu-popup"]')) {
-              if (details.cancel) details.cancel();
+        onOpenChange={(open, details: unknown) => {
+          if (
+            !open &&
+            details &&
+            (details as { reason?: string }).reason === "outside-press"
+          ) {
+            const evDetails = details as {
+              cancel?: () => void;
+              event?: { target?: EventTarget | null };
+            };
+            const target = evDetails.event?.target as Element;
+            if (
+              target?.closest?.("#titlebar") ||
+              target?.closest?.('[data-slot="context-menu-popup"]')
+            ) {
+              if (evDetails.cancel) evDetails.cancel();
               return;
             }
           }
-          if (props.onOpenChange) props.onOpenChange(open, details);
+          if (props.onOpenChange)
+            props.onOpenChange(
+              open,
+              details as Parameters<NonNullable<typeof props.onOpenChange>>[1],
+            );
         }}
         {...props}
       />
@@ -68,13 +83,13 @@ export const DrawerPortal: typeof DrawerPrimitive.Portal =
 export function DrawerTrigger(
   props: DrawerPrimitive.Trigger.Props,
 ): React.ReactElement {
-  return <DrawerPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
+  return <DrawerPrimitive.Trigger data-slot='drawer-trigger' {...props} />;
 }
 
 export function DrawerClose(
   props: DrawerPrimitive.Close.Props,
 ): React.ReactElement {
-  return <DrawerPrimitive.Close data-slot="drawer-close" {...props} />;
+  return <DrawerPrimitive.Close data-slot='drawer-close' {...props} />;
 }
 
 export function DrawerSwipeArea({
@@ -97,7 +112,7 @@ export function DrawerSwipeArea({
         position === "right" && "inset-y-0 right-0 w-8",
         className,
       )}
-      data-slot="drawer-swipe-area"
+      data-slot='drawer-swipe-area'
       {...props}
     />
   );
@@ -113,7 +128,7 @@ export function DrawerBackdrop({
         "fixed top-10 inset-x-0 bottom-0 z-50 bg-black/32 opacity-[calc(1-var(--drawer-swipe-progress))] backdrop-blur-sm transition-opacity duration-450 ease-[cubic-bezier(0.32,0.72,0,1)] data-ending-style:opacity-0 data-starting-style:opacity-0 data-ending-style:duration-[calc(var(--drawer-swipe-strength)*400ms)] data-swiping:duration-0 supports-[-webkit-touch-callout:none]:absolute",
         className,
       )}
-      data-slot="drawer-backdrop"
+      data-slot='drawer-backdrop'
       {...props}
     />
   );
@@ -142,7 +157,7 @@ export function DrawerViewport({
         variant === "inset" && position !== "top" && "pb-(--inset)",
         className,
       )}
-      data-slot="drawer-viewport"
+      data-slot='drawer-viewport'
       {...props}
     />
   );
@@ -180,9 +195,9 @@ export function DrawerPopup({
             position === "top" &&
               "data-starting-style:transform-[translateY(calc(-100%-var(--inset)))] data-ending-style:transform-[translateY(calc(-100%-var(--inset)))] transform-[translateY(var(--drawer-swipe-movement-y))] border-b after:inset-x-0 after:bottom-full after:h-(--bleed) has-data-[slot=drawer-bar]:pb-2",
             position === "left" &&
-              "data-starting-style:transform-[translateX(calc(-100%-var(--inset)))] data-ending-style:transform-[translateX(calc(-100%-var(--inset)))] transform-[translateX(var(--drawer-swipe-movement-x))] w-[calc(100%-(--spacing(12)))] max-w-md border-e after:inset-y-0 after:end-full after:w-(--bleed) has-data-[slot=drawer-bar]:pe-2",
+              "data-starting-style:transform-[translateX(calc(-100%-var(--inset)))] data-ending-style:transform-[translateX(calc(-100%-var(--inset)))] transform-[translateX(var(--drawer-swipe-movement-x))] w-[calc(100%-(--spacing(12)))] max-w-md border-e after:inset-y-0 after:inset-e-full after:w-(--bleed) has-data-[slot=drawer-bar]:pe-2",
             position === "right" &&
-              "transform-[translateX(var(--drawer-swipe-movement-x))] data-ending-style:transform-[translateX(calc(100%+var(--inset)))] data-starting-style:transform-[translateX(calc(100%+var(--inset)))] col-start-2 w-[calc(100%-(--spacing(12)))] max-w-md border-s after:inset-y-0 after:start-full after:w-(--bleed) has-data-[slot=drawer-bar]:ps-2",
+              "transform-[translateX(var(--drawer-swipe-movement-x))] data-ending-style:transform-[translateX(calc(100%+var(--inset)))] data-starting-style:transform-[translateX(calc(100%+var(--inset)))] col-start-2 w-[calc(100%-(--spacing(12)))] max-w-md border-s after:inset-y-0 after:inset-s-full after:w-(--bleed) has-data-[slot=drawer-bar]:ps-2",
             variant !== "straight" &&
               cn(
                 position === "bottom" && "rounded-t-2xl",
@@ -219,25 +234,16 @@ export function DrawerPopup({
               "data-nested-drawer-open:transform-[translateX(calc(var(--drawer-swipe-movement-x)-var(--stack-peek-offset)))_scale(var(--scale))] origin-left",
             className,
           )}
-          data-slot="drawer-popup"
-          onInteractOutside={(e: any) => {
-            const target = e.target as Element;
-            if (target.closest?.('#titlebar') || target.closest?.('[data-slot="context-menu-popup"]')) {
-              e.preventDefault();
-            }
-            if ((props as any).onInteractOutside) (props as any).onInteractOutside(e);
-          }}
-          {...props}
-        >
+          data-slot='drawer-popup'
+          {...props}>
           <GlobalContextMenu>
-            <div className="flex flex-col h-full w-full">
+            <div className='flex flex-col h-full w-full'>
               {children}
               {showCloseButton && (
                 <DrawerPrimitive.Close
-                  aria-label="Close"
-                  className="absolute end-2 top-2"
-                  render={<Button size="icon" variant="ghost" />}
-                >
+                  aria-label='Close'
+                  className='absolute inset-e-2 top-2'
+                  render={<Button size='icon' variant='ghost' />}>
                   <XIcon />
                 </DrawerPrimitive.Close>
               )}
@@ -314,7 +320,7 @@ export function DrawerTitle({
         "font-heading font-semibold text-xl leading-none",
         className,
       )}
-      data-slot="drawer-title"
+      data-slot='drawer-title'
       {...props}
     />
   );
@@ -327,7 +333,7 @@ export function DrawerDescription({
   return (
     <DrawerPrimitive.Description
       className={cn("text-muted-foreground text-sm", className)}
-      data-slot="drawer-description"
+      data-slot='drawer-description'
       {...props}
     />
   );
@@ -362,7 +368,7 @@ export function DrawerPanel({
 
   if (scrollable) {
     return (
-      <ScrollArea className="touch-auto flex-1 min-h-0" scrollFade={scrollFade}>
+      <ScrollArea className='touch-auto flex-1 min-h-0' scrollFade={scrollFade}>
         {content}
       </ScrollArea>
     );
@@ -517,11 +523,10 @@ export function DrawerMenuTrigger({
         "flex min-h-9 w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1 text-base text-foreground outline-none hover:bg-accent hover:text-accent-foreground sm:min-h-8 sm:text-sm [&_svg:not(:last-child)]:-mx-0.5 [&_svg:not([class*='size-'])]:size-4.5 sm:[&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         className,
       )}
-      data-slot="drawer-menu-trigger"
-      {...props}
-    >
+      data-slot='drawer-menu-trigger'
+      {...props}>
       {children}
-      <ChevronRightIcon className="ms-auto -me-0.5 opacity-80" />
+      <ChevronRightIcon className='ms-auto -me-0.5 opacity-80' />
     </DrawerTrigger>
   );
 }
@@ -550,41 +555,38 @@ export function DrawerMenuCheckboxItem({
           : "grid-cols-[1rem_1fr] pe-4",
         className,
       )}
-      data-slot="drawer-menu-checkbox-item"
+      data-slot='drawer-menu-checkbox-item'
       defaultChecked={defaultChecked}
       disabled={disabled}
       onCheckedChange={onCheckedChange}
       render={render}
-      {...props}
-    >
+      {...props}>
       {variant === "switch" ? (
         <>
-          <span className="col-start-1">{children}</span>
+          <span className='col-start-1'>{children}</span>
           <CheckboxPrimitive.Indicator
-            className="inset-shadow-[0_1px_--theme(--color-black/4%)] col-start-2 inline-flex h-[calc(var(--thumb-size)+2px)] w-[calc(var(--thumb-size)*2-2px)] shrink-0 items-center rounded-full p-px outline-none transition-[background-color,box-shadow] duration-200 [--thumb-size:--spacing(4)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-checked:bg-primary data-unchecked:bg-input data-disabled:opacity-64 sm:[--thumb-size:--spacing(3)]"
-            keepMounted
-          >
-            <span className="pointer-events-none block aspect-square h-full in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:origin-[var(--thumb-size)_50%] origin-left in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:translate-x-[calc(var(--thumb-size)-4px)] in-[[data-slot=drawer-menu-checkbox-item]:active]:not-data-disabled:scale-x-110 in-[[data-slot=drawer-menu-checkbox-item]:active]:rounded-[var(--thumb-size)/calc(var(--thumb-size)*1.10)] rounded-(--thumb-size) bg-background shadow-sm/5 will-change-transform [transition:translate_.15s,border-radius_.15s,scale_.1s_.1s,transform-origin_.15s]" />
+            className='inset-shadow-[0_1px_--theme(--color-black/4%)] col-start-2 inline-flex h-[calc(var(--thumb-size)+2px)] w-[calc(var(--thumb-size)*2-2px)] shrink-0 items-center rounded-full p-px outline-none transition-[background-color,box-shadow] duration-200 [--thumb-size:--spacing(4)] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background data-checked:bg-primary data-unchecked:bg-input data-disabled:opacity-64 sm:[--thumb-size:--spacing(3)]'
+            keepMounted>
+            <span className='pointer-events-none block aspect-square h-full in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:origin-[var(--thumb-size)_50%] origin-left in-[[data-slot=drawer-menu-checkbox-item][data-checked]]:translate-x-[calc(var(--thumb-size)-4px)] in-[[data-slot=drawer-menu-checkbox-item]:active]:not-data-disabled:scale-x-110 in-[[data-slot=drawer-menu-checkbox-item]:active]:rounded-[var(--thumb-size)/calc(var(--thumb-size)*1.10)] rounded-(--thumb-size) bg-background shadow-sm/5 will-change-transform [transition:translate_.15s,border-radius_.15s,scale_.1s_.1s,transform-origin_.15s]' />
           </CheckboxPrimitive.Indicator>
         </>
       ) : (
         <>
-          <CheckboxPrimitive.Indicator className="col-start-1">
+          <CheckboxPrimitive.Indicator className='col-start-1'>
             <svg
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
+              fill='none'
+              height='24'
+              stroke='currentColor'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth='2'
+              viewBox='0 0 24 24'
+              width='24'
+              xmlns='http://www.w3.org/2000/svg'>
+              <path d='M5.252 12.7 10.2 18.63 18.748 5.37' />
             </svg>
           </CheckboxPrimitive.Indicator>
-          <span className="col-start-2">{children}</span>
+          <span className='col-start-2'>{children}</span>
         </>
       )}
     </CheckboxPrimitive.Root>
@@ -598,7 +600,7 @@ export function DrawerMenuRadioGroup({
   return (
     <RadioGroupPrimitive
       className={cn("flex flex-col", className)}
-      data-slot="drawer-menu-radio-group"
+      data-slot='drawer-menu-radio-group'
       {...props}
     />
   );
@@ -622,28 +624,26 @@ export function DrawerMenuRadioItem({
         "grid-cols-[1rem_1fr] items-center pe-4",
         className,
       )}
-      data-slot="drawer-menu-radio-item"
+      data-slot='drawer-menu-radio-item'
       disabled={disabled}
       render={render}
       value={value}
-      {...props}
-    >
-      <RadioPrimitive.Indicator className="col-start-1">
+      {...props}>
+      <RadioPrimitive.Indicator className='col-start-1'>
         <svg
-          fill="none"
-          height="24"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          width="24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d="M5.252 12.7 10.2 18.63 18.748 5.37" />
+          fill='none'
+          height='24'
+          stroke='currentColor'
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          strokeWidth='2'
+          viewBox='0 0 24 24'
+          width='24'
+          xmlns='http://www.w3.org/2000/svg'>
+          <path d='M5.252 12.7 10.2 18.63 18.748 5.37' />
         </svg>
       </RadioPrimitive.Indicator>
-      <span className="col-start-2">{children}</span>
+      <span className='col-start-2'>{children}</span>
     </RadioPrimitive.Root>
   );
 }

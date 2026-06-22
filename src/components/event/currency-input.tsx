@@ -1,7 +1,7 @@
-import * as React from 'react';
-import { cn } from '@/lib/utils';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import * as React from "react";
 
 interface CurrencyInputProps {
   value: string;
@@ -18,29 +18,25 @@ function CurrencyInput({
   onChange,
   label,
   id,
-  placeholder = '0.00',
+  placeholder = "0.00",
   readOnly = false,
   className,
 }: CurrencyInputProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
 
-    // Allow only digits and a single decimal point
-    if (raw === '') {
-      onChange('');
+    if (raw === "") {
+      onChange("");
       return;
     }
 
-    // Strip anything that isn't a digit or dot
-    const cleaned = raw.replace(/[^0-9.]/g, '');
+    const cleaned = raw.replace(/[^0-9.]/g, "");
 
-    // Prevent multiple dots
-    const parts = cleaned.split('.');
+    const parts = cleaned.split(".");
     const sanitized =
-      parts.length <= 2 ? cleaned : `${parts[0]}.${parts.slice(1).join('')}`;
+      parts.length <= 2 ? cleaned : `${parts[0]}.${parts.slice(1).join("")}`;
 
-    // Limit to 2 decimal places while typing
-    const [integer, decimal] = sanitized.split('.');
+    const [integer, decimal] = sanitized.split(".");
     if (decimal !== undefined && decimal.length > 2) {
       onChange(`${integer}.${decimal.slice(0, 2)}`);
       return;
@@ -50,14 +46,14 @@ function CurrencyInput({
   };
 
   const handleBlur = () => {
-    if (value === '' || value === '.') {
-      onChange('0.00');
+    if (value === "" || value === ".") {
+      onChange("0.00");
       return;
     }
 
     const num = parseFloat(value);
     if (isNaN(num)) {
-      onChange('0.00');
+      onChange("0.00");
       return;
     }
 
@@ -65,24 +61,24 @@ function CurrencyInput({
   };
 
   return (
-    <div className={cn('space-y-1.5', className)}>
+    <div className={cn("space-y-1.5", className)}>
       <Label htmlFor={id}>{label}</Label>
-      <div className="relative">
-        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground select-none">
+      <div className='relative'>
+        <span className='pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground select-none'>
           S/
         </span>
         <Input
           id={id}
-          type="text"
-          inputMode="decimal"
+          type='text'
+          inputMode='decimal'
           value={value}
           onChange={handleChange}
           onBlur={handleBlur}
           placeholder={placeholder}
           readOnly={readOnly}
           className={cn(
-            'pl-9 tabular-nums',
-            readOnly && 'bg-muted cursor-default'
+            "pl-9 tabular-nums",
+            readOnly && "bg-muted cursor-default",
           )}
         />
       </div>

@@ -1,6 +1,7 @@
 export interface JusePackage {
+  nombre: string;
   id: string;
-  nroPaquete: string; // e.g., I-PAQ001
+  nroPaquete: string;
   especificaciones: string;
   precio: number;
   movilidad: string;
@@ -12,7 +13,7 @@ export interface JusePackage {
 export interface PackageFormValues {
   nroPaquete: string;
   especificaciones: string;
-  precio: string; // Stored as string in form, parsed to number
+  precio: string;
   movilidad: string;
   tipoEvento: string;
 }
