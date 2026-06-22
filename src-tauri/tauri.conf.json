@@ -12,7 +12,21 @@
   "app": {
     "windows": [
       {
+        "title": "Cargando...",
+        "label": "splashscreen",
+        "url": "/splash.html",
+        "visible": false,
+        "width": 400,
+        "height": 300,
+        "decorations": false,
+        "resizable": false,
+        "center": true,
+        "alwaysOnTop": true
+      },
+      {
         "title": "Juse Show",
+        "label": "main",
+        "visible": false,
         "width": 1200,
         "height": 800,
         "minWidth": 800,

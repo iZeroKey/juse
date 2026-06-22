@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Cargando Juse...</title>
+    <script>
+      (function () {
+        try {
+          var theme = localStorage.getItem("juse-ui-theme") || "system";
+          var isDark =
+            theme === "dark" ||
+            (theme === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+          var bgColor = isDark ? "#09090b" : "#f8fafc";
+          document.write(
+            "<style>html, body { background-color: " + bgColor + "; }</style>",
+          );
+
+          if (window.__TAURI_INTERNALS__) {
+            window.__TAURI_INTERNALS__.invoke("splashscreen_ready");
+          } else {
+            document.addEventListener("DOMContentLoaded", function () {
+              if (window.__TAURI_INTERNALS__) {
+                window.__TAURI_INTERNALS__.invoke("splashscreen_ready");
+              }
+            });
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        font-family: system-ui, sans-serif;
+      }
+
+      .container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logo {
+        width: 100px;
+        height: 100px;
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.7;
+          transform: scale(0.95);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="splash-container">
+      <img src="/juse.png" alt="Juse Show" class="logo" />
+    </div>
+  </body>
+</html>

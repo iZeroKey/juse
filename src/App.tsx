@@ -2,7 +2,7 @@ import { useEvents } from "@/hooks/use-events";
 import type { CalendarView, JuseEvent } from "@/types/event";
 import { format } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { sileo } from "sileo";
 
@@ -16,6 +16,7 @@ import { NavDrawer } from "@/components/layout/nav-drawer";
 import { TitleBar } from "@/components/title-bar";
 import { formatDateHeader } from "@/lib/calendar-utils";
 import { cn } from "@/lib/utils";
+import { invoke } from "@tauri-apps/api/core";
 import { addMonths, addWeeks, isToday } from "date-fns";
 import {
   ChevronLeft,
@@ -49,6 +50,19 @@ export default function App() {
   const [contractsActiveTab, setContractsActiveTab] = useState<
     "contracts" | "packages"
   >("contracts");
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "__TAURI_INTERNALS__" in window) {
+      const timer = setTimeout(async () => {
+        try {
+          await invoke("close_splashscreen");
+        } catch (e) {
+          console.error("Failed to manage splash screen via Rust", e);
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleEventClick = useCallback((event: JuseEvent) => {
     setSelectedEvent(event);
