@@ -83,6 +83,11 @@ body {
 
 /* ── Scrollbar styling ── */
 
+::selection {
+  background-color: var(--color-accent-muted);
+  color: var(--color-text-primary);
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -223,5 +228,15 @@ html.theme-transitioning *,
 html.theme-transitioning *::before,
 html.theme-transitioning *::after {
   transition: none !important;
+}
+
+/* Hide number spin buttons */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 

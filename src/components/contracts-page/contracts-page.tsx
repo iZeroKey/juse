@@ -6,51 +6,13 @@ import { PackagesTable } from './packages-table';
 import { ContractsTable } from './contracts-table';
 import { NavDrawer } from '@/components/layout/nav-drawer';
 
-export function ContractsPage() {
-  const [activeTab, setActiveTab] = useState<'contracts' | 'packages'>('contracts');
+interface ContractsPageProps {
+  activeTab: 'contracts' | 'packages';
+}
 
+export function ContractsPage({ activeTab }: ContractsPageProps) {
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden">
-      <header className="flex items-center gap-4 border-b border-border bg-surface px-4 py-3 shrink-0">
-        {/* Navigation Drawer wrapping the Menu Icon */}
-        <NavDrawer>
-          <button
-            type="button"
-            className="p-1.5 md:p-2 rounded-md hover:bg-muted transition-colors text-muted-foreground cursor-pointer flex items-center justify-center shrink-0 mr-1"
-            aria-label="Abrir menú"
-          >
-            <Menu className="size-5 md:size-5" />
-          </button>
-        </NavDrawer>
-
-        <div className="select-none font-display text-lg font-bold tracking-tight flex items-center shrink-0">
-          <img src="/juse.png" alt="Juse Logo" className="h-6 md:h-7 object-contain" />
-        </div>
-
-        {/* Tabs */}
-        <div className="ml-auto flex items-center p-1 bg-muted rounded-lg">
-          <button
-            onClick={() => setActiveTab('contracts')}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'contracts' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <FileText className="size-4" />
-            Contratos
-          </button>
-          <button
-            onClick={() => setActiveTab('packages')}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors",
-              activeTab === 'packages' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Package className="size-4" />
-            Paquetes
-          </button>
-        </div>
-      </header>
       <main className="flex-1 overflow-hidden bg-background relative p-4 md:p-6">
         <AnimatePresence mode="wait">
           {activeTab === 'contracts' ? (

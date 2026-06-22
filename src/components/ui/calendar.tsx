@@ -108,11 +108,11 @@ function Calendar({
           defaultClassNames.day
         ),
         range_start: cn(
-          "rounded-l-md bg-accent",
+          "rounded-l-md bg-[var(--color-juse-blue)]/10",
           defaultClassNames.range_start
         ),
-        range_middle: cn("rounded-none", defaultClassNames.range_middle),
-        range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
+        range_middle: cn("rounded-none bg-[var(--color-juse-blue)]/10", defaultClassNames.range_middle),
+        range_end: cn("rounded-r-md bg-[var(--color-juse-blue)]/10", defaultClassNames.range_end),
         today: cn(
           "rounded-full bg-muted text-accent font-bold data-[selected=true]:bg-accent data-[selected=true]:text-white",
           defaultClassNames.today
@@ -206,10 +206,10 @@ function CalendarDayButton({
       className={cn(
         "flex items-center justify-center aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal rounded-full border-none transition-colors cursor-pointer outline-none",
         "group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-2 group-data-[focused=true]/day:ring-ring",
-        "data-[range-end=true]:rounded-full data-[range-end=true]:bg-accent data-[range-end=true]:text-white",
-        "data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-accent/10 data-[range-middle=true]:text-accent",
-        "data-[range-start=true]:rounded-full data-[range-start=true]:bg-accent data-[range-start=true]:text-white",
-        "data-[selected-single=true]:bg-accent data-[selected-single=true]:text-white data-[selected-single=true]:font-bold data-[selected-single=true]:shadow-md",
+        "data-[range-end=true]:rounded-full data-[range-end=true]:bg-[var(--color-juse-blue)] data-[range-end=true]:text-white",
+        "data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-transparent data-[range-middle=true]:text-foreground",
+        "data-[range-start=true]:rounded-full data-[range-start=true]:bg-[var(--color-juse-blue)] data-[range-start=true]:text-white",
+        "data-[selected-single=true]:bg-[var(--color-juse-blue)] data-[selected-single=true]:text-white data-[selected-single=true]:font-bold data-[selected-single=true]:shadow-md",
         "hover:bg-muted hover:text-foreground active:bg-muted/80",
         "[&>span]:text-xs [&>span]:opacity-70",
         defaultClassNames.day,

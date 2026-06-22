@@ -1,8 +1,9 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { JuseEvent } from '@/types/event';
 import { generateId, calculateDuration } from '@/lib/utils';
+import { loadData, saveData } from '@/lib/storage';
 
-const STORAGE_KEY = 'juse-events';
+const STORAGE_KEY = 'juse-events.json';
 
 interface EventsContextValue {
   events: JuseEvent[];
@@ -11,23 +12,10 @@ interface EventsContextValue {
   deleteEvent: (id: string) => void;
   getEvent: (id: string) => JuseEvent | undefined;
   replaceEvents: (events: JuseEvent[]) => void;
+  isLoaded: boolean;
 }
 
 export const EventsContext = createContext<EventsContextValue | null>(null);
-
-function loadEvents(): JuseEvent[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as JuseEvent[];
-  } catch {
-    return [];
-  }
-}
-
-function saveEvents(events: JuseEvent[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
-}
 
 function enrichEvent(event: Partial<JuseEvent> & { startTime: string; endTime: string; totalEvento: number; adelanto: number }): Pick<JuseEvent, 'duration' | 'saldo'> {
   return {
@@ -37,11 +25,21 @@ function enrichEvent(event: Partial<JuseEvent> & { startTime: string; endTime: s
 }
 
 export function EventsProvider({ children }: { children: React.ReactNode }) {
-  const [events, setEvents] = useState<JuseEvent[]>(loadEvents);
+  const [events, setEvents] = useState<JuseEvent[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    saveEvents(events);
-  }, [events]);
+    loadData<JuseEvent[]>(STORAGE_KEY, []).then(data => {
+      setEvents(data);
+      setIsLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      saveData(STORAGE_KEY, events);
+    }
+  }, [events, isLoaded]);
 
   const addEvent = useCallback((eventData: Omit<JuseEvent, 'id' | 'duration' | 'createdAt' | 'updatedAt'>): JuseEvent => {
     const id = generateId();
@@ -83,8 +81,8 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <EventsContext.Provider value={{ events, addEvent, updateEvent, deleteEvent, getEvent, replaceEvents }}>
-      {children}
+    <EventsContext.Provider value={{ events, addEvent, updateEvent, deleteEvent, getEvent, replaceEvents, isLoaded }}>
+      {isLoaded ? children : null}
     </EventsContext.Provider>
   );
 }

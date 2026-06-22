@@ -45,14 +45,12 @@ export function TitleBar() {
       <ContextMenuTrigger className='w-full pointer-events-auto'>
         <div
           id='titlebar'
-          className='pointer-events-auto relative h-10 bg-background flex select-none items-center justify-between z-[10000] shrink-0'
+          className='pointer-events-auto relative h-10 border-b border-border bg-background flex select-none items-center justify-between z-[10000] shrink-0'
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}>
-          {/* Decorative bottom border that doesn't overlap the window control buttons */}
-          <div className='absolute bottom-0 left-0 right-[144px] h-[1px] bg-border pointer-events-none' />
           <div
             data-tauri-drag-region
-            className='pl-4 text-sm font-semibold text-foreground flex items-center gap-2 flex-1 h-full cursor-default'
+            className='pl-4 pr-[144px] text-sm font-semibold text-foreground flex items-center gap-2 flex-1 h-full cursor-default'
             onMouseDown={(e) => {
               if (e.buttons === 1) {
                 e.preventDefault();
@@ -63,7 +61,7 @@ export function TitleBar() {
             }}>
             <span className='pointer-events-none'>juse</span>
           </div>
-          <div className='flex h-full'>
+          <div className='flex h-10 absolute right-0 top-0 z-10'>
             <button
               onClick={() => getCurrentWindow().minimize()}
               className='inline-flex items-center justify-center h-full w-12 hover:bg-black/5 active:bg-black/10 dark:hover:bg-white/10 dark:active:bg-white/20 text-muted-foreground hover:text-foreground transition-colors'>

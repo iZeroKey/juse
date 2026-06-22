@@ -126,8 +126,13 @@ export function ContractViewSheet({ open, onClose, contract }: ContractViewSheet
                     {contract.nombresPapitos && <DataRow label="Papitos" value={contract.nombresPapitos} />}
                     {contract.nombreBebe && <DataRow label="Bebé" value={contract.nombreBebe} />}
                     {contract.informacionAdicional && (
-                      <div className="col-span-2 mt-1">
-                        <DataRow label="Info Adicional" value={<span className="whitespace-pre-wrap">{contract.informacionAdicional}</span>} />
+                      <div className="col-span-2 mt-2 space-y-1.5">
+                        <span className="text-sm text-muted-foreground block">Info Adicional</span>
+                        <div className="rounded-lg bg-muted p-3">
+                          <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                            {contract.informacionAdicional}
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -141,11 +146,9 @@ export function ContractViewSheet({ open, onClose, contract }: ContractViewSheet
                     <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                       <Package className="size-3.5" /> Paquete
                     </h3>
-                    {packageInfo && (
-                      <span className="text-xs font-medium text-[var(--color-juse-blue)] bg-blue-50 px-2 py-0.5 rounded-full">
-                        {packageInfo.nroPaquete}
-                      </span>
-                    )}
+                    <span className="text-xs font-medium text-[var(--color-juse-blue)] dark:text-blue-400 bg-[var(--color-juse-blue)]/10 px-2.5 py-0.5 rounded-full">
+                      {packageInfo?.nroPaquete || contract.paqueteNombre || "Sin Nombre"}
+                    </span>
                   </div>
                   
                   <div className="space-y-3">

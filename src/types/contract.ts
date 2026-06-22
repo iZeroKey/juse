@@ -16,6 +16,7 @@ export interface JuseContract {
   
   // Paquete
   paqueteId?: string; // Optional reference to the package
+  paqueteNombre?: string; // For custom packages
   paqueteDetalle: string;
   movilidad: string;
   
@@ -48,6 +49,7 @@ export interface ContractFormValues {
   fechaEvento: string;
   horaEvento: string;
   paqueteId: string;
+  paqueteNombre: string;
   paqueteDetalle: string;
   movilidad: string;
   precio: string;

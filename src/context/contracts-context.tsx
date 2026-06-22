@@ -2,8 +2,9 @@ import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { JuseContract } from '@/types/contract';
 import { generateId } from '@/lib/utils';
 import { defaultContracts } from '@/data/seed';
+import { loadData, saveData } from '@/lib/storage';
 
-const STORAGE_KEY = 'juse-contracts';
+const STORAGE_KEY = 'juse-contracts.json';
 
 interface ContractsContextValue {
   contracts: JuseContract[];
@@ -11,26 +12,10 @@ interface ContractsContextValue {
   updateContract: (id: string, updates: Partial<JuseContract>) => void;
   deleteContract: (id: string) => void;
   getContract: (id: string) => JuseContract | undefined;
+  isLoaded: boolean;
 }
 
 export const ContractsContext = createContext<ContractsContextValue | null>(null);
-
-function loadContracts(): JuseContract[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultContracts));
-      return defaultContracts;
-    }
-    return JSON.parse(raw) as JuseContract[];
-  } catch {
-    return defaultContracts;
-  }
-}
-
-function saveContracts(contracts: JuseContract[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(contracts));
-}
 
 export function generateContractNumber(contracts: JuseContract[], year: number): string {
   const prefix = `${year}-`;
@@ -56,11 +41,21 @@ export function generateContractNumber(contracts: JuseContract[], year: number):
 }
 
 export function ContractsProvider({ children }: { children: React.ReactNode }) {
-  const [contracts, setContracts] = useState<JuseContract[]>(loadContracts);
+  const [contracts, setContracts] = useState<JuseContract[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    saveContracts(contracts);
-  }, [contracts]);
+    loadData<JuseContract[]>(STORAGE_KEY, defaultContracts).then(data => {
+      setContracts(data);
+      setIsLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      saveData(STORAGE_KEY, contracts);
+    }
+  }, [contracts, isLoaded]);
 
   const addContract = useCallback((contractData: Omit<JuseContract, 'id' | 'createdAt' | 'updatedAt'>): JuseContract => {
     const newContract: JuseContract = {
@@ -92,8 +87,8 @@ export function ContractsProvider({ children }: { children: React.ReactNode }) {
   }, [contracts]);
 
   return (
-    <ContractsContext.Provider value={{ contracts, addContract, updateContract, deleteContract, getContract }}>
-      {children}
+    <ContractsContext.Provider value={{ contracts, addContract, updateContract, deleteContract, getContract, isLoaded }}>
+      {isLoaded ? children : null}
     </ContractsContext.Provider>
   );
 }

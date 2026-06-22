@@ -1,8 +1,9 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { JusePackage } from '@/types/package';
 import { generateId } from '@/lib/utils';
+import { loadData, saveData } from '@/lib/storage';
 
-const STORAGE_KEY = 'juse-packages';
+const STORAGE_KEY = 'juse-packages.json';
 
 interface PackagesContextValue {
   packages: JusePackage[];
@@ -10,66 +11,29 @@ interface PackagesContextValue {
   updatePackage: (id: string, updates: Partial<JusePackage>) => void;
   deletePackage: (id: string) => void;
   getPackage: (id: string) => JusePackage | undefined;
+  isLoaded: boolean;
 }
 
 export const PackagesContext = createContext<PackagesContextValue | null>(null);
 
-function loadPackages(): JusePackage[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-      return [];
-    }
-    const parsed = JSON.parse(raw) as any[];
-    return parsed.map(pkg => {
-      let migratedSpecs: any[] = [];
-      
-      const rawArray = Array.isArray(pkg.especificaciones) 
-        ? pkg.especificaciones 
-        : (typeof pkg.especificaciones === 'string' ? pkg.especificaciones.split(' / ').map((s: string) => s.trim()).filter(Boolean) : []);
-
-      migratedSpecs = rawArray.flatMap((item: any) => {
-        if (typeof item === 'object' && item !== null && 'value' in item) {
-          return item; // Already modern
-        }
-        const str = String(item);
-        if (str.includes('---')) {
-          const parts = str.split('---').map(p => p.trim()).filter(Boolean);
-          const result = [];
-          if (parts.length > 0) {
-            if (str.startsWith('---')) {
-              result.push({ value: parts[0], isSpecial: true });
-            } else {
-              result.push({ value: parts[0], isSpecial: false });
-              if (parts[1]) result.push({ value: parts[1], isSpecial: true });
-            }
-          }
-          return result;
-        }
-        return { value: str, isSpecial: false };
-      });
-
-      return {
-        ...pkg,
-        especificaciones: migratedSpecs
-      };
-    }) as JusePackage[];
-  } catch {
-    return [];
-  }
-}
-
-function savePackages(packages: JusePackage[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(packages));
-}
+// Migration function removed since specifications are now plain strings
 
 export function PackagesProvider({ children }: { children: React.ReactNode }) {
-  const [packages, setPackages] = useState<JusePackage[]>(loadPackages);
+  const [packages, setPackages] = useState<JusePackage[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    savePackages(packages);
-  }, [packages]);
+    loadData<JusePackage[]>(STORAGE_KEY, []).then(data => {
+      setPackages(data);
+      setIsLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      saveData(STORAGE_KEY, packages);
+    }
+  }, [packages, isLoaded]);
 
   const addPackage = useCallback((pkgData: Omit<JusePackage, 'id' | 'createdAt' | 'updatedAt'>): JusePackage => {
     const newPkg: JusePackage = {
@@ -100,8 +64,8 @@ export function PackagesProvider({ children }: { children: React.ReactNode }) {
   }, [packages]);
 
   return (
-    <PackagesContext.Provider value={{ packages, addPackage, updatePackage, deletePackage, getPackage }}>
-      {children}
+    <PackagesContext.Provider value={{ packages, addPackage, updatePackage, deletePackage, getPackage, isLoaded }}>
+      {isLoaded ? children : null}
     </PackagesContext.Provider>
   );
 }

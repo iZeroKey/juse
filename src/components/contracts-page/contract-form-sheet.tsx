@@ -5,8 +5,9 @@ import type { ContractFormValues, JuseContract } from '@/types/contract';
 import { EVENT_TYPES } from '@/types/event';
 import { format, parseISO, parse, isValid } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm, useWatch, Controller } from 'react-hook-form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, Calendar as CalendarIcon, Baby, CircleDollarSign, X, Save } from 'lucide-react';
 import { sileo } from 'sileo';
 import { Input } from '@/components/ui/input';
@@ -43,7 +44,8 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
   const { contracts, addContract, updateContract } = useContracts();
   const { packages } = usePackages();
   
-  const { register, handleSubmit, reset, control, setValue, formState: { errors } } = useForm<ContractFormValues>({
+  const [packagePopoverOpen, setPackagePopoverOpen] = useState(false);
+  const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm<ContractFormValues>({
     defaultValues: {
       contratoNumber: '',
       fechaEmision: format(new Date(), 'dd/MM/yyyy'),
@@ -55,6 +57,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
       fechaEvento: format(new Date(), 'dd/MM/yyyy'),
       horaEvento: '16:00',
       paqueteId: '',
+      paqueteNombre: '',
       paqueteDetalle: '',
       movilidad: '',
       precio: '',
@@ -80,9 +83,10 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
           tipoEvento: initialData.tipoEvento,
           fechaEvento: initialData.fechaEvento ? format(parseISO(initialData.fechaEvento), 'dd/MM/yyyy') : '',
           horaEvento: initialData.horaEvento,
-          paqueteId: initialData.paqueteId || '',
-          paqueteDetalle: initialData.paqueteDetalle,
-          movilidad: initialData.movilidad,
+          paqueteId: initialData?.paqueteId || '',
+          paqueteNombre: initialData?.paqueteNombre || '',
+          paqueteDetalle: initialData?.paqueteDetalle || '',
+          movilidad: initialData?.movilidad || '',
           precio: initialData.precio.toString(),
           aCuenta: initialData.aCuenta.toString(),
           formaPago: initialData.formaPago,
@@ -102,7 +106,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
           tipoEvento: '',
           fechaEvento: format(new Date(), 'dd/MM/yyyy'),
           horaEvento: '16:00',
-          paqueteId: '',
+          paqueteNombre: '',
           paqueteDetalle: '',
           movilidad: '',
           precio: '',
@@ -117,43 +121,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
     }
   }, [open, initialData, reset, contracts]);
 
-  // Handle auto-fill from package selection
-  const selectedPackageId = useWatch({ control, name: 'paqueteId' });
-  const paqueteDetalleValue = useWatch({ control, name: 'paqueteDetalle' });
-
-  const prevPackageId = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (open) {
-      prevPackageId.current = initialData ? (initialData.paqueteId || '') : '';
-    }
-  }, [open, initialData]);
-
-  useEffect(() => {
-    // Solo autocompletar si hay un paquete seleccionado y es diferente al anterior (cambio real del usuario)
-    if (selectedPackageId && selectedPackageId !== prevPackageId.current) {
-      prevPackageId.current = selectedPackageId;
-      
-      const pkg = packages.find(p => p.id === selectedPackageId);
-      if (pkg) {
-        setValue('paqueteDetalle', Array.isArray(pkg.especificaciones) 
-          ? pkg.especificaciones.reduce((acc: string, curr: any, idx: number, arr: any[]) => {
-              if (idx === 0) return typeof curr === 'string' ? curr : curr.value;
-              const isSpecial = typeof curr === 'string' ? false : curr.isSpecial;
-              const prevWasSpecial = typeof arr[idx - 1] === 'string' ? false : arr[idx - 1].isSpecial;
-              const separator = (isSpecial || prevWasSpecial) ? ' --- ' : ' / ';
-              return acc + separator + (typeof curr === 'string' ? curr : curr.value);
-            }, '')
-          : pkg.especificaciones, { shouldValidate: true });
-        setValue('precio', pkg.precio.toString(), { shouldValidate: true });
-        setValue('movilidad', pkg.movilidad || '', { shouldValidate: true });
-        setValue('tipoEvento', pkg.tipoEvento, { shouldValidate: true });
-      }
-    }
-  }, [selectedPackageId, packages, setValue]);
-
   const onSubmit = (data: ContractFormValues) => {
-    // Validate uniqueness of contratoNumber
     const isDuplicate = contracts.some(c => c.contratoNumber === data.contratoNumber && c.id !== initialData?.id);
     if (isDuplicate) {
       alert(`El número de contrato ${data.contratoNumber} ya existe.`);
@@ -177,7 +145,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
       tipoEvento: data.tipoEvento,
       fechaEvento: isoFechaEvento,
       horaEvento: data.horaEvento,
-      paqueteId: data.paqueteId,
+      paqueteNombre: data.paqueteNombre,
       paqueteDetalle: data.paqueteDetalle,
       movilidad: data.movilidad,
       precio: precioNum,
@@ -219,7 +187,6 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
         <DrawerPanel>
           <form id="contract-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             
-            {/* ── SECCIÓN 0: DETALLES DEL CONTRATO ── */}
             <section className="space-y-5">
               <div className="flex items-center gap-2 border-b border-border pb-2">
                 <CalendarIcon className="w-5 h-5 text-[var(--color-juse-blue)]" />
@@ -241,11 +208,14 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                     control={control}
                     rules={{ required: 'Requerido' }}
                     render={({ field }) => {
-                      // Attempt to parse the dd/MM/yyyy string for the calendar
+                      let isoValue = "";
                       let dateObj = undefined;
                       if (field.value) {
                         const parsed = parse(field.value, 'dd/MM/yyyy', new Date());
-                        if (isValid(parsed)) dateObj = parsed;
+                        if (isValid(parsed)) {
+                           isoValue = format(parsed, 'yyyy-MM-dd');
+                           dateObj = parsed;
+                        }
                       }
 
                       return (
@@ -272,8 +242,15 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                           </Popover>
                           <Input
                             {...field}
-                            placeholder="Ej. 13/02/2025"
-                            className={cn("pl-10", errors.fechaEmision && "border-red-500 focus-visible:ring-red-500")}
+                            type="date"
+                            value={isoValue}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (!val) { field.onChange(""); return; }
+                              const p = parse(val, 'yyyy-MM-dd', new Date());
+                              if (isValid(p)) field.onChange(format(p, "dd/MM/yyyy"));
+                            }}
+                            className={cn("pl-10 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0", errors.fechaEmision && "border-red-500 focus-visible:ring-red-500")}
                           />
                         </div>
                       );
@@ -284,7 +261,6 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
               </div>
             </section>
 
-            {/* ── SECCIÓN 1: DATOS DEL CLIENTE ── */}
             <section className="space-y-5">
               <div className="flex items-center gap-2 border-b border-border pb-2">
                 <User className="w-5 h-5 text-[var(--color-juse-blue)]" />
@@ -320,7 +296,6 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
               </div>
             </section>
 
-            {/* ── SECCIÓN 2: DATOS DEL EVENTO Y PAQUETE ── */}
             <section className="space-y-5">
               <div className="flex items-center gap-2 border-b border-border pb-2">
                 <CalendarIcon className="w-5 h-5 text-[var(--color-juse-blue)]" />
@@ -344,10 +319,14 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                     control={control}
                     rules={{ required: 'Requerido' }}
                     render={({ field }) => {
+                      let isoValue = "";
                       let dateObj = undefined;
                       if (field.value) {
                         const parsed = parse(field.value, 'dd/MM/yyyy', new Date());
-                        if (isValid(parsed)) dateObj = parsed;
+                        if (isValid(parsed)) {
+                           isoValue = format(parsed, 'yyyy-MM-dd');
+                           dateObj = parsed;
+                        }
                       }
 
                       return (
@@ -374,9 +353,15 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                           </Popover>
                           <Input
                             {...field}
-                            type="text"
-                            placeholder="dd/mm/aaaa"
-                            className={cn("pl-10", errors.fechaEvento && "border-red-500 focus-visible:ring-red-500")}
+                            type="date"
+                            value={isoValue}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (!val) { field.onChange(""); return; }
+                              const p = parse(val, 'yyyy-MM-dd', new Date());
+                              if (isValid(p)) field.onChange(format(p, "dd/MM/yyyy"));
+                            }}
+                            className={cn("pl-10 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0", errors.fechaEvento && "border-red-500 focus-visible:ring-red-500")}
                           />
                         </div>
                       );
@@ -396,59 +381,63 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Seleccionar Paquete <span className="text-red-500">*</span></label>
-                <Controller
-                  name="paqueteId"
-                  control={control}
-                  rules={{ required: 'Requerido' }}
-                  render={({ field }) => {
-                    const packageOptions = packages.map(pkg => ({
-                      value: pkg.id,
-                      label: `${pkg.nroPaquete} - S/ ${pkg.precio}`,
-                      original: pkg
-                    }));
-                    const selectedItem = packageOptions.find(p => p.value === field.value) || null;
-
-                    return (
-                      <Combobox
-                        items={packageOptions}
-                        value={selectedItem}
-                        onValueChange={(val) => {
-                          field.onChange(val?.value || '');
-                        }}
-                      >
-                        <ComboboxInput 
-                          placeholder="Buscar paquete..." 
-                          showClear 
-                          className={cn("w-full bg-transparent border-transparent focus-visible:ring-0 focus-visible:border-transparent h-[40px]", errors.paqueteId && "border-red-500 focus-visible:ring-red-500")}
-                        />
-                        <ComboboxPopup className="z-[100]">
-                          <ComboboxEmpty>No se encontraron paquetes.</ComboboxEmpty>
-                          <ComboboxList>
-                            {(item) => (
-                              <ComboboxItem key={item.value} value={item}>
-                                {item.label}
-                              </ComboboxItem>
-                            )}
-                          </ComboboxList>
-                        </ComboboxPopup>
-                      </Combobox>
-                    );
-                  }}
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-foreground">Nombre del Paquete <span className="text-red-500">*</span></label>
+                  <Popover open={packagePopoverOpen} onOpenChange={setPackagePopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <button type="button" className="h-7 px-2.5 text-xs font-medium border bg-secondary/50 rounded-md cursor-pointer hover:bg-secondary w-auto transition-colors">
+                        Cargar Plantilla
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48 p-1 shadow-md rounded-lg" align="end">
+                      {packages.length === 0 ? (
+                        <div className="p-2 text-xs text-muted-foreground text-center">No hay paquetes</div>
+                      ) : (
+                        <div className="max-h-[200px] overflow-y-auto">
+                          {packages.map(pkg => (
+                            <button
+                              key={pkg.id}
+                              type="button"
+                              onClick={() => {
+                                setValue('paqueteNombre', pkg.nroPaquete, { shouldValidate: true });
+                                setValue('paqueteDetalle', pkg.especificaciones || '', { shouldValidate: true });
+                                setValue('precio', pkg.precio.toString(), { shouldValidate: true });
+                                if (pkg.movilidad) setValue('movilidad', pkg.movilidad, { shouldValidate: true });
+                                if (pkg.tipoEvento) setValue('tipoEvento', pkg.tipoEvento, { shouldValidate: true });
+                                setPackagePopoverOpen(false);
+                              }}
+                              className="w-full text-left px-2 py-1.5 text-xs rounded-sm hover:bg-muted transition-colors truncate"
+                            >
+                              <span className="font-medium">{pkg.nroPaquete}</span> <span className="text-muted-foreground">- S/ {pkg.precio}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <Input
+                  {...register('paqueteNombre', { required: 'Requerido' })}
+                  placeholder="Ej. PAQUETE BÁSICO"
+                  className={cn(errors.paqueteNombre && "border-red-500 focus-visible:ring-red-500")}
                 />
-                {errors.paqueteId && <span className="text-[11px] text-red-500 font-medium block">{errors.paqueteId.message}</span>}
+                {errors.paqueteNombre && <span className="text-[11px] text-red-500 font-medium block">{errors.paqueteNombre.message}</span>}
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground">Detalle del Paquete / Especificaciones</label>
-                <div className="w-full min-h-[42px] rounded-lg border border-border bg-muted px-3 py-2 text-sm shadow-sm text-muted-foreground cursor-not-allowed whitespace-pre-wrap break-words">
-                  {paqueteDetalleValue || <span className="opacity-50">Seleccione un paquete para ver los detalles...</span>}
-                </div>
-                <input type="hidden" {...register('paqueteDetalle')} />
+                <label className="text-sm font-medium text-foreground">Detalle del Paquete / Especificaciones <span className="text-red-500">*</span></label>
+                <textarea
+                  {...register('paqueteDetalle', { required: 'Requerido' })}
+                  placeholder="Ingresa las especificaciones del paquete..."
+                  className={cn(
+                    "flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+                    errors.paqueteDetalle && "border-red-500 focus-visible:ring-red-500"
+                  )}
+                />
+                {errors.paqueteDetalle && <span className="text-[11px] text-red-500 font-medium block">{errors.paqueteDetalle.message}</span>}
               </div>
             </section>
 
-            {/* ── SECCIÓN 3: NOMBRES (OPCIONAL) ── */}
             <section className="space-y-5">
               <div className="flex items-center gap-2 border-b border-border pb-2">
                 <Baby className="w-5 h-5 text-[var(--color-juse-blue)]" />
@@ -483,7 +472,6 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
               </div>
             </section>
 
-            {/* ── SECCIÓN 4: FINANZAS ── */}
             <section className="space-y-5">
               <div className="flex items-center gap-2 border-b border-border pb-2">
                 <CircleDollarSign className="w-5 h-5 text-[var(--color-juse-blue)]" />
@@ -504,7 +492,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                   {errors.precio && <span className="text-[11px] text-red-500 font-medium block">{errors.precio.message}</span>}
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-foreground">A Cuenta</label>
+                  <label className="text-sm font-medium text-foreground">Adelanto</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">S/</span>
                     <Input
@@ -514,6 +502,7 @@ export function ContractFormSheet({ open, onClose, initialData }: ContractFormSh
                       className="pl-8"
                     />
                   </div>
+                  {errors.aCuenta && <span className="text-[11px] text-red-500 font-medium block">{errors.aCuenta.message}</span>}
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">Forma de Pago</label>

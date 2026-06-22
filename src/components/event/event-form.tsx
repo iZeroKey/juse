@@ -106,8 +106,8 @@ export function EventForm({
   React.useEffect(() => {
     const total = parseCurrency(totalEventoStr);
     const adelanto = parseCurrency(adelantoStr);
-    const calculatedSaldo = Math.max(0, total - adelanto);
-    setValue('saldo', calculatedSaldo > 0 ? calculatedSaldo.toFixed(2) : '0.00', { shouldDirty: true });
+    const calculatedSaldo = total - adelanto;
+    setValue('saldo', calculatedSaldo.toFixed(2), { shouldDirty: true });
   }, [totalEventoStr, adelantoStr, setValue]);
 
   const processSubmit = (data: EventFormValues) => {
@@ -160,10 +160,14 @@ export function EventForm({
                 control={control}
                 rules={{ required: true }}
                 render={({ field, fieldState: { error } }) => {
+                  let isoValue = "";
                   let dateObj = undefined;
                   if (field.value) {
                     const parsed = parse(field.value, 'dd/MM/yyyy', new Date());
-                    if (isValid(parsed)) dateObj = parsed;
+                    if (isValid(parsed)) {
+                       isoValue = format(parsed, 'yyyy-MM-dd');
+                       dateObj = parsed;
+                    }
                   }
 
                   return (
@@ -190,9 +194,15 @@ export function EventForm({
                       </Popover>
                       <Input
                         {...field}
-                        type="text"
-                        placeholder="dd/mm/aaaa"
-                        className={cn("pl-10", error && "border-red-500 focus-visible:ring-red-500")}
+                        type="date"
+                        value={isoValue}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (!val) { field.onChange(""); return; }
+                          const p = parse(val, 'yyyy-MM-dd', new Date());
+                          if (isValid(p)) field.onChange(format(p, "dd/MM/yyyy"));
+                        }}
+                        className={cn("pl-10 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0", error && "border-red-500 focus-visible:ring-red-500")}
                       />
                     </div>
                   );

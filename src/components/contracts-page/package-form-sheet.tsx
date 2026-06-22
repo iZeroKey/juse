@@ -16,8 +16,7 @@ import {
 } from '@/components/ui/drawer';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
-import { useForm, useFieldArray, useWatch } from 'react-hook-form';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useForm, useWatch } from 'react-hook-form';
 import { sileo } from 'sileo';
 
 interface PackageFormSheetProps {
@@ -33,29 +32,19 @@ export function PackageFormSheet({ open, onClose, initialData }: PackageFormShee
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<PackageFormValues>({
     defaultValues: {
       nroPaquete: '',
-      especificaciones: [{ value: '' }],
+      especificaciones: '',
       precio: '',
       movilidad: '',
       tipoEvento: '',
     }
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'especificaciones',
-  });
-
-  const specs = useWatch({ control, name: 'especificaciones' });
-  const hasEmptySpec = specs?.some(s => !s.value?.trim());
-
   useEffect(() => {
     if (open) {
       if (initialData) {
         reset({
           nroPaquete: initialData.nroPaquete,
-          especificaciones: Array.isArray(initialData.especificaciones) 
-            ? initialData.especificaciones.map(e => typeof e === 'object' ? e : { value: String(e) }) 
-            : [{ value: String(initialData.especificaciones || '') }],
+          especificaciones: String(initialData.especificaciones || ''),
           precio: initialData.precio.toString(),
           movilidad: initialData.movilidad,
           tipoEvento: initialData.tipoEvento,
@@ -63,7 +52,7 @@ export function PackageFormSheet({ open, onClose, initialData }: PackageFormShee
       } else {
         reset({
           nroPaquete: '',
-          especificaciones: [{ value: '' }],
+          especificaciones: '',
           precio: '',
           movilidad: 'MAS MOVILIDAD',
           tipoEvento: '',
@@ -75,7 +64,7 @@ export function PackageFormSheet({ open, onClose, initialData }: PackageFormShee
   const onSubmit = (data: PackageFormValues) => {
     const pkgData = {
       nroPaquete: data.nroPaquete,
-      especificaciones: data.especificaciones.filter(e => e.value?.trim()),
+      especificaciones: data.especificaciones.trim(),
       precio: parseFloat(data.precio) || 0,
       movilidad: data.movilidad,
       tipoEvento: data.tipoEvento,
@@ -83,10 +72,10 @@ export function PackageFormSheet({ open, onClose, initialData }: PackageFormShee
 
     if (initialData) {
       updatePackage(initialData.id, pkgData);
-      sileo.success({ title: 'Paquete actualizado', description: `Los cambios del paquete "${data.nombre}" se han guardado` });
+      sileo.success({ title: 'Paquete actualizado', description: `Los cambios del paquete "${data.nroPaquete}" se han guardado` });
     } else {
       addPackage(pkgData);
-      sileo.success({ title: 'Paquete creado', description: `El paquete "${data.nombre}" ha sido registrado exitosamente` });
+      sileo.success({ title: 'Paquete creado', description: `El paquete "${data.nroPaquete}" ha sido registrado exitosamente` });
     }
     onClose();
   };
@@ -129,73 +118,17 @@ export function PackageFormSheet({ open, onClose, initialData }: PackageFormShee
               {errors.tipoEvento && <span className="text-xs text-red-500">{errors.tipoEvento.message}</span>}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <label className="text-xs font-semibold text-muted-foreground">Especificaciones</label>
-              <div className="flex flex-col">
-                <AnimatePresence initial={false}>
-                  {fields.map((field, index) => (
-                      <motion.div 
-                        key={field.id} 
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden px-1 -mx-1 pt-1 -mt-1"
-                      >
-                      <div className="relative w-full pb-2 group flex items-center">
-                        <Input
-                          {...register(`especificaciones.${index}.value` as const, { required: 'Requerido' })}
-                          placeholder="Ej. ANIMADOR, DJ, MICROFONOS..."
-                          className={cn(
-                            "pr-[5rem]",
-                            specs?.[index]?.isSpecial && "bg-amber-50 border-amber-300 text-amber-900 placeholder:text-amber-300 focus-visible:border-amber-400 focus-visible:ring-amber-400/20 dark:bg-amber-500/10 dark:border-amber-500/30 dark:text-amber-400 dark:placeholder:text-amber-500/50"
-                          )}
-                        />
-                        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 -mt-1 flex items-center gap-1">
-                          <label 
-                            className={`p-1.5 rounded-md cursor-pointer transition-colors ${specs?.[index]?.isSpecial ? 'text-amber-500 hover:bg-amber-100 dark:hover:bg-amber-500/20' : 'text-muted-foreground/60 hover:text-amber-400 hover:bg-muted'}`}
-                            title="Marcar como nota especial"
-                          >
-                            <input 
-                              type="checkbox" 
-                              {...register(`especificaciones.${index}.isSpecial` as const)}
-                              className="sr-only"
-                            />
-                            <Star className="size-4" fill={specs?.[index]?.isSpecial ? 'currentColor' : 'none'} />
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => remove(index)}
-                            className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-md transition-colors"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="size-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                
-                <div className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!hasEmptySpec) append({ value: '' });
-                    }}
-                    disabled={hasEmptySpec}
-                    className={`w-full flex items-center justify-center gap-2 py-2 px-4 border-2 border-dashed rounded-lg transition-colors text-sm font-medium
-                      ${hasEmptySpec 
-                        ? 'border-border text-muted-foreground/60 bg-muted cursor-not-allowed' 
-                        : 'border-border/60 text-muted-foreground hover:border-border hover:text-foreground hover:bg-muted cursor-pointer'
-                      }`}
-                  >
-                    <Plus className="size-4" />
-                    Agregar Especificación
-                  </button>
-                </div>
-              </div>
-              {errors.especificaciones && <span className="text-xs text-red-500">Revisa las especificaciones</span>}
+              <textarea
+                {...register('especificaciones', { required: 'Requerido' })}
+                placeholder="Ej. ANIMADOR / DJ / MICROFONOS"
+                className={cn(
+                  "flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+                  errors.especificaciones && "border-red-500 focus-visible:ring-red-500"
+                )}
+              />
+              {errors.especificaciones && <span className="text-[11px] text-red-500 font-medium block">{errors.especificaciones.message}</span>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
