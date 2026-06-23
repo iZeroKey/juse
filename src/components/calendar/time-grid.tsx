@@ -1,6 +1,7 @@
 "use client";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatHora } from "@/lib/utils";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 interface TimeGridProps {
@@ -72,15 +73,15 @@ function TimeGrid({
   return (
     <ScrollArea scrollFade ref={scrollRef} className='h-full w-full'>
       <div className='flex' style={{ height: totalHeight }}>
-        <div className='relative w-14 shrink-0 border-r border-border'>
+        <div className='relative w-16 shrink-0 border-r border-border'>
           {hours.map((hour) => {
             const top = (hour - gridStartHour) * HOUR_HEIGHT;
             return (
               <span
                 key={hour}
-                className='absolute right-2 font-sans text-[11px] leading-none text-muted-foreground'
+                className='absolute right-2 font-sans text-[11px] leading-none text-muted-foreground whitespace-nowrap'
                 style={{ top: top - 6 }}>
-                {String(hour).padStart(2, "0")}:00
+                {formatHora(`${String(hour).padStart(2, "0")}:00`)}
               </span>
             );
           })}

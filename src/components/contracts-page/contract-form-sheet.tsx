@@ -81,6 +81,8 @@ export function ContractFormSheet({
       nombreBebe: "",
       nombreCumpleanero: "",
       informacionAdicional: "",
+      pagoPersonal: "",
+      tipoComprobante: "",
     },
   });
 
@@ -108,6 +110,8 @@ export function ContractFormSheet({
           nombreBebe: initialData.nombreBebe,
           nombreCumpleanero: initialData.nombreCumpleanero,
           informacionAdicional: initialData.informacionAdicional || "",
+          pagoPersonal: initialData.pagoPersonal?.toString() || "",
+          tipoComprobante: initialData.tipoComprobante || "",
         });
       } else {
         reset({
@@ -133,6 +137,8 @@ export function ContractFormSheet({
           nombreBebe: "",
           nombreCumpleanero: "",
           informacionAdicional: "",
+          pagoPersonal: "",
+          tipoComprobante: "",
         });
       }
     }
@@ -173,6 +179,8 @@ export function ContractFormSheet({
       nombreBebe: data.nombreBebe,
       nombreCumpleanero: data.nombreCumpleanero,
       informacionAdicional: data.informacionAdicional,
+      pagoPersonal: Number(parseFloat(data.pagoPersonal || "0").toFixed(2)),
+      tipoComprobante: data.tipoComprobante || "",
     };
 
     if (initialData) {
@@ -679,9 +687,34 @@ export function ContractFormSheet({
                 </div>
                 <div className='space-y-1.5'>
                   <label className='text-sm font-medium text-foreground'>
+                    Tipo de Comprobante
+                  </label>
+                  <Input
+                    {...register("tipoComprobante")}
+                    placeholder='Ej. Boleta, Factura...'
+                  />
+                </div>
+                <div className='space-y-1.5'>
+                  <label className='text-sm font-medium text-foreground'>
                     Movilidad
                   </label>
                   <Input {...register("movilidad")} />
+                </div>
+                <div className='space-y-1.5'>
+                  <label className='text-sm font-medium text-foreground'>
+                    Pago de Personal
+                  </label>
+                  <div className='relative'>
+                    <span className='absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground'>
+                      S/
+                    </span>
+                    <Input
+                      type='number'
+                      step='0.01'
+                      {...register("pagoPersonal")}
+                      className='pl-8'
+                    />
+                  </div>
                 </div>
               </div>
             </section>

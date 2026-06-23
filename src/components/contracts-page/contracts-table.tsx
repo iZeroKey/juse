@@ -1,6 +1,10 @@
 import { useContracts } from "@/hooks/use-contracts";
 
 import type { JuseContract } from "@/types/contract";
+import {
+  exportContratosExcel,
+  exportContratosPDF,
+} from "@/utils/exportContracts";
 import { generarContratoPDF, generarReciboPDF } from "@/utils/pdfGenerator";
 import {
   flexRender,
@@ -23,6 +27,7 @@ import {
   FileSignature,
   FileText,
   Plus,
+  Search,
   Trash2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -35,7 +40,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatPhoneNumber } from "@/lib/utils";
+import { formatFechaCorta, formatHora, formatPhoneNumber } from "@/lib/utils";
 import { format, isValid, parse } from "date-fns";
 import { es } from "date-fns/locale";
 import { ContractClientSheet } from "./contract-client-sheet";
@@ -88,6 +93,10 @@ export function ContractsTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [fromDateStr, setFromDateStr] = useState("");
   const [toDateStr, setToDateStr] = useState("");
+  const [filterType, setFilterType] = useState<"fechaEvento" | "fechaEmision">(
+    "fechaEvento",
+  );
+  const [searchTerm, setSearchTerm] = useState("");
 
   const parseDateForFilter = (val: string) => {
     if (!val) return 0;
@@ -100,35 +109,51 @@ export function ContractsTable() {
 
   const filteredContracts = useMemo(() => {
     return contracts.filter((contract) => {
-      if (!fromDateStr && !toDateStr) return true;
+      if (fromDateStr || toDateStr) {
+        const dateToUse =
+          filterType === "fechaEvento"
+            ? contract.fechaEvento
+            : contract.fechaEmision;
+        const time = parseDateForFilter(dateToUse);
+        if (!time) return false;
 
-      const time = parseDateForFilter(contract.fechaEvento);
-      if (!time) return false;
+        const eventDate = new Date(time);
+        eventDate.setHours(0, 0, 0, 0);
 
-      const eventDate = new Date(time);
-      eventDate.setHours(0, 0, 0, 0);
+        if (fromDateStr) {
+          const parsedFrom = parse(fromDateStr, "yyyy-MM-dd", new Date());
+          if (isValid(parsedFrom)) {
+            const fromDate = new Date(parsedFrom);
+            fromDate.setHours(0, 0, 0, 0);
+            if (eventDate.getTime() < fromDate.getTime()) return false;
+          }
+        }
 
-      if (fromDateStr) {
-        const parsedFrom = parse(fromDateStr, "yyyy-MM-dd", new Date());
-        if (isValid(parsedFrom)) {
-          const fromDate = new Date(parsedFrom);
-          fromDate.setHours(0, 0, 0, 0);
-          if (eventDate.getTime() < fromDate.getTime()) return false;
+        if (toDateStr) {
+          const parsedTo = parse(toDateStr, "yyyy-MM-dd", new Date());
+          if (isValid(parsedTo)) {
+            const toDate = new Date(parsedTo);
+            toDate.setHours(23, 59, 59, 999);
+            if (eventDate.getTime() > toDate.getTime()) return false;
+          }
         }
       }
 
-      if (toDateStr) {
-        const parsedTo = parse(toDateStr, "yyyy-MM-dd", new Date());
-        if (isValid(parsedTo)) {
-          const toDate = new Date(parsedTo);
-          toDate.setHours(23, 59, 59, 999);
-          if (eventDate.getTime() > toDate.getTime()) return false;
-        }
+      if (searchTerm) {
+        const lowerTerm = searchTerm.toLowerCase();
+        const matchName = contract.clienteNombre
+          ?.toLowerCase()
+          .includes(lowerTerm);
+        const matchDni = contract.clienteDni?.toLowerCase().includes(lowerTerm);
+        const matchContract = contract.contratoNumber
+          ?.toLowerCase()
+          .includes(lowerTerm);
+        if (!matchName && !matchDni && !matchContract) return false;
       }
 
       return true;
     });
-  }, [contracts, fromDateStr, toDateStr]);
+  }, [contracts, fromDateStr, toDateStr, filterType, searchTerm]);
 
   const columns = useMemo(
     () => [
@@ -144,7 +169,7 @@ export function ContractsTable() {
               {String(info.getValue())}
             </div>
             <div className='text-xs text-muted-foreground'>
-              {info.row.original.fechaEmision}
+              {formatFechaCorta(info.row.original.fechaEmision)}
             </div>
           </>
         ),
@@ -157,9 +182,9 @@ export function ContractsTable() {
           row: { original: JuseContract };
         }) => (
           <>
-            {String(info.getValue())}
+            {formatFechaCorta(String(info.getValue()))}
             <span className='block text-xs text-muted-foreground'>
-              {info.row.original.horaEvento}
+              {formatHora(info.row.original.horaEvento)}
             </span>
           </>
         ),
@@ -221,8 +246,27 @@ export function ContractsTable() {
         ),
       },
       {
+        accessorKey: "tipoComprobante",
+        header: "Comprobante",
+        cell: (info: { getValue: () => unknown }) => (
+          <div className='text-muted-foreground whitespace-nowrap'>
+            {String(info.getValue() || "") || "-"}
+          </div>
+        ),
+      },
+      {
         accessorKey: "precio",
         header: "Precio",
+        cell: (info: { getValue: () => unknown }) => (
+          <div className='font-medium whitespace-nowrap'>
+            S/ {Number(info.getValue() || 0).toFixed(2)}
+          </div>
+        ),
+        meta: { className: "text-right justify-end" },
+      },
+      {
+        accessorKey: "pagoPersonal",
+        header: "Pago Personal",
         cell: (info: { getValue: () => unknown }) => (
           <div className='font-medium whitespace-nowrap'>
             S/ {Number(info.getValue() || 0).toFixed(2)}
@@ -324,103 +368,192 @@ export function ContractsTable() {
         <ContextMenuTrigger
           className='flex flex-col gap-4 h-full relative'
           style={{ display: "flex" }}>
-          <div className='flex items-center justify-between shrink-0'>
-            <h2 className='text-lg font-semibold text-foreground'>Contratos</h2>
-            <div className='flex items-center gap-3'>
-              <div className='flex items-center gap-2'>
-                <div className='relative flex items-center w-38.75'>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className='absolute left-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none z-10 cursor-pointer'>
-                        <CalendarIcon className='size-4' />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0 z-100' align='start'>
-                      <Calendar
-                        mode='single'
-                        selected={
-                          fromDateStr
-                            ? isValid(
-                                parse(fromDateStr, "yyyy-MM-dd", new Date()),
-                              )
-                              ? parse(fromDateStr, "yyyy-MM-dd", new Date())
-                              : undefined
-                            : undefined
-                        }
-                        onSelect={(date) =>
-                          setFromDateStr(date ? format(date, "yyyy-MM-dd") : "")
-                        }
-                        locale={es}
-                      />
-                      <div className='p-2 border-t border-border'>
-                        <button
-                          disabled={!fromDateStr}
-                          onClick={() => setFromDateStr("")}
-                          className='w-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground text-xs py-1.5 rounded transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-muted/50 disabled:hover:text-muted-foreground'>
-                          Limpiar
-                        </button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <Input
-                    type='date'
-                    value={fromDateStr}
-                    onChange={(e) => setFromDateStr(e.target.value)}
-                    className='pl-9 h-9 text-sm [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0'
-                  />
-                </div>
+          <div className='flex flex-col gap-4 shrink-0'>
+            <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
+              <h2 className='text-lg font-semibold text-foreground'>
+                Contratos
+              </h2>
+              <div className='flex flex-wrap items-center gap-2'>
+                <button
+                  onClick={() => exportContratosPDF(filteredContracts)}
+                  className='flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-lg hover:brightness-110 transition-all shadow-sm text-sm font-medium cursor-pointer'>
+                  <FileText className='size-4' />
+                  Exportar PDF
+                </button>
+                <button
+                  onClick={() => exportContratosExcel(filteredContracts)}
+                  className='flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:brightness-110 transition-all shadow-sm text-sm font-medium cursor-pointer'>
+                  <Download className='size-4' />
+                  Exportar Excel
+                </button>
+                <button
+                  onClick={handleAddNew}
+                  className='flex items-center gap-2 bg-(--color-juse-blue) text-white px-4 py-2 rounded-lg hover:brightness-110 transition-all shadow-sm text-sm font-medium cursor-pointer'>
+                  <Plus className='size-4' />
+                  Nuevo Contrato
+                </button>
+              </div>
+            </div>
 
-                <span className='text-muted-foreground text-sm'>-</span>
+            <div className='flex flex-col xl:flex-row xl:flex-wrap xl:items-center gap-4 bg-muted/30 p-3 rounded-lg border border-border'>
+              <span className='text-sm font-semibold text-foreground shrink-0'>
+                Filtros:
+              </span>
 
-                <div className='relative flex items-center w-38.75'>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className='absolute left-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none z-10 cursor-pointer'>
-                        <CalendarIcon className='size-4' />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0 z-100' align='start'>
-                      <Calendar
-                        mode='single'
-                        selected={
-                          toDateStr
-                            ? isValid(
-                                parse(toDateStr, "yyyy-MM-dd", new Date()),
-                              )
-                              ? parse(toDateStr, "yyyy-MM-dd", new Date())
-                              : undefined
-                            : undefined
-                        }
-                        onSelect={(date) =>
-                          setToDateStr(date ? format(date, "yyyy-MM-dd") : "")
-                        }
-                        locale={es}
-                      />
-                      <div className='p-2 border-t border-border'>
-                        <button
-                          disabled={!toDateStr}
-                          onClick={() => setToDateStr("")}
-                          className='w-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground text-xs py-1.5 rounded transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-muted/50 disabled:hover:text-muted-foreground'>
-                          Limpiar
-                        </button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+              <div className='flex items-center gap-2 flex-auto min-w-55'>
+                <span className='text-xs font-medium text-muted-foreground whitespace-nowrap hidden sm:inline-block'>
+                  Buscar:
+                </span>
+                <div className='relative flex-1'>
+                  <Search className='absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
                   <Input
-                    type='date'
-                    value={toDateStr}
-                    onChange={(e) => setToDateStr(e.target.value)}
-                    className='pl-9 h-9 text-sm [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0'
+                    placeholder='Nombre, DNI o Contrato...'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className='pl-9 h-9 w-full text-xs'
                   />
                 </div>
               </div>
 
-              <button
-                onClick={handleAddNew}
-                className='flex items-center gap-2 bg-(--color-juse-blue) text-white px-4 py-2 rounded-lg hover:brightness-110 transition-all shadow-sm text-sm font-medium cursor-pointer'>
-                <Plus className='size-4' />
-                Nuevo Contrato
-              </button>
+              <div className='flex flex-wrap items-center gap-4'>
+                <div className='flex items-center gap-2'>
+                  <span className='text-xs font-medium text-muted-foreground whitespace-nowrap'>
+                    Fechas por:
+                  </span>
+                  <Select
+                    value={filterType}
+                    onValueChange={(val) =>
+                      setFilterType(val as "fechaEvento" | "fechaEmision")
+                    }>
+                    <SelectTrigger className='h-9 w-27.5 text-xs'>
+                      <SelectValue placeholder='Filtrar' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='fechaEvento'>F. Evento</SelectItem>
+                      <SelectItem value='fechaEmision'>F. Emisión</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className='flex items-center gap-2'>
+                  <span className='text-xs font-medium text-muted-foreground whitespace-nowrap'>
+                    Desde:
+                  </span>
+                  <div className='relative flex items-center w-full sm:w-32.5'>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className='absolute left-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none z-10 cursor-pointer'>
+                          <CalendarIcon className='size-4' />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className='w-auto p-0 z-100'
+                        align='start'>
+                        <Calendar
+                          mode='single'
+                          selected={
+                            fromDateStr
+                              ? isValid(
+                                  parse(fromDateStr, "yyyy-MM-dd", new Date()),
+                                )
+                                ? parse(fromDateStr, "yyyy-MM-dd", new Date())
+                                : undefined
+                              : undefined
+                          }
+                          onSelect={(date) =>
+                            setFromDateStr(
+                              date ? format(date, "yyyy-MM-dd") : "",
+                            )
+                          }
+                          locale={es}
+                        />
+                        <div className='p-2 border-t border-border'>
+                          <button
+                            disabled={!fromDateStr}
+                            onClick={() => setFromDateStr("")}
+                            className='w-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground text-xs py-1.5 rounded transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-muted/50 disabled:hover:text-muted-foreground'>
+                            Limpiar
+                          </button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <Input
+                      type='date'
+                      value={fromDateStr}
+                      onChange={(e) => setFromDateStr(e.target.value)}
+                      className='pl-9 h-9 w-full text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0'
+                    />
+                  </div>
+                </div>
+
+                <div className='flex items-center gap-2'>
+                  <span className='text-xs font-medium text-muted-foreground whitespace-nowrap'>
+                    Hasta:
+                  </span>
+                  <div className='relative flex items-center w-full sm:w-32.5'>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className='absolute left-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground focus-visible:outline-none z-10 cursor-pointer'>
+                          <CalendarIcon className='size-4' />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className='w-auto p-0 z-100'
+                        align='start'>
+                        <Calendar
+                          mode='single'
+                          selected={
+                            toDateStr
+                              ? isValid(
+                                  parse(toDateStr, "yyyy-MM-dd", new Date()),
+                                )
+                                ? parse(toDateStr, "yyyy-MM-dd", new Date())
+                                : undefined
+                              : undefined
+                          }
+                          onSelect={(date) =>
+                            setToDateStr(date ? format(date, "yyyy-MM-dd") : "")
+                          }
+                          locale={es}
+                        />
+                        <div className='p-2 border-t border-border'>
+                          <button
+                            disabled={!toDateStr}
+                            onClick={() => setToDateStr("")}
+                            className='w-full bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground text-xs py-1.5 rounded transition-colors font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-muted/50 disabled:hover:text-muted-foreground'>
+                            Limpiar
+                          </button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <Input
+                      type='date'
+                      value={toDateStr}
+                      onChange={(e) => setToDateStr(e.target.value)}
+                      className='pl-9 h-9 w-full text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:opacity-0'
+                    />
+                  </div>
+                </div>
+
+                <button
+                  disabled={
+                    !(
+                      searchTerm ||
+                      fromDateStr ||
+                      toDateStr ||
+                      filterType !== "fechaEvento"
+                    )
+                  }
+                  onClick={() => {
+                    setSearchTerm("");
+                    setFromDateStr("");
+                    setToDateStr("");
+                    setFilterType("fechaEvento");
+                  }}
+                  className='h-9 px-3 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-md transition-colors cursor-pointer shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-muted-foreground'>
+                  Limpiar todos
+                </button>
+              </div>
             </div>
           </div>
 

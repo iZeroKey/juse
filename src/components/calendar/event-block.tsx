@@ -10,7 +10,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { getEventColors } from "@/lib/calendar-utils";
-import { calculateDuration, cn } from "@/lib/utils";
+import { calculateDuration, cn, formatHora } from "@/lib/utils";
 import type { JuseEvent } from "@/types/event";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Edit2, MapPin, Trash2 } from "lucide-react";
@@ -35,7 +35,8 @@ function EventBlock({
 }: EventBlockProps) {
   const { bg, text, dot, colorValue } = getEventColors(event.color);
   const hasSaldo = event.saldo > 0;
-  const missingStaff = event.dj.length === 0 || event.animadoras.length === 0;
+  const missingStaff =
+    (event.dj || []).length === 0 || (event.animadores || []).length === 0;
 
   if (compact) {
     return (
@@ -113,7 +114,7 @@ function EventBlock({
                   className={cn(
                     "text-[9px] font-medium shrink-0 whitespace-nowrap text-muted-foreground opacity-80",
                   )}>
-                  {event.startTime}
+                  {formatHora(event.startTime)}
                 </span>
                 {hasSaldo && (
                   <span className='size-1 rounded-full bg-red-500 shrink-0 ml-auto' />
@@ -137,8 +138,8 @@ function EventBlock({
                       text,
                     )}>
                     {isCompact
-                      ? event.startTime
-                      : `${event.startTime} - ${event.endTime}`}
+                      ? formatHora(event.startTime)
+                      : `${formatHora(event.startTime)} - ${formatHora(event.endTime)}`}
                   </span>
 
                   {isCompact && (hasSaldo || missingStaff) && (

@@ -1,4 +1,9 @@
-import { formatFecha, formatHora, formatPhoneNumber } from "@/lib/utils";
+import {
+  formatFecha,
+  formatFechaCorta,
+  formatHoraContrato,
+  formatPhoneNumber,
+} from "@/lib/utils";
 import type { JuseContract } from "@/types/contract";
 import { PDFDocument, PDFFont, PDFPage, StandardFonts } from "pdf-lib";
 import { sileo } from "sileo";
@@ -459,15 +464,27 @@ async function injectData(
   const GLOBAL_OFFSET_Y = -32;
 
   for (const [key, config] of Object.entries(configMap)) {
-    const text = data[key];
-    if (!text) continue;
+    const rawText = data[key];
+    if (!rawText) continue;
+
+    const fontToUse = config.isBold ? fontBold : fontRegular;
+    const charset = fontToUse.getCharacterSet();
+
+    const text = Array.from(String(rawText))
+      .filter((char) => {
+        const code = char.codePointAt(0) || 0;
+        return (
+          charset.includes(code) || code === 10 || code === 13 || code === 9
+        );
+      })
+      .join("");
 
     await drawTextAligned(
       page,
       text,
       config.x as number,
       (config.y as number) + GLOBAL_OFFSET_Y,
-      config.isBold ? fontBold : fontRegular,
+      fontToUse,
       config.size as number,
       config.alignX as "left" | "center" | "right",
       config.alignY as "bottom" | "middle" | "top",
@@ -497,7 +514,7 @@ export async function generarReciboPDF(
   const page = pdfDoc.getPages()[0];
 
   const injectMap = {
-    fechaEmision: formatFecha(data.fechaEmision),
+    fechaEmision: formatFechaCorta(data.fechaEmision),
     contratoNumber: data.contratoNumber,
     clienteNombre: data.clienteNombre,
     cantidadLetras: numeroALetras(data.aCuenta),
@@ -613,7 +630,7 @@ export async function generarContratoPDF(
 
   const injectMap = {
     contratoNumber: data.contratoNumber,
-    fechaEmision: formatFecha(data.fechaEmision),
+    fechaEmision: formatFechaCorta(data.fechaEmision),
     clienteNombre: data.clienteNombre,
     clienteDni: data.clienteDni,
     clienteDireccion: data.clienteDireccion,
@@ -621,7 +638,7 @@ export async function generarContratoPDF(
 
     fechaEvento: formatFecha(data.fechaEvento),
     tipoEvento: data.tipoEvento,
-    horaEvento: formatHora(data.horaEvento),
+    horaEvento: formatHoraContrato(data.horaEvento),
 
     paqueteId: data.paqueteNombre || data.paqueteId || "",
 

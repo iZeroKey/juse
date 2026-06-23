@@ -33,7 +33,7 @@ const VIEWS: { value: CalendarView; label: string; short: string }[] = [
 ];
 
 export default function App() {
-  const { addEvent, updateEvent, deleteEvent, getEvent } = useEvents();
+  const { addEvent, updateEvent, deleteEvent } = useEvents();
   const location = useLocation();
 
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -95,8 +95,7 @@ export default function App() {
   const handleFormSubmit = useCallback(
     (data: Omit<JuseEvent, "id" | "duration" | "createdAt" | "updatedAt">) => {
       if (editingEvent) {
-        updateEvent(editingEvent.id, data);
-        const updated = getEvent(editingEvent.id);
+        const updated = updateEvent(editingEvent.id, data);
         if (updated) setSelectedEvent(updated);
         sileo.success({
           title: "Evento actualizado",
@@ -112,7 +111,7 @@ export default function App() {
       setFormOpen(false);
       setEditingEvent(undefined);
     },
-    [editingEvent, updateEvent, addEvent, getEvent],
+    [editingEvent, updateEvent, addEvent],
   );
 
   const handleFormCancel = useCallback(() => {

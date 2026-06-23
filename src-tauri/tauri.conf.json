@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Juse Show",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "identifier": "com.juse.app",
   "build": {
     "frontendDist": "../dist",
@@ -21,7 +21,7 @@
         "decorations": false,
         "resizable": false,
         "center": true,
-        "alwaysOnTop": true
+        "alwaysOnTop": false
       },
       {
         "title": "Juse Show",

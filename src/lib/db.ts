@@ -36,31 +36,27 @@ async function initDB(db: Database) {
       id TEXT PRIMARY KEY,
       contratoNumber TEXT NOT NULL,
       fechaEmision TEXT NOT NULL,
-      
       clienteNombre TEXT NOT NULL,
       clienteDni TEXT,
       clienteDireccion TEXT,
       clienteCelular TEXT,
-      
       tipoEvento TEXT,
       fechaEvento TEXT NOT NULL,
       horaEvento TEXT,
-      
       paqueteId TEXT,
       paqueteNombre TEXT,
       paqueteDetalle TEXT,
       movilidad TEXT,
-      
       precio REAL NOT NULL,
       aCuenta REAL NOT NULL,
       saldo REAL NOT NULL,
       formaPago TEXT,
-      
       nombresPapitos TEXT,
       nombreBebe TEXT,
       nombreCumpleanero TEXT,
       informacionAdicional TEXT,
-      
+      pagoPersonal REAL,
+      tipoComprobante TEXT,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL
     )
@@ -76,13 +72,18 @@ async function initDB(db: Database) {
       eventType TEXT NOT NULL,
       color TEXT,
       location TEXT NOT NULL,
-      
-      animadoras TEXT NOT NULL,
-      bailarinas TEXT NOT NULL,
+      tematica TEXT,
+      contactoNombre TEXT,
+      contactoNumero TEXT,
+      animadores TEXT NOT NULL,
+      bailarines TEXT NOT NULL,
       dj TEXT NOT NULL,
-      staffAdicional TEXT NOT NULL,
-      munecos TEXT NOT NULL,
-      
+      staffLucido TEXT NOT NULL,
+      staffApoyo TEXT NOT NULL,
+      muneco TEXT NOT NULL,
+      videoFotografia TEXT NOT NULL,
+      payaso TEXT NOT NULL,
+      showMagia TEXT NOT NULL,
       totalEvento REAL NOT NULL,
       movilidad REAL NOT NULL,
       adelanto REAL NOT NULL,
@@ -90,7 +91,6 @@ async function initDB(db: Database) {
       pagoPersonal REAL NOT NULL,
       ganancia REAL NOT NULL,
       observacion TEXT,
-      
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL
     )
@@ -170,9 +170,10 @@ export async function migrateFromJSON() {
             id, contratoNumber, fechaEmision, clienteNombre, clienteDni, clienteDireccion, clienteCelular,
             tipoEvento, fechaEvento, horaEvento, paqueteId, paqueteNombre, paqueteDetalle, movilidad,
             precio, aCuenta, saldo, formaPago, nombresPapitos, nombreBebe, nombreCumpleanero, informacionAdicional,
+            pagoPersonal, tipoComprobante,
             createdAt, updatedAt
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26
           )
         `,
           [
@@ -198,6 +199,8 @@ export async function migrateFromJSON() {
             contract.nombreBebe || "",
             contract.nombreCumpleanero || "",
             contract.informacionAdicional || "",
+            contract.pagoPersonal || 0,
+            contract.tipoComprobante || "",
             normalizeDate(contract.createdAt) ||
               new Date().toISOString().split("T")[0],
             normalizeDate(contract.updatedAt) ||
@@ -216,11 +219,12 @@ export async function migrateFromJSON() {
           `
           INSERT INTO events (
             id, date, startTime, endTime, duration, eventType, color, location,
-            animadoras, bailarinas, dj, staffAdicional, munecos,
+            tematica, contactoNombre, contactoNumero,
+            animadores, bailarines, dj, staffLucido, staffApoyo, muneco, videoFotografia, payaso, showMagia,
             totalEvento, movilidad, adelanto, saldo, pagoPersonal, ganancia, observacion,
             createdAt, updatedAt
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29
           )
         `,
           [
@@ -232,11 +236,18 @@ export async function migrateFromJSON() {
             event.eventType || "",
             event.color || "",
             event.location || "",
-            JSON.stringify(event.animadoras || []),
-            JSON.stringify(event.bailarinas || []),
+            event.tematica || "",
+            event.contactoNombre || "",
+            event.contactoNumero || "",
+            JSON.stringify(event.animadores || []),
+            JSON.stringify(event.bailarines || []),
             JSON.stringify(event.dj || []),
-            JSON.stringify(event.staffAdicional || []),
-            JSON.stringify(event.munecos || []),
+            JSON.stringify(event.staffLucido || []),
+            JSON.stringify(event.staffApoyo || []),
+            JSON.stringify(event.muneco || []),
+            JSON.stringify(event.videoFotografia || []),
+            JSON.stringify(event.payaso || []),
+            JSON.stringify(event.showMagia || []),
             event.totalEvento || 0,
             event.movilidad || 0,
             event.adelanto || 0,
@@ -268,10 +279,15 @@ export async function migrateFromJSON() {
 }
 
 export async function getContractsFromDB(): Promise<JuseContract[]> {
-  const db = await getDb();
-  return await db.select<JuseContract[]>(
-    "SELECT * FROM contracts ORDER BY fechaEvento DESC",
-  );
+  try {
+    const db = await getDb();
+    return await db.select<JuseContract[]>(
+      "SELECT * FROM contracts ORDER BY fechaEvento DESC",
+    );
+  } catch (e) {
+    console.error("Error fetching contracts:", e);
+    return [];
+  }
 }
 
 export async function insertContractToDB(contract: JuseContract) {
@@ -282,9 +298,10 @@ export async function insertContractToDB(contract: JuseContract) {
       id, contratoNumber, fechaEmision, clienteNombre, clienteDni, clienteDireccion, clienteCelular,
       tipoEvento, fechaEvento, horaEvento, paqueteId, paqueteNombre, paqueteDetalle, movilidad,
       precio, aCuenta, saldo, formaPago, nombresPapitos, nombreBebe, nombreCumpleanero, informacionAdicional,
+      pagoPersonal, tipoComprobante,
       createdAt, updatedAt
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26
     )
   `,
     [
@@ -310,6 +327,8 @@ export async function insertContractToDB(contract: JuseContract) {
       contract.nombreBebe ?? "",
       contract.nombreCumpleanero ?? "",
       contract.informacionAdicional ?? "",
+      contract.pagoPersonal ?? 0,
+      contract.tipoComprobante ?? "",
       normalizeDate(contract.createdAt) ?? "",
       normalizeDate(contract.updatedAt) ?? "",
     ],
@@ -355,10 +374,15 @@ export async function deleteContractFromDB(id: string) {
 }
 
 export async function getPackagesFromDB(): Promise<JusePackage[]> {
-  const db = await getDb();
-  return await db.select<JusePackage[]>(
-    "SELECT * FROM packages ORDER BY nroPaquete DESC",
-  );
+  try {
+    const db = await getDb();
+    return await db.select<JusePackage[]>(
+      "SELECT * FROM packages ORDER BY nroPaquete DESC",
+    );
+  } catch (e) {
+    console.error("Error fetching packages:", e);
+    return [];
+  }
 }
 
 export async function insertPackageToDB(pkg: JusePackage) {
@@ -417,17 +441,29 @@ export async function deletePackageFromDB(id: string) {
 
 export async function getEventsFromDB(): Promise<JuseEvent[]> {
   const db = await getDb();
-  const rawEvents = await db.select<Record<string, unknown>[]>(
-    "SELECT * FROM events ORDER BY date DESC, startTime DESC",
-  );
+
+  let rawEvents: Record<string, unknown>[];
+  try {
+    rawEvents = await db.select<Record<string, unknown>[]>(
+      "SELECT * FROM events ORDER BY date DESC, startTime DESC",
+    );
+  } catch (e) {
+    console.error("Error fetching events:", e);
+
+    return [];
+  }
 
   return rawEvents.map((e) => ({
     ...e,
-    animadoras: JSON.parse(String(e.animadoras || "[]")),
-    bailarinas: JSON.parse(String(e.bailarinas || "[]")),
+    animadores: JSON.parse(String(e.animadores || "[]")),
+    bailarines: JSON.parse(String(e.bailarines || "[]")),
     dj: JSON.parse(String(e.dj || "[]")),
-    staffAdicional: JSON.parse(String(e.staffAdicional || "[]")),
-    munecos: JSON.parse(String(e.munecos || "[]")),
+    staffLucido: JSON.parse(String(e.staffLucido || "[]")),
+    staffApoyo: JSON.parse(String(e.staffApoyo || "[]")),
+    muneco: JSON.parse(String(e.muneco || "[]")),
+    videoFotografia: JSON.parse(String(e.videoFotografia || "[]")),
+    payaso: JSON.parse(String(e.payaso || "[]")),
+    showMagia: JSON.parse(String(e.showMagia || "[]")),
   })) as unknown as JuseEvent[];
 }
 
@@ -437,11 +473,12 @@ export async function insertEventToDB(event: JuseEvent) {
     `
     INSERT INTO events (
       id, date, startTime, endTime, duration, eventType, color, location,
-      animadoras, bailarinas, dj, staffAdicional, munecos,
+      tematica, contactoNombre, contactoNumero,
+      animadores, bailarines, dj, staffLucido, staffApoyo, muneco, videoFotografia, payaso, showMagia,
       totalEvento, movilidad, adelanto, saldo, pagoPersonal, ganancia, observacion,
       createdAt, updatedAt
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29
     )
   `,
     [
@@ -453,11 +490,18 @@ export async function insertEventToDB(event: JuseEvent) {
       event.eventType ?? "",
       event.color ?? "",
       event.location ?? "",
-      JSON.stringify(event.animadoras || []),
-      JSON.stringify(event.bailarinas || []),
+      event.tematica ?? "",
+      event.contactoNombre ?? "",
+      event.contactoNumero ?? "",
+      JSON.stringify(event.animadores || []),
+      JSON.stringify(event.bailarines || []),
       JSON.stringify(event.dj || []),
-      JSON.stringify(event.staffAdicional || []),
-      JSON.stringify(event.munecos || []),
+      JSON.stringify(event.staffLucido || []),
+      JSON.stringify(event.staffApoyo || []),
+      JSON.stringify(event.muneco || []),
+      JSON.stringify(event.videoFotografia || []),
+      JSON.stringify(event.payaso || []),
+      JSON.stringify(event.showMagia || []),
       event.totalEvento ?? 0,
       event.movilidad ?? 0,
       event.adelanto ?? 0,

@@ -59,11 +59,29 @@ export function formatFecha(isoString?: string) {
   return `${parseInt(partes[2])} de ${meses[parseInt(partes[1]) - 1]} de ${partes[0]}`;
 }
 
+export function formatFechaCorta(isoString?: string) {
+  if (!isoString) return "";
+  const partes = isoString.split("T")[0].split("-");
+  if (partes.length !== 3) return isoString;
+  return `${partes[2].padStart(2, "0")}/${partes[1].padStart(2, "0")}/${partes[0]}`;
+}
+
 export function formatHora(horaStr: string): string {
   if (!horaStr) return horaStr;
   const [h, m] = horaStr.split(":");
   let hi = parseInt(h, 10);
   const ampm = hi >= 12 ? "PM" : "AM";
+  hi = hi % 12;
+  if (hi === 0) hi = 12;
+  const hs = hi.toString().padStart(2, "0");
+  return `${hs}:${m} ${ampm}`;
+}
+
+export function formatHoraContrato(horaStr: string): string {
+  if (!horaStr) return horaStr;
+  const [h, m] = horaStr.split(":");
+  let hi = parseInt(h, 10);
+  const ampm = hi >= 12 ? "p. m." : "a. m.";
   hi = hi % 12;
   if (hi === 0) hi = 12;
   const hs = hi.toString().padStart(2, "0");

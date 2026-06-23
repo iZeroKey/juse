@@ -19,19 +19,31 @@ import {
 } from "@/components/ui/drawer";
 import { Separator } from "@/components/ui/separator";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn, formatCurrency, formatDuration } from "@/lib/utils";
+import { generateEventMessage } from "@/lib/message-template";
+import {
+  calculateDuration,
+  cn,
+  formatCurrency,
+  formatDuration,
+  formatHora,
+} from "@/lib/utils";
 import type { JuseEvent } from "@/types/event";
 import { format, parse } from "date-fns";
 import { es } from "date-fns/locale";
 import {
   AlertTriangle,
   Calendar,
+  Check,
   Clock,
+  Copy,
   MapPin,
+  Palette,
   Pencil,
+  Phone,
   Trash2,
 } from "lucide-react";
 import * as React from "react";
+import { EventMessageDrawer } from "./event-message-drawer";
 
 interface EventSheetProps {
   event: JuseEvent | null;
@@ -48,7 +60,7 @@ function formatFullDate(dateStr: string): string {
 }
 
 function formatTimeRange(start: string, end: string): string {
-  return `${start} — ${end}`;
+  return `${formatHora(start)} — ${formatHora(end)}`;
 }
 
 function StaffSection({
@@ -118,6 +130,8 @@ function EventSheet({
   children,
 }: EventSheetProps) {
   const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [messageDrawerOpen, setMessageDrawerOpen] = React.useState(false);
+  const [copiedMessage, setCopiedMessage] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const handleDelete = () => {
@@ -125,6 +139,18 @@ function EventSheet({
     onDelete(event.id);
     setConfirmOpen(false);
     onClose();
+  };
+
+  const handleCopyMessage = async () => {
+    if (!event) return;
+    try {
+      const msg = generateEventMessage(event);
+      await navigator.clipboard.writeText(msg);
+      setCopiedMessage(true);
+      setTimeout(() => setCopiedMessage(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text", err);
+    }
   };
 
   return (
@@ -151,15 +177,15 @@ function EventSheet({
                   </div>
                 </div>
 
-                {(event.dj.length === 0 || event.animadoras.length === 0) && (
+                {(event.dj.length === 0 || event.animadores.length === 0) && (
                   <div className='flex items-center gap-1.5 pt-2'>
                     <AlertTriangle className='size-3.5 text-amber-500' />
                     <span className='text-xs text-amber-600'>
-                      {event.dj.length === 0 && event.animadoras.length === 0
-                        ? "Sin DJ ni animadora asignados"
+                      {event.dj.length === 0 && event.animadores.length === 0
+                        ? "Sin DJ ni animador(a) asignados"
                         : event.dj.length === 0
                           ? "Sin DJ asignado"
-                          : "Sin animadora asignada"}
+                          : "Sin animador(a) asignado(a)"}
                     </span>
                   </div>
                 )}
@@ -194,7 +220,9 @@ function EventSheet({
                           {formatTimeRange(event.startTime, event.endTime)}
                         </span>
                         <Badge variant='secondary' className='ml-auto text-xs'>
-                          {formatDuration(event.duration)}
+                          {formatDuration(
+                            calculateDuration(event.startTime, event.endTime),
+                          )}
                         </Badge>
                       </div>
 
@@ -204,6 +232,28 @@ function EventSheet({
                           {event.location || "Sin ubicación"}
                         </span>
                       </div>
+
+                      {event.tematica && (
+                        <div className='flex items-center gap-3'>
+                          <Palette className='size-4 shrink-0 text-muted-foreground' />
+                          <span className='text-sm text-foreground'>
+                            {event.tematica}
+                          </span>
+                        </div>
+                      )}
+
+                      {(event.contactoNombre || event.contactoNumero) && (
+                        <div className='flex items-center gap-3'>
+                          <Phone className='size-4 shrink-0 text-muted-foreground' />
+                          <span className='text-sm text-foreground'>
+                            {event.contactoNombre}{" "}
+                            {event.contactoNombre && event.contactoNumero
+                              ? "—"
+                              : ""}{" "}
+                            {event.contactoNumero}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </section>
 
@@ -216,20 +266,33 @@ function EventSheet({
 
                     <div className='space-y-3'>
                       <StaffSection
-                        label='Animadora(s)'
-                        people={event.animadoras}
+                        label='Animador(a)(es)'
+                        people={event.animadores}
                         warn
                       />
                       <StaffSection
-                        label='Bailarinas / Staff Lúdico'
-                        people={event.bailarinas}
+                        label='Bailarín(a)(es)'
+                        people={event.bailarines}
+                      />
+                      <StaffSection
+                        label='Staff Lúdico'
+                        people={event.staffLucido}
                       />
                       <StaffSection label='DJ' people={event.dj} warn />
                       <StaffSection
-                        label='Staff'
-                        people={event.staffAdicional}
+                        label='Staff de Apoyo'
+                        people={event.staffApoyo}
                       />
-                      <StaffSection label='Muñecos' people={event.munecos} />
+                      <StaffSection label='Muñeco' people={event.muneco} />
+                      <StaffSection
+                        label='Video y Fotografía'
+                        people={event.videoFotografia}
+                      />
+                      <StaffSection label='Payaso' people={event.payaso} />
+                      <StaffSection
+                        label='Show de Magia'
+                        people={event.showMagia}
+                      />
                     </div>
                   </section>
 
@@ -284,6 +347,34 @@ function EventSheet({
                       </div>
                     )}
                   </section>
+
+                  <Separator />
+
+                  <section className='space-y-3'>
+                    <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>
+                      Mensaje
+                    </h3>
+                    <div className='flex gap-3'>
+                      <button
+                        type='button'
+                        onClick={handleCopyMessage}
+                        className='flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer'>
+                        {copiedMessage ? (
+                          <Check className='size-4' />
+                        ) : (
+                          <Copy className='size-4' />
+                        )}
+                        {copiedMessage ? "¡Copiado!" : "Copiar mensaje"}
+                      </button>
+                      <button
+                        type='button'
+                        onClick={() => setMessageDrawerOpen(true)}
+                        className='flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-lg transition-colors cursor-pointer'>
+                        <Pencil className='size-4' />
+                        Editar mensaje
+                      </button>
+                    </div>
+                  </section>
                 </div>
               </DrawerPanel>
 
@@ -308,6 +399,12 @@ function EventSheet({
             </>
           )}
         </DrawerPopup>
+
+        <EventMessageDrawer
+          event={event}
+          open={messageDrawerOpen}
+          onClose={() => setMessageDrawerOpen(false)}
+        />
         {children}
       </Drawer>
 

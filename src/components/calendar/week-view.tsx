@@ -15,7 +15,7 @@ import {
   isToday,
   timeToMinutes,
 } from "@/lib/calendar-utils";
-import { cn } from "@/lib/utils";
+import { cn, formatHora } from "@/lib/utils";
 import type { JuseEvent } from "@/types/event";
 import { useEffect, useMemo, useState } from "react";
 
@@ -67,7 +67,7 @@ function DesktopWeekGrid({
   return (
     <div className='flex h-full flex-col'>
       <div className='flex border-b border-border'>
-        <div className='w-14 shrink-0' />
+        <div className='w-16 shrink-0' />
         {weekDays.map((d) => {
           const today = isToday(d);
           return (
@@ -122,7 +122,7 @@ function DesktopWeekGrid({
                   timeOffset >= block.startHour &&
                   timeOffset <= block.endHour && (
                     <div
-                      className='pointer-events-none absolute left-14 right-0 z-30 flex items-center'
+                      className='pointer-events-none absolute left-16 right-0 z-30 flex items-center'
                       style={{
                         top: (timeOffset - block.startHour) * HOUR_HEIGHT,
                       }}>
@@ -131,7 +131,7 @@ function DesktopWeekGrid({
                     </div>
                   )}
 
-                <div className='relative w-14 shrink-0 border-r border-border bg-surface'>
+                <div className='relative w-16 shrink-0 border-r border-border bg-surface'>
                   {hours.map((hour) => {
                     if (hour === block.startHour && block.startHour > 0)
                       return null;
@@ -144,9 +144,9 @@ function DesktopWeekGrid({
                     return (
                       <span
                         key={hour}
-                        className='absolute right-2 font-sans text-[11px] leading-none text-muted-foreground'
+                        className='absolute right-2 font-sans text-[11px] leading-none text-muted-foreground whitespace-nowrap'
                         style={{ top: top - 6 }}>
-                        {displayHour}:00
+                        {formatHora(`${displayHour}:00`)}
                       </span>
                     );
                   })}

@@ -20,7 +20,7 @@ import {
   computeTimeBlocks,
   timeToMinutes,
 } from "@/lib/calendar-utils";
-import { cn } from "@/lib/utils";
+import { cn, formatHora } from "@/lib/utils";
 import type { JuseEvent } from "@/types/event";
 
 import {
@@ -50,7 +50,7 @@ function EventDot({ event }: { event: JuseEvent }) {
 
   return (
     <div
-      className={cn("size-1.5 md:size-2 rounded-full", dot)}
+      className={cn("size-2 md:size-2.5 rounded-full", dot)}
       aria-label={`${event.eventType} — ${event.location}`}
     />
   );
@@ -95,7 +95,7 @@ function DayCell({
           onClick={handleDayClick}
           className={cn(
             "flex-1 w-full relative flex flex-col items-start border-b border-r border-border p-1 md:p-2",
-            "min-h-20 md:min-h-30",
+            "min-h-14",
             "text-left cursor-pointer transition-colors duration-200 hover:bg-accent-soft",
             !isCurrentMonth && "opacity-40",
           )}>
@@ -115,10 +115,10 @@ function DayCell({
           </motion.span>
 
           <div className='hidden w-full flex-row flex-wrap gap-1 md:flex items-center mt-1'>
-            {events.slice(0, 5).map((event) => (
+            {events.slice(0, 9).map((event) => (
               <EventDot key={event.id} event={event} />
             ))}
-            {events.length > 5 && (
+            {events.length > 9 && (
               <span
                 role='button'
                 tabIndex={0}
@@ -130,18 +130,18 @@ function DayCell({
                   }
                 }}
                 className='cursor-pointer px-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors'>
-                +{events.length - 5} más
+                +{events.length - 9} más
               </span>
             )}
           </div>
 
           <div className='flex flex-wrap gap-1 md:hidden mt-1 items-center'>
-            {events.slice(0, 5).map((event) => (
+            {events.slice(0, 6).map((event) => (
               <EventDot key={event.id} event={event} />
             ))}
-            {events.length > 5 && (
+            {events.length > 6 && (
               <span className='text-[9px] text-text-secondary font-medium'>
-                +{events.length - 5}
+                +{events.length - 6}
               </span>
             )}
           </div>
@@ -248,7 +248,7 @@ function DesktopDaySidebar({
                 timeOffset >= block.startHour &&
                 timeOffset <= block.endHour && (
                   <div
-                    className='pointer-events-none absolute left-12 right-0 z-30 flex items-center'
+                    className='pointer-events-none absolute left-14 right-0 z-30 flex items-center'
                     style={{
                       top: (timeOffset - block.startHour) * HOUR_HEIGHT,
                     }}>
@@ -257,7 +257,7 @@ function DesktopDaySidebar({
                   </div>
                 )}
 
-              <div className='relative w-12 shrink-0 border-r border-border bg-surface/50 backdrop-blur-sm z-10'>
+              <div className='relative w-14 shrink-0 border-r border-border bg-surface/50 backdrop-blur-sm z-10'>
                 {hours.map((hour) => {
                   if (hour === block.startHour && block.startHour > 0)
                     return null;
@@ -269,9 +269,9 @@ function DesktopDaySidebar({
                   return (
                     <span
                       key={hour}
-                      className='absolute right-2 font-sans text-[10px] font-medium text-muted-foreground'
+                      className='absolute right-2 font-sans text-[10px] font-medium text-muted-foreground whitespace-nowrap'
                       style={{ top: top - 6 }}>
-                      {displayHour}:00
+                      {formatHora(`${displayHour}:00`)}
                     </span>
                   );
                 })}

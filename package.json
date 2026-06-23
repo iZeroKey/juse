@@ -1,7 +1,8 @@
 {
-  "name": "juse",
+  "name": "juse-show",
+  "author": "iZeroKey",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,6 +21,8 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "framer-motion": "^12.12.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.511.0",
     "pdf-lib": "^1.17.1",
     "radix-ui": "^1.6.0",
@@ -30,7 +33,9 @@
     "react-router-dom": "^7.18.0",
     "sileo": "^0.1.5",
     "tailwind-merge": "^3.3.0",
-    "vaul": "^1.1.2"
+    "vaul": "^1.1.2",
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

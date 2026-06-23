@@ -21,6 +21,8 @@ export interface JuseContract {
   nombreBebe: string;
   nombreCumpleanero: string;
   informacionAdicional: string;
+  pagoPersonal: number;
+  tipoComprobante: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -46,4 +48,6 @@ export interface ContractFormValues {
   nombreBebe: string;
   nombreCumpleanero: string;
   informacionAdicional: string;
+  pagoPersonal: string;
+  tipoComprobante: string;
 }

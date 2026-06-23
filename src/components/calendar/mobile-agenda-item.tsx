@@ -34,7 +34,8 @@ export function MobileAgendaItem({
 }: MobileAgendaItemProps) {
   const { bg, text, colorValue } = getEventColors(event.color || "blue");
   const hasSaldo = event.saldo > 0;
-  const missingStaff = event.dj.length === 0 || event.animadoras.length === 0;
+  const missingStaff =
+    (event.dj || []).length === 0 || (event.animadores || []).length === 0;
 
   return (
     <ContextMenu>

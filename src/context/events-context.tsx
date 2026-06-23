@@ -13,7 +13,10 @@ interface EventsContextValue {
   addEvent: (
     event: Omit<JuseEvent, "id" | "duration" | "createdAt" | "updatedAt">,
   ) => JuseEvent;
-  updateEvent: (id: string, updates: Partial<JuseEvent>) => void;
+  updateEvent: (
+    id: string,
+    updates: Partial<JuseEvent>,
+  ) => JuseEvent | undefined;
   deleteEvent: (id: string) => void;
   getEvent: (id: string) => JuseEvent | undefined;
   replaceEvents: (events: JuseEvent[]) => void;
@@ -78,27 +81,29 @@ export function EventsProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const updateEvent = useCallback((id: string, updates: Partial<JuseEvent>) => {
-    let updatedEventMerged: JuseEvent | undefined = undefined;
+  const updateEvent = useCallback(
+    (id: string, updates: Partial<JuseEvent>): JuseEvent | undefined => {
+      const existing = events.find((e) => e.id === id);
+      if (!existing) return undefined;
 
-    setEvents((prev) =>
-      prev.map((e) => {
-        if (e.id !== id) return e;
-        const merged = {
-          ...e,
-          ...updates,
-          updatedAt: new Date().toISOString().split("T")[0],
-        };
-        const computed = enrichEvent(merged);
-        updatedEventMerged = { ...merged, ...computed };
-        return updatedEventMerged;
-      }),
-    );
+      const merged = {
+        ...existing,
+        ...updates,
+        updatedAt: new Date().toISOString().split("T")[0],
+      };
+      const computed = enrichEvent(merged as unknown as JuseEvent);
+      const updatedEventMerged = { ...merged, ...computed };
 
-    if (updatedEventMerged) {
+      setEvents((prev) =>
+        prev.map((e) => (e.id === id ? updatedEventMerged : e)),
+      );
+
       updateEventInDB(id, updatedEventMerged).catch(console.error);
-    }
-  }, []);
+
+      return updatedEventMerged;
+    },
+    [events],
+  );
 
   const deleteEvent = useCallback((id: string) => {
     setEvents((prev) => prev.filter((e) => e.id !== id));

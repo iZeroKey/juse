@@ -225,3 +225,11 @@ input[type="number"] {
   appearance: textfield;
   -moz-appearance: textfield;
 }
+
+[data-sileo-svg] path {
+  fill: var(--color-surface) !important;
+}
+
+[data-sileo-description] {
+  color: var(--color-text-secondary) !important;
+}

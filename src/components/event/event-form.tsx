@@ -45,18 +45,25 @@ function eventToFormValues(event: JuseEvent): EventFormValues {
     eventType: event.eventType,
     color: event.color || "blue",
     location: event.location,
-    animadoras: event.animadoras,
-    bailarinas: event.bailarinas,
-    dj: event.dj,
-    staffAdicional: event.staffAdicional,
-    munecos: event.munecos,
-    totalEvento: event.totalEvento.toFixed(2),
-    movilidad: event.movilidad.toFixed(2),
-    adelanto: event.adelanto.toFixed(2),
-    saldo: event.saldo.toFixed(2),
-    pagoPersonal: event.pagoPersonal.toFixed(2),
-    ganancia: event.ganancia.toFixed(2),
-    observacion: event.observacion,
+    tematica: event.tematica || "",
+    contactoNombre: event.contactoNombre || "",
+    contactoNumero: event.contactoNumero || "",
+    animadores: event.animadores || [],
+    bailarines: event.bailarines || [],
+    dj: event.dj || [],
+    staffLucido: event.staffLucido || [],
+    staffApoyo: event.staffApoyo || [],
+    muneco: event.muneco || [],
+    videoFotografia: event.videoFotografia || [],
+    payaso: event.payaso || [],
+    showMagia: event.showMagia || [],
+    totalEvento: event.totalEvento?.toFixed(2) || "",
+    movilidad: event.movilidad?.toFixed(2) || "",
+    adelanto: event.adelanto?.toFixed(2) || "",
+    saldo: event.saldo?.toFixed(2) || "",
+    pagoPersonal: event.pagoPersonal?.toFixed(2) || "",
+    ganancia: event.ganancia?.toFixed(2) || "",
+    observacion: event.observacion || "",
   };
 }
 
@@ -67,11 +74,18 @@ const defaultFormValues: EventFormValues = {
   eventType: "",
   color: "blue",
   location: "",
-  animadoras: [],
-  bailarinas: [],
+  tematica: "",
+  contactoNombre: "",
+  contactoNumero: "",
+  animadores: [],
+  bailarines: [],
   dj: [],
-  staffAdicional: [],
-  munecos: [],
+  staffLucido: [],
+  staffApoyo: [],
+  muneco: [],
+  videoFotografia: [],
+  payaso: [],
+  showMagia: [],
   totalEvento: "",
   movilidad: "",
   adelanto: "",
@@ -128,11 +142,18 @@ export function EventForm({
       eventType: data.eventType,
       color: data.color,
       location: data.location,
-      animadoras: data.animadoras,
-      bailarinas: data.bailarinas,
+      tematica: data.tematica,
+      contactoNombre: data.contactoNombre,
+      contactoNumero: data.contactoNumero,
+      animadores: data.animadores,
+      bailarines: data.bailarines,
       dj: data.dj,
-      staffAdicional: data.staffAdicional,
-      munecos: data.munecos,
+      staffLucido: data.staffLucido,
+      staffApoyo: data.staffApoyo,
+      muneco: data.muneco,
+      videoFotografia: data.videoFotografia,
+      payaso: data.payaso,
+      showMagia: data.showMagia,
       totalEvento: parseCurrency(data.totalEvento),
       movilidad: parseCurrency(data.movilidad),
       adelanto: parseCurrency(data.adelanto),
@@ -312,6 +333,34 @@ export function EventForm({
                   />
                 </div>
               </div>
+
+              <div className='space-y-1.5'>
+                <Label htmlFor='tematica'>Temática</Label>
+                <Input
+                  id='tematica'
+                  placeholder='Temática del evento'
+                  {...register("tematica")}
+                />
+              </div>
+
+              <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+                <div className='space-y-1.5'>
+                  <Label htmlFor='contactoNombre'>Nombre de Contacto</Label>
+                  <Input
+                    id='contactoNombre'
+                    placeholder='Nombre'
+                    {...register("contactoNombre")}
+                  />
+                </div>
+                <div className='space-y-1.5'>
+                  <Label htmlFor='contactoNumero'>Número de Contacto</Label>
+                  <Input
+                    id='contactoNumero'
+                    placeholder='Teléfono/Celular'
+                    {...register("contactoNumero")}
+                  />
+                </div>
+              </div>
             </motion.div>
           )}
 
@@ -324,29 +373,43 @@ export function EventForm({
               transition={{ duration: 0.2 }}
               className='space-y-4 pt-4 px-1 pb-1'>
               <Controller
-                name='animadoras'
+                name='animadores'
                 control={control}
                 render={({ field }) => (
                   <StaffTagInput
-                    id='animadoras'
-                    label='Animadora(s)'
+                    id='animadores'
+                    label='Animador(a)(es)'
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder='Nombre de animadora'
+                    placeholder='Nombre de animador(a)'
                   />
                 )}
               />
 
               <Controller
-                name='bailarinas'
+                name='bailarines'
                 control={control}
                 render={({ field }) => (
                   <StaffTagInput
-                    id='bailarinas'
-                    label='Bailarinas / Staff Lúdico'
+                    id='bailarines'
+                    label='Bailarín(a)(es)'
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder='Nombre de bailarina o staff'
+                    placeholder='Nombre de bailarín(a)'
+                  />
+                )}
+              />
+
+              <Controller
+                name='staffLucido'
+                control={control}
+                render={({ field }) => (
+                  <StaffTagInput
+                    id='staffLucido'
+                    label='Staff Lúdico'
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder='Nombre del staff lúdico'
                   />
                 )}
               />
@@ -366,29 +429,71 @@ export function EventForm({
               />
 
               <Controller
-                name='staffAdicional'
+                name='staffApoyo'
                 control={control}
                 render={({ field }) => (
                   <StaffTagInput
-                    id='staffAdicional'
-                    label='Staff'
+                    id='staffApoyo'
+                    label='Staff de Apoyo'
                     value={field.value}
                     onChange={field.onChange}
-                    placeholder='Staff'
+                    placeholder='Nombre del staff de apoyo'
                   />
                 )}
               />
 
               <Controller
-                name='munecos'
+                name='muneco'
                 control={control}
                 render={({ field }) => (
                   <StaffTagInput
-                    id='munecos'
-                    label='Muñecos'
+                    id='muneco'
+                    label='Muñeco'
                     value={field.value}
                     onChange={field.onChange}
                     placeholder='Nombre del muñeco o personaje'
+                  />
+                )}
+              />
+
+              <Controller
+                name='videoFotografia'
+                control={control}
+                render={({ field }) => (
+                  <StaffTagInput
+                    id='videoFotografia'
+                    label='Video y Fotografía'
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder='Nombre para video/fotografía'
+                  />
+                )}
+              />
+
+              <Controller
+                name='payaso'
+                control={control}
+                render={({ field }) => (
+                  <StaffTagInput
+                    id='payaso'
+                    label='Payaso'
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder='Nombre del payaso'
+                  />
+                )}
+              />
+
+              <Controller
+                name='showMagia'
+                control={control}
+                render={({ field }) => (
+                  <StaffTagInput
+                    id='showMagia'
+                    label='Show de Magia'
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder='Nombre para el show de magia'
                   />
                 )}
               />
