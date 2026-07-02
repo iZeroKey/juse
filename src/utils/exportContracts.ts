@@ -155,6 +155,7 @@ export const exportContratosExcel = async (contracts: JuseContract[]) => {
     "Nombre Bebé": c.nombreBebe || "-",
     "Nombre Cumpleañero": c.nombreCumpleanero || "-",
     "Información Adicional": c.informacionAdicional || "-",
+    Observación: c.observacion || "-",
     Precio: c.precio,
     "A Cuenta": c.aCuenta,
     Saldo: c.saldo,
@@ -286,6 +287,7 @@ export const exportContratosPDF = async (contracts: JuseContract[]) => {
     "Paquete / Detalle",
     "Nombres/Bebe",
     "Info Adic.",
+    "Observación",
     "Precio",
     "A Cuenta",
     "Saldo",
@@ -304,6 +306,7 @@ export const exportContratosPDF = async (contracts: JuseContract[]) => {
     `${c.paqueteNombre || "-"}\n${c.paqueteDetalle || "-"}`,
     `${c.nombresPapitos || "-"}\n${c.nombreBebe || "-"}\n${c.nombreCumpleanero || "-"}`,
     c.informacionAdicional || "-",
+    c.observacion || "-",
     `S/ ${c.precio.toFixed(2)}`,
     `S/ ${c.aCuenta.toFixed(2)}`,
     `S/ ${c.saldo.toFixed(2)}`,
@@ -319,21 +322,22 @@ export const exportContratosPDF = async (contracts: JuseContract[]) => {
     styles: { fontSize: 7, cellPadding: 1, overflow: "linebreak" },
     headStyles: { fillColor: [41, 128, 185], fontSize: 7 },
     columnStyles: {
-      0: { cellWidth: 20 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 35 },
-      3: { cellWidth: 25 },
-      4: { cellWidth: 35 },
-      5: { cellWidth: 25 },
-      6: { cellWidth: 25 },
-      7: { cellWidth: 45 },
-      8: { cellWidth: 35 },
-      9: { cellWidth: 40 },
-      10: { cellWidth: 15 },
-      11: { cellWidth: 15 },
-      12: { cellWidth: 15 },
-      13: { cellWidth: 15 },
-      14: { cellWidth: 25 },
+      0: { cellWidth: 20 }, // Contrato
+      1: { cellWidth: 20 }, // F. Emisión
+      2: { cellWidth: 35 }, // Cliente
+      3: { cellWidth: 25 }, // DNI/Teléfono
+      4: { cellWidth: 35 }, // Dirección
+      5: { cellWidth: 25 }, // T. Evento
+      6: { cellWidth: 25 }, // F. Evento / Hora
+      7: { cellWidth: 45 }, // Paquete / Detalle
+      8: { cellWidth: 35 }, // Nombres/Bebe
+      9: { cellWidth: 40 }, // Info Adic.
+      10: { cellWidth: 40 }, // Observación
+      11: { cellWidth: 15 }, // Precio
+      12: { cellWidth: 15 }, // A Cuenta
+      13: { cellWidth: 15 }, // Saldo
+      14: { cellWidth: 15 }, // Pago P.
+      15: { cellWidth: 25 }, // Comprobante
     },
   });
 

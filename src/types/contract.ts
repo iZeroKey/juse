@@ -23,6 +23,7 @@ export interface JuseContract {
   informacionAdicional: string;
   pagoPersonal: number;
   tipoComprobante: string;
+  observacion?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,4 +51,5 @@ export interface ContractFormValues {
   informacionAdicional: string;
   pagoPersonal: string;
   tipoComprobante: string;
+  observacion: string;
 }

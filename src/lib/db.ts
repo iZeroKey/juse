@@ -17,84 +17,119 @@ export async function getDb(): Promise<Database> {
 }
 
 async function initDB(db: Database) {
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS packages (
-      id TEXT PRIMARY KEY,
-      nombre TEXT NOT NULL,
-      precio REAL NOT NULL,
-      nroPaquete TEXT NOT NULL,
-      especificaciones TEXT,
-      movilidad TEXT,
-      tipoEvento TEXT,
-      createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL
-    )
-  `);
+  const migrations = [
+    // Version 1 (Inicial)
+    async () => {
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS packages (
+          id TEXT PRIMARY KEY,
+          nombre TEXT NOT NULL,
+          precio REAL NOT NULL,
+          nroPaquete TEXT NOT NULL,
+          especificaciones TEXT,
+          movilidad TEXT,
+          tipoEvento TEXT,
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
+        )
+      `);
 
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS contracts (
-      id TEXT PRIMARY KEY,
-      contratoNumber TEXT NOT NULL,
-      fechaEmision TEXT NOT NULL,
-      clienteNombre TEXT NOT NULL,
-      clienteDni TEXT,
-      clienteDireccion TEXT,
-      clienteCelular TEXT,
-      tipoEvento TEXT,
-      fechaEvento TEXT NOT NULL,
-      horaEvento TEXT,
-      paqueteId TEXT,
-      paqueteNombre TEXT,
-      paqueteDetalle TEXT,
-      movilidad TEXT,
-      precio REAL NOT NULL,
-      aCuenta REAL NOT NULL,
-      saldo REAL NOT NULL,
-      formaPago TEXT,
-      nombresPapitos TEXT,
-      nombreBebe TEXT,
-      nombreCumpleanero TEXT,
-      informacionAdicional TEXT,
-      pagoPersonal REAL,
-      tipoComprobante TEXT,
-      createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL
-    )
-  `);
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS contracts (
+          id TEXT PRIMARY KEY,
+          contratoNumber TEXT NOT NULL,
+          fechaEmision TEXT NOT NULL,
+          clienteNombre TEXT NOT NULL,
+          clienteDni TEXT,
+          clienteDireccion TEXT,
+          clienteCelular TEXT,
+          tipoEvento TEXT,
+          fechaEvento TEXT NOT NULL,
+          horaEvento TEXT,
+          paqueteId TEXT,
+          paqueteNombre TEXT,
+          paqueteDetalle TEXT,
+          movilidad TEXT,
+          precio REAL NOT NULL,
+          aCuenta REAL NOT NULL,
+          saldo REAL NOT NULL,
+          formaPago TEXT,
+          nombresPapitos TEXT,
+          nombreBebe TEXT,
+          nombreCumpleanero TEXT,
+          informacionAdicional TEXT,
+          pagoPersonal REAL,
+          tipoComprobante TEXT,
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
+        )
+      `);
 
-  await db.execute(`
-    CREATE TABLE IF NOT EXISTS events (
-      id TEXT PRIMARY KEY,
-      date TEXT NOT NULL,
-      startTime TEXT NOT NULL,
-      endTime TEXT NOT NULL,
-      duration INTEGER NOT NULL,
-      eventType TEXT NOT NULL,
-      color TEXT,
-      location TEXT NOT NULL,
-      tematica TEXT,
-      contactoNombre TEXT,
-      contactoNumero TEXT,
-      animadores TEXT NOT NULL,
-      bailarines TEXT NOT NULL,
-      dj TEXT NOT NULL,
-      staffLucido TEXT NOT NULL,
-      staffApoyo TEXT NOT NULL,
-      muneco TEXT NOT NULL,
-      videoFotografia TEXT NOT NULL,
-      payaso TEXT NOT NULL,
-      showMagia TEXT NOT NULL,
-      totalEvento REAL NOT NULL,
-      movilidad REAL NOT NULL,
-      adelanto REAL NOT NULL,
-      saldo REAL NOT NULL,
-      pagoPersonal REAL NOT NULL,
-      ganancia REAL NOT NULL,
-      observacion TEXT,
-      createdAt TEXT NOT NULL,
-      updatedAt TEXT NOT NULL
-    )
-  `);
+      await db.execute(`
+        CREATE TABLE IF NOT EXISTS events (
+          id TEXT PRIMARY KEY,
+          date TEXT NOT NULL,
+          startTime TEXT NOT NULL,
+          endTime TEXT NOT NULL,
+          duration INTEGER NOT NULL,
+          eventType TEXT NOT NULL,
+          color TEXT,
+          location TEXT NOT NULL,
+          tematica TEXT,
+          contactoNombre TEXT,
+          contactoNumero TEXT,
+          animadores TEXT NOT NULL,
+          bailarines TEXT NOT NULL,
+          dj TEXT NOT NULL,
+          staffLucido TEXT NOT NULL,
+          staffApoyo TEXT NOT NULL,
+          muneco TEXT NOT NULL,
+          videoFotografia TEXT NOT NULL,
+          payaso TEXT NOT NULL,
+          showMagia TEXT NOT NULL,
+          totalEvento REAL NOT NULL,
+          movilidad REAL NOT NULL,
+          adelanto REAL NOT NULL,
+          saldo REAL NOT NULL,
+          pagoPersonal REAL NOT NULL,
+          ganancia REAL NOT NULL,
+          observacion TEXT,
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
+        )
+      `);
+    },
+    // Version 2 (Agregar observacion a contracts)
+    async () => {
+      try {
+        await db.execute(`ALTER TABLE contracts ADD COLUMN observacion TEXT`);
+      } catch (e) {
+        // Ignorar si la columna ya existe por algún motivo (ej. durante desarrollo)
+        console.warn("La columna observacion ya podría existir o hubo un problema:", e);
+      }
+    }
+  ];
+
+  try {
+    const result = await db.select<{ user_version: number }[]>("PRAGMA user_version;");
+    const currentVersion = result[0]?.user_version || 0;
+
+    for (let i = currentVersion; i < migrations.length; i++) {
+      try {
+        await migrations[i]();
+        console.log(`Migración a la versión ${i + 1} aplicada correctamente.`);
+      } catch (e) {
+        console.error(`Error aplicando la migración ${i + 1}:`, e);
+        break; // Detener migraciones subsecuentes en caso de error grave
+      }
+    }
+
+    await db.execute(`PRAGMA user_version = ${migrations.length};`);
+  } catch (error) {
+    console.error("Error al obtener PRAGMA user_version, fallback a ejecución básica.", error);
+    // En caso extremo que el engine no soporte PRAGMA (muy raro en Tauri SQL), corremos la primera al menos
+    await migrations[0]();
+  }
 }
 
 function normalizeDate(val: string): string {
@@ -170,10 +205,10 @@ export async function migrateFromJSON() {
             id, contratoNumber, fechaEmision, clienteNombre, clienteDni, clienteDireccion, clienteCelular,
             tipoEvento, fechaEvento, horaEvento, paqueteId, paqueteNombre, paqueteDetalle, movilidad,
             precio, aCuenta, saldo, formaPago, nombresPapitos, nombreBebe, nombreCumpleanero, informacionAdicional,
-            pagoPersonal, tipoComprobante,
+            pagoPersonal, tipoComprobante, observacion,
             createdAt, updatedAt
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
           )
         `,
           [
@@ -201,6 +236,7 @@ export async function migrateFromJSON() {
             contract.informacionAdicional || "",
             contract.pagoPersonal || 0,
             contract.tipoComprobante || "",
+            contract.observacion || "",
             normalizeDate(contract.createdAt) ||
               new Date().toISOString().split("T")[0],
             normalizeDate(contract.updatedAt) ||
@@ -298,10 +334,10 @@ export async function insertContractToDB(contract: JuseContract) {
       id, contratoNumber, fechaEmision, clienteNombre, clienteDni, clienteDireccion, clienteCelular,
       tipoEvento, fechaEvento, horaEvento, paqueteId, paqueteNombre, paqueteDetalle, movilidad,
       precio, aCuenta, saldo, formaPago, nombresPapitos, nombreBebe, nombreCumpleanero, informacionAdicional,
-      pagoPersonal, tipoComprobante,
+      pagoPersonal, tipoComprobante, observacion,
       createdAt, updatedAt
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
     )
   `,
     [
@@ -329,6 +365,7 @@ export async function insertContractToDB(contract: JuseContract) {
       contract.informacionAdicional ?? "",
       contract.pagoPersonal ?? 0,
       contract.tipoComprobante ?? "",
+      contract.observacion ?? "",
       normalizeDate(contract.createdAt) ?? "",
       normalizeDate(contract.updatedAt) ?? "",
     ],

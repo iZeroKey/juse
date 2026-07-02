@@ -20,6 +20,7 @@ import {
   Save,
   User,
   X,
+  FileText,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -81,6 +82,7 @@ export function ContractFormSheet({
       nombreBebe: "",
       nombreCumpleanero: "",
       informacionAdicional: "",
+      observacion: "",
       pagoPersonal: "",
       tipoComprobante: "",
     },
@@ -110,6 +112,7 @@ export function ContractFormSheet({
           nombreBebe: initialData.nombreBebe,
           nombreCumpleanero: initialData.nombreCumpleanero,
           informacionAdicional: initialData.informacionAdicional || "",
+          observacion: initialData.observacion || "",
           pagoPersonal: initialData.pagoPersonal?.toString() || "",
           tipoComprobante: initialData.tipoComprobante || "",
         });
@@ -137,6 +140,7 @@ export function ContractFormSheet({
           nombreBebe: "",
           nombreCumpleanero: "",
           informacionAdicional: "",
+          observacion: "",
           pagoPersonal: "",
           tipoComprobante: "",
         });
@@ -179,6 +183,7 @@ export function ContractFormSheet({
       nombreBebe: data.nombreBebe,
       nombreCumpleanero: data.nombreCumpleanero,
       informacionAdicional: data.informacionAdicional,
+      observacion: data.observacion,
       pagoPersonal: Number(parseFloat(data.pagoPersonal || "0").toFixed(2)),
       tipoComprobante: data.tipoComprobante || "",
     };
@@ -621,6 +626,25 @@ export function ContractFormSheet({
                     placeholder='Detalles extra, notas, etc.'
                   />
                 </div>
+              </div>
+            </section>
+
+            <section className='space-y-5'>
+              <div className='flex items-center gap-2 border-b border-border pb-2'>
+                <FileText className='w-5 h-5 text-(--color-juse-blue)' />
+                <h3 className='font-semibold text-foreground'>
+                  Observación
+                </h3>
+              </div>
+              <div className='space-y-1.5'>
+                <label className='text-sm font-medium text-foreground'>
+                  Observaciones internas del contrato
+                </label>
+                <textarea
+                  {...register("observacion")}
+                  placeholder='Ingresa las observaciones aquí...'
+                  className='flex min-h-20 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
+                />
               </div>
             </section>
 

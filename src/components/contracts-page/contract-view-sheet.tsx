@@ -221,6 +221,22 @@ export function ContractViewSheet({
 
                 <Separator />
 
+                {contract.observacion && (
+                  <>
+                    <section className='space-y-3'>
+                      <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2'>
+                        <FileText className='size-3.5' /> Observación
+                      </h3>
+                      <div className='rounded-lg bg-muted/50 p-3 border border-border/50'>
+                        <p className='text-sm text-foreground whitespace-pre-wrap leading-relaxed'>
+                          {contract.observacion}
+                        </p>
+                      </div>
+                    </section>
+                    <Separator />
+                  </>
+                )}
+
                 <section className='space-y-3'>
                   <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2'>
                     <DollarSign className='size-3.5' /> Finanzas

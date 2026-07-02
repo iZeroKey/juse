@@ -373,6 +373,18 @@ const contratoConfig = {
     maxLines: 1,
   },
 
+  observacion: {
+    x: 447,
+    y: 447,
+    size: 10,
+    isBold: true,
+    alignX: "center",
+    alignY: "center",
+    maxWidth: 240,
+    lineHeight: 14,
+    maxLines: 4,
+  },
+
   formaPago: {
     x: 443,
     y: 226,
@@ -647,6 +659,7 @@ export async function generarContratoPDF(
     nombresPapitos: data.nombresPapitos || "",
     nombreCumpleanero: data.nombreCumpleanero || "",
     informacionAdicional: data.informacionAdicional || "",
+    observacion: data.observacion || "",
     formaPago: data.formaPago,
 
     simboloPrecio: "S/",
