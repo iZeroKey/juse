@@ -659,7 +659,9 @@ export async function generarContratoPDF(
     nombresPapitos: data.nombresPapitos || "",
     nombreCumpleanero: data.nombreCumpleanero || "",
     informacionAdicional: data.informacionAdicional || "",
-    observacion: data.observacion || "",
+    observacion:
+      data.observacion ||
+      "El elenco llega 30 minutos antes para comenzar a la hora pactada en el contrato, luego de ello existe un adicional de 40 soles por cada media hora o se realiza un recorte en el tiempo de duración del show.",
     formaPago: data.formaPago,
 
     simboloPrecio: "S/",
